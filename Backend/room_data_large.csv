@@ -1,0 +1,312 @@
+Room ID,Date,Start,End,Room Type,Department,Year,Status,Day,Course,Instructor
+SCB-SF1,2025-01-20,13:00,14:55,Classroom,Computer Science,1,Booked,Monday,CSM 157,K. Owusu-Agyemang
+SCB-SF1,2025-01-20,15:00,16:55,Classroom,Computer Science,1,Booked,Monday,CSM 165,K.A Gyamfi
+SCB-TF1,2025-01-20,15:00,16:55,Classroom,Computer Science,1,Booked,Monday,MATH 161,M.A. Boateng
+SCB-GF1,2025-01-21,08:00,09:55,Classroom,Computer Science,1,Booked,Tuesday,CSM 153,A.A ANING
+SCB-SF1,2025-01-21,08:00,09:55,Classroom,Computer Science,1,Booked,Tuesday,CSM 157,K.Owusu-Agyemang
+SCB-SF1,2025-01-21,15:00,16:55,Classroom,Computer Science,1,Booked,Tuesday,CSM 151,A.S Gaddafi
+SCB-SF8,2025-01-22,08:00,09:55,Classroom,Computer Science,1,Booked,Wednesday,CSM 151,A.S Gaddafi
+SCB-GF1,2025-01-22,08:00,09:55,Classroom,Computer Science,1,Booked,Wednesday,CSM 153,A.A ANING
+SCB-FF5,2025-01-22,10:30,12:25,Classroom,Computer Science,1,Booked,Wednesday,CS-SEMINAR,All Lecturers
+Casely Hayford Room 202,2025-01-22,13:00,14:55,Lecture Hall,Computer Science,1,Booked,Wednesday,ENGL 157,T. Oduro-Kwarteng
+ID UNKNOWN,2025-01-22,15:00,15:55,Classroom,Computer Science,1,Booked,Wednesday,CSM 157,K.Owusu-Agyemang
+ID UNKNOWN,2025-01-22,16:00,16:55,Classroom,Computer Science,1,Booked,Wednesday,CSM 157,K.Owusu-Agyemang
+SCB-GF1,2025-01-23,10:30,12:25,Classroom,Computer Science,1,Booked,Thursday,ENGL 157,T. Oduro-Kwarteng
+ID UNKNOWN,2025-01-23,17:00,17:55,Classroom,Computer Science,1,Booked,Thursday,MATH 161,M.A. Boateng
+ID UNKNOWN,2025-01-23,18:00,18:55,Classroom,Computer Science,1,Booked,Thursday,MATH 161,M.A. Boateng
+SS-NEW AUDITORIUM,2025-01-24,08:00,09:55,Auditorium,Computer Science,1,Booked,Friday,ECON 151,P.O Takyi
+SCB-FF1,2025-01-24,13:00,14:55,Classroom,Computer Science,1,Booked,Friday,MATH 161,M.A. Boateng
+SCB-SF1,2025-01-24,13:00,14:55,Classroom,Computer Science,1,Booked,Friday,CSM 165,K.A Gyamfi
+SCB-FF1,2025-01-24,15:00,15:55,Classroom,Computer Science,1,Booked,Friday,CSM 165,K.A Gyamfi
+SCB-FF1,2025-01-24,16:00,16:55,Classroom,Computer Science,1,Booked,Friday,CSM 165,K.A Gyamfi
+SCB-SF20,2025-01-20,08:00,09:55,Classroom,Computer Science,2,Booked,Monday,CSM 273,G. O. FOSU
+MVBA-GF1,2025-01-20,08:00,09:55,Classroom,Computer Science,2,Booked,Monday,CSM 291,Y.M MISSAH
+SCB-SF1,2025-01-20,10:30,12:25,Classroom,Computer Science,2,Booked,Monday,CSM 251,F. K. AMPONG
+SCB-FF1,2025-01-20,10:30,12:25,Classroom,Computer Science,2,Booked,Monday,CSM 281,F. TWUM
+Casely Hayford Room 202 (DB12),2025-01-22,08:00,09:55,Seminar Room,Computer Science,2,Booked,Monday,FC 181,D. PIMPONG
+SCB-SF19,2025-01-20,13:00,14:55,Classroom,Computer Science,2,Booked,Monday,ENGL 263,T. Oduro-Kwarteng
+MVBA-GF1,2025-01-22,08:00,09:55,Classroom,Computer Science,2,Booked,Wednesday,CSM 291,Y.M MISSAH
+SCB-SF19,2025-01-22,08:00,09:55,Classroom,Computer Science,2,Booked,Wednesday,CSM 273,G. O. FOSU
+SCB-FF5,2025-01-22,10:30,12:25,Classroom,Computer Science,2,Booked,Wednesday,CS-SEMINAR,All Lecturers
+SCB-SF8,2025-01-22,15:00,16:55,Classroom,Computer Science,2,Booked,Wednesday,CSM 265,E. Osei
+SCB-FF1,2025-01-22,15:00,16:55,Classroom,Computer Science,2,Booked,Wednesday,CSM 297,K.O PEASAH
+MVBA-GF1,2025-01-23,08:00,09:55,Classroom,Computer Science,2,Booked,Thursday,CSM 255,K. Takyi
+MVBA-GF1,2025-01-23,10:30,12:25,Classroom,Computer Science,2,Booked,Thursday,CSM 255,K. Takyi
+SCB-TF1,2025-01-23,13:00,14:55,Classroom,Computer Science,2,Booked,Thursday,CSM 265,E. Osei
+SCB-FF1,2025-01-23,15:00,16:55,Classroom,Computer Science,2,Booked,Thursday,CSM 281,F. TWUM
+SCB-FF1,2025-01-23,17:00,18:55,Classroom,Computer Science,2,Booked,Thursday,CSM 297,K.O PEASAH
+SCB-SF1,2025-01-24,08:00,09:55,Classroom,Computer Science,2,Booked,Friday,ENGL 263,T. Oduro-Kwarteng
+SCB-SF1,2025-01-24,10:30,12:25,Classroom,Computer Science,2,Booked,Friday,CSM 251,F. K. AMPONG
+SCB-TF1,2025-01-24,18:00,18:55,Classroom,Computer Science,2,Booked,Friday,CSM 273,G. O. FOSU
+SCB-SF8,2025-01-20,08:00,09:55,Classroom,Computer Science,3,Booked,Monday,CSM 387,D. ASAMOAH
+Casely Hayford Room 202,2025-01-20,13:00,14:55,Lecture Hall,Computer Science,3,Booked,Monday,CSM 399,L.A. BANNING
+Casely Hayford Room 202,2025-01-20,10:30,12:25,Lecture Hall,Computer Science,3,Booked,Monday,CSM 399,L.A. BANNING
+Casely Hayford Room 202,2025-01-20,15:00,16:55,Lecture Hall,Computer Science,3,Booked,Monday,CSM 387,D. ASAMOAH
+SCB-SF7,2025-01-21,08:00,09:55,Classroom,Computer Science,3,Booked,Tuesday,CSM 357,R. O. M. Gyening
+SCB-SF19,2025-01-21,10:30,12:25,Classroom,Computer Science,3,Booked,Tuesday,CSM 357,R. O. M. Gyening
+BB-BLT,2025-01-21,15:00,15:55,Lecture Theatre,Computer Science,3,Booked,Tuesday,CSM 387,D. ASAMOAH
+BB-BLT,2025-01-21,16:00,16:55,Lecture Theatre,Computer Science,3,Booked,Tuesday,CSM 353,B.T. Partey
+SCB-SF1,2025-01-21,17:00,18:55,Classroom,Computer Science,3,Booked,Tuesday,CSM 393,B.E. Owusu
+SCB-FF5,2025-01-22,10:30,12:25,Classroom,Computer Science,3,Booked,Wednesday,CS-SEMINAR,All Lecturers
+SCB-SF19,2025-01-22,17:00,18:55,Classroom,Computer Science,3,Booked,Wednesday,CSM 393,B.E. Owusu
+SCB-SF20,2025-01-23,08:00,09:55,Classroom,Computer Science,3,Booked,Thursday,CSM 395,Y.M MISSAH
+SCB-SF8,2025-01-23,13:00,14:55,Classroom,Computer Science,3,Booked,Thursday,ACF 255,B. OSEI
+SCB-SF20,2025-01-23,15:00,16:55,Classroom,Computer Science,3,Booked,Thursday,CSM 353,B.T. Partey
+Casely Hayford Room 202,2025-01-23,08:00,09:55,Classroom,Computer Science,3,Booked,Thursday,CSM 395,Y.M MISSAH
+SCB-SF7,2025-01-23,17:00,18:55,Classroom,Computer Science,3,Booked,Thursday,CSM 353,B.T. Partey
+SCB-SF1,2025-01-23,17:00,18:55,Classroom,Computer Science,3,Booked,Thursday,ACF 255,B. OSEI
+MVBA-GF1,2025-01-20,10:30,12:25,Classroom,Computer Science,4,Booked,Monday,CSM 497,N. Ussiph
+SCB-SF1,2025-01-20,13:00,14:55,Classroom,Computer Science,4,Booked,Monday,CSM 477,M. ASANTE
+SCB-SF7,2025-01-20,17:00,18:55,Classroom,Computer Science,4,Booked,Monday,CSM 483,B.T. Partey
+SCB-SF20,2025-01-20,15:00,16:55,Classroom,Computer Science,4,Booked,Monday,CSM 483,B.T. Partey
+ID UNKNOWN,2025-01-21,15:00,16:55,Classroom,Computer Science,4,Booked,Tuesday,CSM 481,K.A PABBI
+ID UNKNOWN,2025-01-21,17:00,17:55,Classroom,Computer Science,4,Booked,Tuesday,CSM 481,K.A PABBI
+SCB-SF1,2025-01-21,18:00,18:55,Classroom,Computer Science,4,Booked,Tuesday,CSM 481,K.A PABBI
+SCB-FF5,2025-01-22,10:30,12:25,Classroom,Computer Science,4,Booked,Wednesday,CS-SEMINAR,All Lecturers
+SCB-FF1,2025-01-22,13:00,14:55,Classroom,Computer Science,4,Booked,Wednesday,CSM 481,K.A PABBI
+SCB-SF1,2025-01-22,15:00,16:55,Classroom,Computer Science,4,Booked,Wednesday,CSM 495,F. TWUM
+SCB-SF1,2025-01-22,17:00,18:55,Classroom,Computer Science,4,Booked,Wednesday,CSM 495,F. TWUM
+SCB-SF19,2025-01-23,10:30,12:25,Classroom,Computer Science,4,Booked,Thursday,CSM 491,O. Komyo
+SCB-TF1,2025-01-23,15:00,16:55,Classroom,Computer Science,4,Booked,Thursday,MAS 261,M/M Senyah
+SCB-SF19,2025-01-23,13:00,14:55,Classroom,Computer Science,4,Booked,Thursday,CSM 491,O. Komyo
+NO ID ASSIGNED,2025-01-24,08:00,18:55,NULL,Computer Science,4,Booked,Friday,PROJECT,NULL
+SCB-SF1,2025-01-20,08:00,9:55,Lecture Hall,Biology,1,Booked,Monday,BIOL 155,E.J.D BELFORD
+SCB-GF1,2025-01-20,10:30,12:25,Lecture Hall,Biology,1,Booked,Monday,BIOL 157,J.A. Bentil
+Casely Hayford Room 202 (DB12),2025-01-20,17:00,18:55,Seminar Room,Biology,1,Booked,Monday,BIOL 157,J.A. Bentil
+SCB-GF17,2025-01-20,13:00,14:55,Lecture Hall,Biology,1,Booked,Monday,BIOL 155,E.J.D BELFORD
+SCB-FF1,2025-01-21,08:00,09:55,Lecture Hall,Biology,1,Booked,Tuesday,BIOL 151,W.G AKANWARIWIAK
+Casely Hayford Room 202 (DB12),2025-01-21,08:00,09:55,Seminar Room,Mathematics,1,Booked,Tuesday,MATH 157,R.N. Bonkor
+SCB-TF1,2025-01-21,10:30,12:25,Lecture Hall,Biology,1,Booked,Tuesday,BIOL 159,P. ADDO-FORDJOUR
+SCB-TF1,2025-01-21,13:00,14:55,Lecture Hall,Biology,1,Booked,Tuesday,MATH 157,R.N. Bonkor
+Casely Hayford Room 202 (DB12),2025-01-21,13:00,14:55,Seminar Room,Biology,1,Booked,Tuesday,BIOL 159,F.E Awortwi
+BB-GL100,2025-01-21,16:00,18:55,Laboratory,Biology,1,Booked,Tuesday,BIOL 153,K. Boampong
+Casely Hayford Room 202 (DB12),2025-01-22,08:00,09:55,Seminar Room,Biology,1,Booked,Wednesday,ENGL 157,T. Oduro-Kwarteng
+SCB-FF5,2025-01-22,08:00,09:55,Lecture Hall,Biology,1,Booked,Wednesday,BIOL 151,W.G AKANWARIWIAK
+BB-GL100,2025-01-22,13:00,15:55,Laboratory,Biology,1,Booked,Wednesday,BIOL 151,W.G AKANWARIWIAK
+Casely Hayford Room 202 (DB12),2025-01-24,10:30,12:25,Seminar Room,English,1,Booked,Wednesday,ENGL 157,T. Oduro-Kwarteng
+BB-GL100,2025-01-22,16:00,18:55,Laboratory,Biology,1,Booked,Wednesday,ENG 151,W.G AKANWARIWIAK
+BB-BLT,2025-01-22,10:30,12:55,Laboratory,Biology,1,Booked,Wednesday,Department Serminar,W.G AKANWARIWIAK
+MVBA-GF1,2025-01-24,08:00,09:55,Lecture Hall,Biology,1,Booked,Friday,BIOL 153,P. ADDO-FORDJOUR/K. Boampong
+Casely Hayford Room 202 (DB12),2025-01-26,10:30,12:25,Seminar Room,Biology,1,Booked,Friday,BIOL 153,K. Boampong
+BB-GL100,2025-01-24,14:00,16:55,Laboratory,Biology,1,Booked,Friday,BIOL 155,E.J.D BELFORD
+SCB-FF1,2025-01-20,15:00,16:55,Lecture Hall,Biology,2,Booked,Monday,BIOL 253,P.K BAIDOO
+SCB-FF1,2025-01-20,17:00,18:55,Lecture Hall,Biology,2,Booked,Monday,BIOL 253,P.K BAIDOO
+COMP LAB,2025-01-21,08:00,09:55,Computer Lab,Biology,2,Booked,Tuesday,CSM 183,K. Owusu-Agyemang
+BB-GL100,2025-01-21,13:00,15:55,Laboratory,Biology,2,Booked,Tuesday,BIOL 257,A.K APETORGBOR
+Casely Hayford Room 202 (DB12),2025-01-21,17:00,18:55,Seminar Room,Biology,2,Booked,Tuesday,CSM 183,K. Owusu-Agyemang
+BB-BLT,2025-01-22,10:30,12:25,Lecture Hall,Biology,2,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+BB-GL200,2025-01-22,13:00,15:55,Laboratory,Biology,2,Booked,Wednesday,BIOL 253,P.K BAIDOO
+BB-GL200,2025-01-22,16:00,18:55,Laboratory,Biology,2,Booked,Wednesday,BIOL 255,A.K APETORGBOR
+SCB-FF1,2025-01-23,08:00,09:55,Lecture Hall,Sociology,2,Booked,Thursday,SOC 251,H. ASIEDU
+SCB-SF1,2025-01-23,10:30,12:25,Lecture Hall,Biology,2,Booked,Thursday,BIOL 251,R.C ABAIDOO/L.A OFORI
+SCB-SF1,2025-01-23,13:00,14:55,Lecture Hall,Biology,2,Booked,Thursday,BIOL 257,A.K APETORGBOR
+Casely Hayford Room 202 (DB12),2025-01-23,13:00,14:55,Seminar Room,English,2,Booked,Thursday,ENGL 263,J.Anring
+SCB-SF1,2025-01-23,15:00,16:55,Lecture Hall,Biology,2,Booked,Thursday,BIOL 251,R.C ABAIDOO/L.A OFORI
+Casely Hayford Room 202 (DB12),2025-01-23,17:00,18:55,Seminar Room,Biology,2,Booked,Thursday,BIOL 257,A.K APETORGBOR
+Casely Hayford Room 202 (DB12),2025-01-24,08:00,09:55,Seminar Room,Biology,2,Booked,Friday,ENGL 263,J.Anring
+SCB-FF1,2025-01-24,08:00,09:55,Lecture Hall,Biology,2,Booked,Friday,BIOL 255,A.K APETORGBOR
+SCB-FF1,2025-01-24,10:30,12:55,Lecture Hall,Biology,2,Booked,Friday,BIOL 255,A.K APETORGBOR
+BB-SL-MB,2025-01-24,13:00,14:55,Lecture Hall,Biology,2,Booked,Friday,BIOL 251,R.C ABAIDOO/L.A OFORI
+BB-SL-MB,2025-01-24,15:00,16:55,Lecture Hall,Biology,2,Booked,Friday,BIOL 251,R.C ABAIDOO/L.A OFORI
+COMP LAB,2025-01-24,17:00,18:55,Computer Lab,Biology,2,Booked,Friday,CSM 183,K. Owusu-Agyemang
+BB-GL100,2025-01-20,08:00,11:55,Laboratory,Biology,3,Booked,Monday,BIOL 353,P. ADDO-FORDJOUR
+SCB-FF1,2025-01-20,13:00,14:55,Lecture Hall,Biology,3,Booked,Monday,BCHEM 365,A. TETTEH
+SCB-FF1,2025-01-20,15:00,15:55,Lecture Hall,Biology,3,Booked,Monday,BCHEM 365,A. TETTEH
+SCB-TF1,2025-01-21,08:00,09:55,Lecture Hall,Biology,3,Booked,Tuesday,BIOL 353,P. ADDO-FORDJOUR
+ID UNKNOWN,2025-01-21,10:30,11:25,Lecture Hall,Biology,3,Booked,Tuesday,BIOL 355,S. ABANKWA-KWARTENG
+SCB-SF1,2025-01-21,08:00,09:55,Lecture Hall,Biology,3,Booked,Tuesday,BIOL 355,S. ABANKWA-KWARTENG
+ID UNKNOWN,2025-01-21,13:00,13:55,Lecture Hall,Biology,3,Booked,Tuesday,BCHEM 365,A. TETTEH
+ID UNKNOWN,2025-01-21,14:00,14:55,Lecture Hall,Biology,3,Booked,Tuesday,BIOL 359,J.A LARBI/D. OWUSU
+ID UNKNOWN,2025-01-21,15:00,16:55,Lecture Hall,Biology,3,Booked,Tuesday,BIOL 353,P. ADDO-FORDJOUR
+BB-BLT,2025-01-22,10:30,11:25,Lecture Hall,Biology,3,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+SCB-TF1,2025-01-22,13:00,14:55,Lecture Hall,Biology,3,Booked,Wednesday,MATH 153,V.K DEDU
+SCB-TF1,2025-01-22,15:00,16:55,Lecture Hall,Biology,3,Booked,Wednesday,MATH 153,V.K DEDU
+SCB-GF1,2025-01-23,08:00,09:55,Lecture Hall,Biology,3,Booked,Thursday,BIOL 359,J.A LARBI/D. OWUSU
+SCB-FF1,2025-01-23,10:30,12:25,Lecture Hall,Biology,3,Booked,Thursday,BIOL 351,S. AKYEAMPONG
+SCB-FF1,2025-01-23,13:00,14:55,Lecture Hall,Biology,3,Booked,Thursday,BIOL 355,S. ABANKWA-KWARTENG
+FOSSB-GF8,2025-01-23,15:00,16:55,Lecture Hall,Biology,3,Booked,Thursday,MAS 261,MM Senyah
+ID UNKNOWN,2025-01-23,08:00,09:55,Lecture Hall,Biology,3,Booked,Thursday,BIOL 351,S. AKYEAMPONG
+SCB-FF1,2025-01-23,10:30,12:25,Lecture Hall,Biology,3,Booked,Thursday,BIOL 359,J.A LARBI/D. OWUSU
+FOSSB-GF8,2025-01-23,17:00,18:55,Lecture Hall,Biology,3,Booked,Thursday,MAS 261,MM Senyah
+BB-GL100,2025-01-24,10:30,13:25,Laboratory,Biology,3,Booked,Friday,BIOL 351,S. AKYEAMPONG
+SCB-GF1,2025-01-20,08:00,09:55,Lecture Hall,Biology,4,Booked,Monday,BIOL 463,F.E Awortwi
+BB-GL300,2025-01-20,10:30,12:25,Laboratory,Biology,4,Booked,Monday,BIOL 459,D. OWUSU
+BB-GL300,2025-01-20,13:00,15:55,Laboratory,Biology,4,Booked,Monday,BIOL 457 SEMINAR,J.L TERLABIE
+BB-GL300,2025-01-21,08:00,09:55,Laboratory,Biology,4,Booked,Tuesday,BIOL 451,J.A LARBI
+BB-GL300,2025-01-21,10:30,13:25,Laboratory,Biology,4,Booked,Tuesday,BIOL 461,S. AKYEAMPONG
+BB-GL300,2025-01-21,14:00,15:55,Laboratory,Biology,4,Booked,Tuesday,BIOL 463,F.E Awortwi
+BB-GL300,2025-01-22,08:00,09:55,Laboratory,Biology,4,Booked,Wednesday,BIOL 461,S. AKYEAMPONG
+BB-BLT,2025-01-22,10:30,11:25,Lecture Hall,Biology,4,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+BB-GL300,2025-01-23,08:00,09:55,Laboratory,Biology,4,Booked,Thursday,BIOL 457,J.L TERLABIE
+BB-GL300,2025-01-23,13:00,165:55,Laboratory,Biology,4,Booked,Thursday,BIOL 451 SEMINAR,J.A LARBI
+BB-GL300,2025-01-24,08:00,10:30,Laboratory,Biology,4,Booked,Friday,BIOL 459 SEMINAR,D. OWUSU
+PROJECT,2025-01-24,14:00,18:55,Project,Biology,4,Booked,Friday,PROJECT,ALL LECTURERS (TAB)
+BB-GL200,2025-01-20,16:00,16:55,Lecture Room,Environmental Science,1,Booked,Monday,CSM 183,K. Takyi
+FOSSB-GF8,2025-01-21,13:00,14:55,Lecture Room,Environmental Science,1,Booked,Tuesday,ENGL 157,P.O. Yeboah
+BB-GL200,2025-01-21,16:00,18:55,Lecture Room,Environmental Science,1,Booked,Tuesday,ENVS 151,F. Balfour-Ata
+SCB-SF7,2025-01-22,10:30,12:25,Seminar Room,Environmental Science,1,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+CHEM LAB,2025-01-22,13:00,14:55,Laboratory,Environmental Science,1,Booked,Wednesday,CHEM 169,J. APAU
+SCB-SF19,2025-01-22,14:00,16:55,Lecture Room,Environmental Science,1,Booked,Wednesday,CSM 183,K. Takyi
+CB-LT1,2025-01-22,17:00,18:55,Lecture Theater,Environmental Science,1,Booked,Wednesday,MATH 161,E. Bonya
+SCB-SF8,2025-01-23,08:00,09:55,Lecture Room,Environmental Science,1,Booked,Thursday,CHEM 157,O. AKOTO
+SCB-SF8,2025-01-23,10:30,12:25,Lecture Room,Environmental Science,1,Booked,Thursday,ENVS 153,L.N.A SACKEY
+SCB-FF5,2025-01-23,13:00,14:55,Lecture Room,Environmental Science,1,Booked,Thursday,FC 181,H.O. Danso
+FB-PLT,2025-01-23,17:00,17:55,Lecture Room,Environmental Science,1,Booked,Thursday,MATH 161,E. Bonya
+SCB-SF7,2025-01-24,08:00,09:55,Lecture Room,Environmental Science,1,Booked,Friday,ENVS 151,F. Balfour-Ata
+SCB-FF24,2025-01-20,13:00,14:55,Lecture Room,Environmental Science,2,Booked,Monday,BIOL 251,A. A. SYLVERKEN
+SCB-TF34,2025-01-21,08:00,09:55,Lecture Room,Environmental Science,2,Booked,Tuesday,ENVS 265,A. SULEMANA
+BB-SL-MB,2025-01-21,10:30,13:55,Laboratory,Environmental Science,2,Booked,Tuesday,BIOL 251,A. A. SYLVERKEN
+BB-SLEQ,2025-01-21,14:00,16:55,Lecture Room,Environmental Science,2,Booked,Tuesday,ENVS 261,L.N.A SACKEY
+BB-SLEQ,2025-01-21,18:00,18:55,Lecture Room,Environmental Science,2,Booked,Tuesday,ENVS 261,L.N.A SACKEY
+SCB-SF7,2025-01-22,10:30,12:25,Seminar Room,Environmental Science,2,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+SCB-SF19,2025-01-22,13:00,14:55,Lecture Room,Environmental Science,2,Booked,Wednesday,ENVS 253,L.N.A SACKEY
+SCB-SF19,2025-01-22,18:00,18:55,Lecture Room,Environmental Science,2,Booked,Wednesday,ENVS 253,L.N.A SACKEY
+SCB-SF19,2025-01-23,08:00,09:55,Lecture Room,Environmental Science,2,Booked,Thursday,ENVS 251,L. MENSAH
+BB-SLEQ,2025-01-23,11:30,14:55,Lecture Room,Environmental Science,2,Booked,Thursday,ENVS 261,L.N.A SACKEY
+SCB-SF19,2025-01-23,15:00,16:55,Lecture Room,Environmental Science,2,Booked,Thursday,ENVS 257,M.A ARKOH
+SCB-FF24,2025-01-24,08:00,09:55,Lecture Room,Environmental Science,2,Booked,Friday,ENGL 263,P.O Siaw
+SCB-SF19,2025-01-24,10:30,12:25,Lecture Room,Environmental Science,2,Booked,Friday,ENVS 255,F. Balfour-Ata
+SCB-SF20,2025-01-24,14:00,16:55,Lecture Room,Environmental Science,2,Booked,Friday,ENVS 263,S.A. Takyi
+ID UNKNOWN,2025-01-20,18:00,18:55,Lecture Room,Environmental Science,3,Booked,Monday,ENVS 359,B. FEHBAFFOE
+ID UNKNOWN,2025-01-21,17:00,18:55,Lecture Room,Environmental Science,3,Booked,Tuesday,ENVS 359,B. FEHBAFFOE
+SCB-FF1,2025-01-22,08:00,09:55,Lecture Room,Environmental Science,3,Booked,Wednesday,ENVS 351,B. FEHBAFFOE
+SCB-SF7,2025-01-22,10:30,12:25,Seminar Room,Environmental Science,3,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+SCB-FF5,2025-01-22,13:00,14:55,Lecture Room,Environmental Science,3,Booked,Wednesday,ENVS 361,F. Balfour-Ata
+SCB-TF34,2025-01-22,15:00,16:55,Lecture Room,Environmental Science,3,Booked,Wednesday,ENVS 355,L. MENSAH
+ID UNKNOWN,2025-01-22,17:00,18:55,Lecture Room,Environmental Science,3,Booked,Wednesday,ENVS 359,B. FEHBAFFOE
+ID UNKNOWN,2025-01-23,9:00,9:55,Lecture Room,Environmental Science,3,Booked,Thursday,ENVS 363,E. K. AMOAH
+SCB-GF17,2025-01-23,15:00,16:55,Lecture Room,Environmental Science,3,Booked,Thursday,ENVS 363,E. K. AMOAH
+ID UNKNOWN,2025-01-23,17:00,18:55,Lecture Room,Environmental Science,3,Booked,Thursday,ENVS 359,E. K. AMOAH
+SCB-SF8,2025-01-24,10:30,12:25,Lecture Room,Environmental Science,3,Booked,Friday,MAS 261,C. Adjormodsoku
+SCB-SF8,2025-01-24,13:00,14:55,Lecture Room,Environmental Science,3,Booked,Friday,ENVS 365,B.A. Osei-Owusu
+SCB-FF24,2025-01-24,15:00,16:55,Lecture Room,Environmental Science,3,Booked,Friday,ENVS 353,B.A. Osei-Owusu
+SCB-SF8,2025-01-21,10:30,12:25,Lecture Room,Environmental Science,4,Booked,Tuesday,ENVS 451,"P. Antei-Agyei / F. Balfour-Ata"
+SCB-TF34,2025-01-21,13:00,14:55,Lecture Room,Environmental Science,4,Booked,Tuesday,ENVS 459,K. MEZAH
+ID UNKNOWN,2025-01-21,13:00,14:55,Lecture Room,Environmental Science,4,Booked,Tuesday,ECON 483,F.ADUSAH-POKU
+BB-BLT,2025-01-22,08:00,09:55,Lecture Room,Environmental Science,4,Booked,Wednesday,ENVS 457,L.N.A SACKEY
+SCB-SF7,2025-01-22,10:30,12:25,Seminar Room,Environmental Science,4,Booked,Wednesday,DEPARTMENTAL SEMINAR,All Lecturers
+ID UNKNOWN,2025-01-22,13:00,13:55,Lecture Room,Environmental Science,4,Booked,Wednesday,SOC 469,M.S. Boampong
+SCB-GF17,2025-01-23,10:30,12:25,Lecture Room,Environmental Science,4,Booked,Thursday,SOC 469,M.S. Boampong
+SCB-SF7,2025-01-23,14:00,15:55,Lecture Room,Environmental Science,4,Booked,Thursday,ECON 483,F. Adusah-POKU
+SCB-TF1,2025-01-24,10:30,12:25,Lecture Room,Environmental Science,4,Booked,Friday,ENVS 453,L. MENSAH
+SCB-SF20,2025-01-20,10:00,12:55,Classroom,Stats,1,Booked,Monday,MATH 171,G. O. Fosu
+FOSSB-B3,2025-01-20,18:00,18:55,Classroom,Stats,1,Booked,Monday,MATH 173,P. A. Kwabi
+FOSSB-B3,2025-01-20,17:00,17:55,Classroom,Stats,1,Booked,Monday,ENG 157,T.Oduro-Kwarteng
+SCB-SF4,2025-01-22,10:30,12:55,Classroom,Stats,1,Booked,Wednesday,MATHS-SEMINAR,All Lecturers
+Math COMP LAB SF26,2025-01-22,15:00,16:55,Classroom,Stats,1,Booked,Wednesday,MATH 177,I. Mensah
+Math COMP LAB SF26,2025-01-22,17:00,18:55,Classroom,Stats,1,Booked,Wednesday,MATH 177,I. Mensah
+SCB-FF24,2025-01-23,15:00,16:55,Classroom,Stats,1,Booked,Thursday,STAT 155,A. A. Adu
+SCB-FF24,2025-01-23,17:00,18:55,Classroom,Stats,1,Booked,Thursday,STAT 155,A. A. Adu
+ID UNKNOWN,2025-01-24,08:00,09:55,Classroom,Stats,1,Booked,Friday,ECON 151,R. E. Ayi-Bor
+SCB-FF6,2025-01-24,08:00,09:55,Classroom,Stats,1,Booked,Friday,BIOL 181,J. A. Lardi-Ababkwa-Kwarteng
+CB-LT2,2025-01-24,16:00,16:55,Classroom,Stats,1,Booked,Friday,MATH 171,G. O. Fosu
+SCB-SF19,2025-01-24,17:00,18:55,Classroom,Stats,1,Booked,Friday,MATH 173,P. A. Kwabi
+SCB-SF7,2025-01-20,08:00,09:55,Classroom,Stats,2,Booked,Monday,MATH 277,P. A. Kwabi
+SCB-SF20,2025-01-20,13:30,14:55,Classroom,Stats,2,Booked,Monday,MATH 279,E. Owusu-Ansah
+SCB-SF20,2025-01-20,17:00,17:55,Classroom,Stats,2,Booked,Monday,MATH 275,Y. E. Ayepkle
+SCB-GF18,2025-01-20,18:00,18:55,Classroom,Stats,2,Booked,Monday,STAT 251,A. A. Adu
+PP-PLT,2025-01-21,10:00,09:55,Classroom,Stats,2,Booked,Tuesday,MATH 275,Y. E. Ayepkle
+SCB-SF8,2025-01-21,10:30,11:25,Classroom,Stats,2,Booked,Tuesday,MATH 265,A. Sakyi
+BB-BLT,2025-01-21,15:00,15:55,Classroom,Stats,2,Booked,Tuesday,FC 181 Group 2,C. Boakye-Agyeman
+ID UNKNOWN,2025-01-23,09:00,09:55,Classroom,Stats,2,Booked,Thursdayy,MATH 277,I.K Dontwi
+SCB-SF4,2025-01-22,08:00,08:55,Classroom,Stats,2,Booked,Wednesday,MATHS-SEMINAR,All Lecturers
+FOSSB-GFR1,2025-01-22,15:00,16:55,Classroom,Stats,2,Booked,Wednesday,ENGL 263, B.O.Bainson
+SCB-SF8,2025-01-22,13:00,14:55,Classroom,Stats,2,Booked,Wednesday,MATH 267,P. A. Kwabi
+COMP LAB SF26,2025-01-23,10:30,12:25,Classroom,Stats,2,Booked,Thursday,MATH 279,E. Owusu-Ansah
+SCB-FF24,2025-01-23,17:00,17:55,Classroom,Stats,2,Booked,Thursday,STAT 251,G.A OKYERE Minkah
+SCB-SF20,2025-01-23,18:00,18:55,Classroom,Stats,2,Booked,Thursdayy,MATH 265,A. Sakyi
+SCB-FF5,2025-01-24,08:00,08:55,Classroom,Stats,2,Booked,Friday,STAT 251,A. A. Adu
+ID UNKNOWN,2025-01-24,08:00,09:55,Classroom,Stats,2,Booked,Friday,ECON 151,R.E. Ayi-Bor
+SCB-GF17,2025-01-24,12:00,12:55,Classroom,Stats,2,Booked,Friday,MATH 275,B.O BAISON
+SCB-FF24,2025-01-24,13:00,14:55,Classroom,Stats,2,Booked,Friday,STAT 251,A. A. Adu
+SCB-TF34,2025-01-24,08:00,09:55,Classroom,Stats,3,Booked,Friday,MATH 267,P. A. Kwabi
+SCB-SF7,2025-01-20,08:00,08:55,Classroom,Stats,3,Booked,Monday,STAT 357,E. O. Owiredu
+SCB-SF7,2025-01-20,09:00,09:55,Classroom,Stats,3,Booked,Monday,STAT 359,E. D. Jowusu Ansah
+SCB-FF5,2025-01-20,16:00,16:55,Classroom,Stats,3,Booked,Monday,STAT 353,E. D. Jowusu Ansah
+SCB-TF1,2025-01-20,17:00,17:55,Classroom,Stats,3,Booked,Monday,STAT 355,A. A. Adu
+SCB-SF4,2025-01-21,08:00,08:55,Classroom,Stats,3,Booked,Tuesday,STAT 351,E. Harris
+SCB-TF34,2025-01-21,09:00,09:55,Classroom,Stats,3,Booked,Tuesday,STAT 353,S. K. Appiah
+SCB-SF20,2025-01-21,16:00,16:55,Classroom,Stats,3,Booked,Tuesday,MATH 359,E. D. Jowusu Ansah
+SCB-SF20,2025-01-21,17:00,17:55,Classroom,Stats,3,Booked,Tuesday,MATH 365,A. Sakyi
+SCB-SF4,2025-01-22,08:00,08:55,Classroom,Stats,3,Booked,Wednesday,MATHS-SEMINAR,All Lecturers
+SCB-TF34,2025-01-22,11:30,12:25,Classroom,Stats,3,Booked,Wednesday,STAT 351,E. Harris
+SCB-TF1,2025-01-22,13:00,13:55,Classroom,Stats,3,Booked,Wednesday,MATH 365,A. Sakyi
+SCB-GF18,2025-01-23,08:00,08:55,Classroom,Stats,3,Booked,Thursday,MATH 379,G. E. Awasie
+SCB-TF34,2025-01-23,14:00,14:55,Classroom,Stats,3,Booked,Thursday,STAT 355,A. A. Adu
+SCB-FF24,2025-01-24,16:00,16:55,Classroom,Stats,3,Booked,Friday,MATH 379,G. E. Awasie
+SCB-FF24,2025-01-24,17:00,17:55,Classroom,Stats,3,Booked,Friday,STAT 357,E. O. Owiredu
+SCB-GF17,2025-01-20,08:00,09:55,Classroom,Maths,1,Booked,Monday,PHY 153,K. Preko
+FOSSB-GF8,2025-01-20,15:00,16:55,Classroom,Maths,1,Booked,Monday,ENGL 157,H.M Eyison
+SCB-SF20,2025-01-21,13:00,13:55,Classroom,Maths,1,Booked,Tuesday,MATH 175,I. Takyi
+COMP LAB SF26,2025-01-21,15:30,16:55,Classroom,Maths,1,Booked,Tuesday,MATH 177,I. Mensah
+COMP LAB SF26,2025-01-21,17:00,18:55,Classroom,Maths,1,Booked,Tuesday,MATH 177,I. Mensah
+CB-LT2,2025-01-21,15:00,15:55,Classroom,Maths,1,Booked,Tuesday,MATH 171,B.E. Owusu
+SCB-SF4,2025-01-22,08:00,08:55,Classroom,Maths,1,Booked,Wednesday,MATHS-SEMINAR,All Lecturers
+SCB-SF7,2025-01-23,13:00,13:55,Classroom,Maths,1,Booked,Thursday,PHY 153,K. Preko
+SCB-SF20,2025-01-24,17:00,17:55,Classroom,Maths,1,Booked,Friday,MATH 175,I. Takyi
+CB-A10,2025-01-23,08:00,09:55,Classroom,Maths,1,Booked,Thursday,CHEM 155,C.R. Kwawu
+SCB-SF20,2025-01-23,11:30,12:25,Classroom,Maths,1,Booked,Thursday,MATH 171,B.E. Owusu
+SCB-FF6,2025-01-24,08:00,09:55,Classroom,Maths,1,Booked,Friday,BIOL 181,J.A. Lardi-Abankwa-Warteng
+SCB-SF20,2025-01-24,16:00,16:55,Classroom,Maths,1,Booked,Friday,MATH 173,P.A. Kwabi
+CB-LT1,2025-01-24,17:00,17:55,Classroom,Maths,1,Booked,Friday,MATH 175,I. Takyi
+SCB-FF5,2025-01-20,10:30,12:25,Classroom,Mathematics,2,Booked,Monday,MATH 277,L.K. Dontwi
+SCB-B23,2025-01-20,16:00,17:55,Classroom,Mathematics,2,Booked,Monday,STAT 251,G.A. Okere / R. Minkah
+SCB-FF5,2025-01-21,08:00,09:55,Classroom,Mathematics,2,Booked,Tuesday,MATH 275,B.O. Bainson
+SCB-SF20,2025-01-21,10:30,12:25,Classroom,Mathematics,2,Booked,Tuesday,MATH 279,E. Owusu-Ansah
+SCB-FF5,2025-01-21,15:00,16:55,Classroom,Mathematics,2,Booked,Tuesday,MATH 265,A. Sakyi
+CB-LT2,2025-01-21,17:00,18:55,Classroom,Mathematics,2,Booked,Tuesday,FC 181,C. Boakye-Agyeman
+SCB-FF4,2025-01-22,08:00,08:55,Classroom,Mathematics,2,Booked,Wednesday,MATH 277,R.E. Ayi-Bor
+SCB-SF4,2025-01-22,10:30,12:25,Lab,Mathematics,2,Booked,Wednesday,MATHS - SEMINAR,All Lecturers
+SCB-SF8,2025-01-22,13:00,14:55,Classroom,Mathematics,2,Booked,Wednesday,MATH 267,B.O. Bainson
+FOSSB-GF8,2025-01-22,15:00,16:55,Classroom,Mathematics,2,Booked,Wednesday,ENGL 263,H.M. Eyi-son
+SCB-SF4,2025-01-23,08:00,09:55,Classroom,Mathematics,2,Booked,Thursday,MATH 279,E. Owusu-Ansah
+SCB-GF17,2025-01-23,10:30,12:25,Classroom,Mathematics,2,Booked,Thursday,ECON 151,R.E. Ayi-Bor (Group 1)
+SCB-FF24,2025-01-23,13:00,14:55,Classroom,Mathematics,2,Booked,Thursday,MATH 275,B.O. Bainson
+SCB-FF24,2025-01-23,15:00,16:55,Classroom,Mathematics,2,Booked,Thursday,STAT 251,G.A. Okere / R. Minkah
+SCB-TF34,2025-01-24,08:00,09:55,Classroom,Mathematics,2,Booked,Friday,MATH 267,B.O. Bainson
+SCB-FF24,2025-01-24,10:30,12:25,Classroom,Mathematics,2,Booked,Friday,STAT 251,G.A. Okere / R. Minkah
+SCB-TF34,2025-01-24,13:00,14:55,Classroom,Mathematics,2,Booked,Friday,MATH 265,A. Sakyi
+PB-PLT,2025-01-20,10:30,12:25,Classroom,Mathematics,3,Booked,Monday,MATH 363,I. Takyi
+SCB-SF7,2025-01-21,10:30,12:25,Classroom,Mathematics,3,Booked,Tuesday,MATH 365,P. Amoakoh-Yirenkyi
+SCB-SF4,2025-01-21,15:00,16:55,Classroom,Mathematics,3,Booked,Tuesday,MATH 373,F.A. Mensah
+CB-LT1,2025-01-21,17:00,17:55,Classroom,Mathematics,3,Booked,Tuesday,MATH 361,K.P. Frimpong
+SCB-FF24,2025-01-21,18:00,18:55,Classroom,Mathematics,3,Booked,Tuesday,MATH 365,P. Amoakoh-Yirenkyi
+SCB-TF34,2025-01-22,10:30,12:25,Classroom,Mathematics,3,Booked,Wednesday,MATHS - SEMINAR,All Lecturers
+SCB-FF24,2025-01-22,13:00,13:55,Classroom,Mathematics,3,Booked,Wednesday,MATH 373,F.A. Mensah
+BB-BLT,2025-01-22,15:00,16:55,Classroom,Mathematics,3,Booked,Wednesday,STAT 357,W.A. Apels
+SCB-TF34,2025-01-23,10:30,12:25,Classroom,Mathematics,3,Booked,Thursday,MATH 379,P. Amoakoh-Yirenkyi
+SCB-FF24,2025-01-23,13:00,14:55,Classroom,Mathematics,3,Booked,Thursday,MATH 361,K.P. Frimpong
+BB-BLT,2025-01-23,15:00,15:55,Classroom,Mathematics,3,Booked,Thursday,MATH 363,I. Takyi
+SCB-FF5,2025-01-23,17:00,17:55,Classroom,Mathematics,3,Booked,Thursday,MATH 379,P. Amoakoh-Yirenkyi
+SCB-FF5,2025-01-23,18:00,18:55,Classroom,Mathematics,3,Booked,Thursday,STAT 357,W.A. Apels
+FOSSB-GF8,2025-01-20,08:00,08:55,Classroom,Physics,1,Booked,Monday,ENGL 157,J.P KUUTIERO
+SCB-GF17,2025-01-20,10:30,11:25,Classroom,Physics,1,Booked,Monday,CSM 151,E.O OPPONG
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,215 @@
+Room ID,Date,Start,End,Room Type,Department,Year,Status,Day,Course
+SCB-GF8,2025-01-20,08:00,08:55,Classroom,Environmental Science,1,Booked,Monday,CSM 183
+BB-GL200,2025-01-20,16:00,16:55,Lecture Hall,Environmental Science,1,Booked,Monday,CSM 183
+FOSSB-GF8,2025-01-21,13:00,15:55,Classroom,Environmental Science,1,Booked,Tuesday,ENGL 157
+BB-GL200,2025-01-21,16:00,18:55,Lecture Hall,Environmental Science,1,Booked,Tuesday,ENVS 151
+SCB-SF7,2025-01-22,10:30,12:25,Laboratory,Environmental Science,1,Booked,Wednesday,DEPARTMENTAL SEMINAR
+CHEM LAB,2025-01-22,13:00,15:55,Laboratory,Environmental Science,1,Booked,Wednesday,CHEM 169
+SCB-SF19,2025-01-22,15:00,15:55,Classroom,Environmental Science,1,Booked,Wednesday,CSM 183
+CB-LT1,2025-01-22,17:00,18:55,Lecture Theatre,Environmental Science,1,Booked,Wednesday,MATH 161
+SCB-SF8,2025-01-23,08:00,09:55,Laboratory,Environmental Science,1,Booked,Thursday,CHEM 157
+SCB-SF8,2025-01-23,10:30,12:25,Laboratory,Environmental Science,1,Booked,Thursday,ENVS 153
+SCB-FF5,2025-01-23,13:00,15:55,Classroom,Environmental Science,1,Booked,Thursday,FC 181
+FB-PLT,2025-01-23,17:00,18:55,Lecture Theatre,Environmental Science,1,Booked,Thursday,MATH 161
+SCB-SF7,2025-01-24,08:00,09:55,Laboratory,Environmental Science,1,Booked,Friday,ENVS 151
+SCB-FF24,2025-01-20,13:00,15:55,Classroom,Environmental Science,2,Booked,Monday,BIOL 251
+SCB-TF34,2025-01-21,08:00,09:55,Laboratory,Environmental Science,2,Booked,Tuesday,ENVS 265
+BB-SL-MB,2025-01-21,10:30,12:25,Laboratory,Environmental Science,2,Booked,Tuesday,BIOL 251
+BB-SLEQ,2025-01-21,14:00,16:55,Laboratory,Environmental Science,2,Booked,Tuesday,ENVS 261
+SCB-SF7,2025-01-22,10:30,12:25,Laboratory,Environmental Science,2,Booked,Wednesday,DEPARTMENTAL SEMINAR
+SCB-SF19,2025-01-22,13:00,15:55,Classroom,Environmental Science,2,Booked,Wednesday,ENVS 253
+SCB-SF19,2025-01-23,08:00,09:55,Classroom,Environmental Science,2,Booked,Thursday,ENVS 251
+BB-SLEQ,2025-01-23,10:30,13:55,Laboratory,Environmental Science,2,Booked,Thursday,ENVS 261
+SCB-SF19,2025-01-23,15:00,16:55,Classroom,Environmental Science,2,Booked,Thursday,ENVS 257
+SCB-FF24,2025-01-24,08:00,09:55,Classroom,Environmental Science,2,Booked,Friday,ENGL 263
+SCB-SF19,2025-01-24,10:30,12:25,Classroom,Environmental Science,2,Booked,Friday,ENVS 255
+SCB-SF20,2025-01-24,15:00,16:55,Classroom,Environmental Science,2,Booked,Friday,ENVS 263
+SCB-FF1,2025-01-22,08:00,09:55,Classroom,Environmental Science,3,Booked,Wednesday,ENVS 351
+SCB-SF7,2025-01-22,10:30,12:25,Laboratory,Environmental Science,3,Booked,Wednesday,DEPARTMENTAL SEMINAR
+SCB-FF5,2025-01-22,13:00,15:55,Classroom,Environmental Science,3,Booked,Wednesday,ENVS 361
+SCB-TF34,2025-01-22,15:00,16:55,Laboratory,Environmental Science,3,Booked,Wednesday,ENVS 355
+SCB-GF17,2025-01-23,15:00,16:55,Classroom,Environmental Science,3,Booked,Thursday,ENVS 363
+SCB-SF8,2025-01-24,10:30,12:25,Laboratory,Environmental Science,3,Booked,Friday,MAS 261
+SCB-SF8,2025-01-24,13:00,15:55,Laboratory,Environmental Science,3,Booked,Friday,ENVS 365
+SCB-FF24,2025-01-24,15:00,16:55,Classroom,Environmental Science,3,Booked,Friday,ENVS 353
+SCB-SF8,2025-01-21,10:30,12:25,Laboratory,Environmental Science,4,Booked,Tuesday,ENVS 451
+SCB-TF34,2025-01-21,13:00,15:55,Laboratory,Environmental Science,4,Booked,Tuesday,ENVS 459
+BB-BLT,2025-01-22,08:00,09:55,Lecture Theatre,Environmental Science,4,Booked,Wednesday,ENVS 457
+SCB-SF7,2025-01-22,10:30,12:25,Laboratory,Environmental Science,4,Booked,Wednesday,DEPARTMENTAL SEMINAR
+SCB-GF17,2025-01-23,10:30,12:25,Classroom,Environmental Science,4,Booked,Thursday,SOC 469
+SCB-SF7,2025-01-23,14:00,16:55,Laboratory,Environmental Science,4,Booked,Thursday,ECON 483
+SCB-TF1,2025-01-24,10:30,12:25,Laboratory,Environmental Science,4,Booked,Friday,ENVS 453
+FB-PLT,2025-01-20,13:00,15:55,Lecture Theatre,Actuarial Science,1,Booked,Monday,MATH 171
+SCB-FF24,2025-01-20,15:00,16:55,Classroom,Actuarial Science,1,Booked,Monday,ACF 255
+CB-LT1,2025-01-20,18:00,19:55,Lecture Theatre,Actuarial Science,1,Booked,Monday,MATH 173
+FOSSB-B3,2025-01-21,15:00,16:55,Classroom,Actuarial Science,1,Booked,Tuesday,ENGL 157
+SCB-SF4,2025-01-22,10:30,12:25,Laboratory,Actuarial Science,1,Booked,Wednesday,MATHS - SEMINAR
+PB-PLT,2025-01-22,17:00,18:55,Lecture Theatre,Actuarial Science,1,Booked,Wednesday,MATH 173
+CB-LT2,2025-01-23,08:00,09:55,Lecture Theatre,Actuarial Science,1,Booked,Thursday,MATH 175
+MATH COMP LAB (SF26),2025-01-23,16:00,18:55,Computer Lab,Actuarial Science,1,Booked,Thursday,MATH 177
+SCB-SF8,2025-01-24,17:00,17:55,Laboratory,Actuarial Science,1,Booked,Friday,MATH 171
+BB-BLT,2025-01-24,18:00,19:55,Lecture Theatre,Actuarial Science,1,Booked,Friday,MATH 175
+SCB-SF20,2025-01-20,18:00,19:55,Classroom,Actuarial Science,2,Booked,Monday,STAT 251
+SCB-FF24,2025-01-21,08:00,09:55,Classroom,Actuarial Science,2,Booked,Tuesday,MATH 279
+SCB-FF24,2025-01-21,13:00,15:55,Classroom,Actuarial Science,2,Booked,Tuesday,STAT 251
+CB-LT1,2025-01-21,17:00,17:55,Lecture Theatre,Actuarial Science,2,Booked,Tuesday,MATH 265
+CB-LT1,2025-01-21,18:00,19:55,Lecture Theatre,Actuarial Science,2,Booked,Tuesday,MATH 277
+SCB-FF24,2025-01-22,08:00,09:55,Classroom,Actuarial Science,2,Booked,Wednesday,MATH 277
+SCB-SF4,2025-01-22,10:30,12:25,Laboratory,Actuarial Science,2,Booked,Wednesday,MATHS - SEMINAR
+FOSSB-B3,2025-01-22,13:00,15:55,Classroom,Actuarial Science,2,Booked,Wednesday,ENGL 263
+SCB-GF19,2025-01-22,16:00,16:55,Classroom,Actuarial Science,2,Booked,Wednesday,STAT 251
+SCB-SF7,2025-01-22,17:00,18:55,Laboratory,Actuarial Science,2,Booked,Wednesday,MATH 275
+MATH COMP LAB (SF26),2025-01-23,08:00,09:55,Computer Lab,Actuarial Science,2,Booked,Thursday,MATH 279
+SCB-SF19,2025-01-23,10:30,12:25,Classroom,Actuarial Science,2,Booked,Thursday,MATH 265
+SCB-GF18,2025-01-23,14:00,16:55,Classroom,Actuarial Science,2,Booked,Thursday,ACTS 251
+BB-BLT,2025-01-24,10:30,12:25,Lecture Theatre,Actuarial Science,2,Booked,Friday,MATH 275
+SCB-SF8,2025-01-24,15:00,15:55,Laboratory,Actuarial Science,2,Booked,Friday,ACTS 251
+SCB-GF19,2025-01-24,16:00,16:55,Classroom,Actuarial Science,2,Booked,Friday,STAT 251
+PB-PLT,2025-01-20,08:00,09:55,Lecture Theatre,Actuarial Science,3,Booked,Monday,MATH 379
+MATH,2025-01-20,13:00,15:55,Classroom,Actuarial Science,3,Booked,Monday,MATH 365
+CB-LT1,2025-01-21,10:30,12:25,Lecture Theatre,Actuarial Science,3,Booked,Tuesday,ACTS 371
+Casely Hayford Room 202 (DB1/2),2025-01-21,15:00,16:55,Conference Room,Actuarial Science,3,Booked,Tuesday,ACTS 353
+SCB-SF19,2025-01-21,17:00,18:55,Classroom,Actuarial Science,3,Booked,Tuesday,STAT 357
+SCB-SF4,2025-01-22,10:30,12:25,Laboratory,Actuarial Science,3,Booked,Wednesday,MATHS - SEMINAR
+SCB-FF24,2025-01-22,17:00,18:55,Classroom,Actuarial Science,3,Booked,Wednesday,MATH 365
+SCB-GF17,2025-01-23,13:00,15:55,Classroom,Actuarial Science,3,Booked,Thursday,ACTS 351
+SCB-SF19,2025-01-23,17:00,18:55,Classroom,Actuarial Science,3,Booked,Thursday,STAT 359
+MATH COMP LAB (SF26),2025-01-24,08:00,09:55,Computer Lab,Actuarial Science,3,Booked,Friday,ACTS 371
+SCB-FF5,2025-01-24,15:00,15:55,Classroom,Actuarial Science,3,Booked,Friday,ACTS 353
+SCB-FF5,2025-01-24,16:00,16:55,Classroom,Actuarial Science,3,Booked,Friday,MATH 379
+CB-LT1,2025-01-24,17:00,17:55,Lecture Theatre,Actuarial Science,3,Booked,Friday,ACTS 351
+STAT 357,2025-01-24,18:00,19:55,Classroom,Actuarial Science,3,Booked,Friday,STAT 357
+SCB-SF8,2025-01-20,13:00,15:55,Laboratory,Actuarial Science,4,Booked,Monday,ACTS 451
+SCB-FF5,2025-01-20,17:00,18:55,Classroom,Actuarial Science,4,Booked,Monday,MAS 261
+SCB-GF17,2025-01-21,10:30,12:25,Classroom,Actuarial Science,4,Booked,Tuesday,ACTS 453
+CB-LT1,2025-01-21,13:00,15:55,Lecture Theatre,Actuarial Science,4,Booked,Tuesday,STAT 371
+STAT 485,2025-01-21,17:00,18:55,Classroom,Actuarial Science,4,Booked,Tuesday,STAT 485
+SCB-TF34,2025-01-22,08:00,09:55,Laboratory,Actuarial Science,4,Booked,Wednesday,MATH 473
+SCB-SF4,2025-01-22,10:30,12:25,Laboratory,Actuarial Science,4,Booked,Wednesday,MATHS - SEMINAR
+SCB-GF17,2025-01-22,13:00,15:55,Classroom,Actuarial Science,4,Booked,Wednesday,LAW 471
+SCB-FF5,2025-01-22,17:00,17:55,Classroom,Actuarial Science,4,Booked,Wednesday,ACTS 457
+ACTS 455,2025-01-22,18:00,19:55,Classroom,Actuarial Science,4,Booked,Wednesday,ACTS 455
+SCB-FF5,2025-01-23,08:00,09:55,Classroom,Actuarial Science,4,Booked,Thursday,ACTS 457
+SCB-GF17,2025-01-23,10:30,12:25,Classroom,Actuarial Science,4,Booked,Thursday,SOC 469
+PB-PLT,2025-01-23,13:00,15:55,Lecture Theatre,Actuarial Science,4,Booked,Thursday,ACTS 459
+SCB-FF5,2025-01-23,14:00,16:55,Classroom,Actuarial Science,4,Booked,Thursday,ACTS 455
+PB-PLT,2025-01-24,13:00,15:55,Lecture Theatre,Actuarial Science,4,Booked,Friday,MATH 473
+ACTS 453,2025-01-24,14:00,16:55,Classroom,Actuarial Science,4,Booked,Friday,ACTS 453
+STAT 371,2025-01-24,15:00,16:55,Classroom,Actuarial Science,4,Booked,Friday,STAT 371
+PB-PLT,2025-01-24,16:00,16:55,Lecture Theatre,Actuarial Science,4,Booked,Friday,ACTS 451
+PB-PLT,2025-01-24,18:00,19:55,Lecture Theatre,Actuarial Science,4,Booked,Friday,ACTS 459
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PB-PLT,2025-01-20,17:00,17:55,Physics Lab Theatre,Physics,1,Booked,Monday,PHY 151,D.D Wemegah
+PB-PLT,2025-01-20,18:00,18:55,Physics Lab Theatre,Physics,1,Booked,Monday,MATH 183,B.O Baidson
+PB-(GP LAB 1&2),2025-01-21,08:00,08:55,General Physics Lab,Physics,1,Booked,Tuesday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GP LAB 1&2),2025-01-21,09:00,09:55,General Physics Lab,Physics,1,Booked,Tuesday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GEN P-LAB 3),2025-01-21,13:00,13:55,General Physics Lab,Physics,1,Booked,Tuesday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GEN P-LAB 3),2025-01-21,15:00,15:55,General Physics Lab,Physics,1,Booked,Tuesday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-PLT,2025-01-22,08:00,08:55,Physics Lab Theatre,Physics,1,Booked,Wednesday,PHY 153,R.M. NOYE
+PB-PLT,2025-01-22,10:30,11:25,Physics Lab Theatre,Physics,1,Booked,Wednesday,COLLOQUIM,ALL PHYSICS STAFF
+CB-LT1,2025-01-22,13:00,13:55,Lecture Theatre,Physics,1,Booked,Wednesday,CHEM 155,M.B Mensah
+SCB-GF17,2025-01-22,15:00,15:55,Classroom,Physics,1,Booked,Wednesday,MATH 183,B.O Baidson
+PB-(GP LAB 1&2),2025-01-23,08:00,08:55,General Physics Lab,Physics,1,Booked,Thursday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GP LAB 1&2),2025-01-23,09:00,09:55,General Physics Lab,Physics,1,Booked,Thursday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GP LAB 1&2),2025-01-23,13:00,13:55,General Physics Lab,Physics,1,Booked,Thursday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+PB-(GP LAB 1&2),2025-01-23,15:00,15:55,General Physics Lab,Physics,1,Booked,Thursday,PHY 155,"V.S Asare / R.M. NOYE / C.D. Boateng"
+CB-LT1,2025-01-24,08:00,08:55,Lecture Theatre,Physics,1,Booked,Friday,FC 181,F.M Newman
+PB-PLT,2025-01-24,09:00,09:55,Physics Lab Theatre,Physics,1,Booked,Friday,PHY 151,D.D Wemegah
+COMP LAB,2025-01-24,13:00,13:55,Computer Lab,Physics,1,Booked,Friday,CSM 151,E.O OPPONG
+CB-LT2,2025-01-24,17:00,17:55,Lecture Theatre,Physics,1,Booked,Friday,PHY 153,R.M. NOYE
+CB-LT2,2025-01-24,18:00,18:55,Lecture Theatre,Physics,1,Booked,Friday,CHEM 155,M.B Mensah
+SCB-FF1,2025-01-20,08:00,08:55,Classroom,Physics,2,Booked,Monday,PHY 253,E.K.K ABAVARE
+PB-(ENG LAB),2025-01-20,10:30,11:25,Engineering Lab,Physics,2,Booked,Monday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+PB-(ENG LAB),2025-01-20,13:00,13:55,Engineering Lab,Physics,2,Booked,Monday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+PB-(ENG LAB),2025-01-20,15:00,15:55,Engineering Lab,Physics,2,Booked,Monday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+SCB-GF17,2025-01-20,17:00,17:55,Classroom,Physics,2,Booked,Monday,MATH 291,G. O. FOSU
+ICT LAB-LIBRARY,2025-01-21,10:30,11:25,ICT Lab,Physics,2,Booked,Tuesday,PHY 261,A. BRITWUM
+ICT LAB-LIBRARY,2025-01-21,13:00,13:55,ICT Lab,Physics,2,Booked,Tuesday,PHY 261,A. BRITWUM
+ICT LAB-LIBRARY,2025-01-21,15:00,15:55,ICT Lab,Physics,2,Booked,Tuesday,PHY 261,A. BRITWUM
+SCB-FF1,2025-01-21,17:00,17:55,Classroom,Physics,2,Booked,Tuesday,PHY 253,E.K.K ABAVARE
+PB-(OPT LAB),2025-01-22,08:00,08:55,Optics Lab,Physics,2,Booked,Wednesday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+PB-PLT,2025-01-22,10:30,11:25,Physics Lab Theatre,Physics,2,Booked,Wednesday,COLLOQUIM,ALL PHYSICS STAFF
+PB-(ENG LAB),2025-01-22,13:00,13:55,Engineering Lab,Physics,2,Booked,Wednesday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+PB-(ENG LAB),2025-01-22,15:00,15:55,Engineering Lab,Physics,2,Booked,Wednesday,PHY 257,"I. NKRUMAH / L.K. Labik / O. ADU POKU / S.K DANUOR"
+SCB-FF1,2025-01-22,17:00,17:55,Classroom,Physics,2,Booked,Wednesday,PHY 251,M.K.E DONKOR
+BB-BLT,2025-01-23,08:00,09:55,Big Lecture Theatre,Physics,2,Booked,Thursday,FC 281,M. Antiri Kooba
+FOSSB-GFR1,2025-01-23,09:00,09:55,Classroom,Physics,2,Booked,Thursday,ENGL 263,J.P KUUTIERO
+SCB-TF34,2025-01-23,08:00,09:55,Classroom,Physics,2,Booked,Friday,PHY 255,C.D. Boateng
+SCB-TF34,2025-01-23,09:00,09:55,Classroom,Physics,2,Booked,Thursday,ECON 151,R.E. Ayibor
+BB-BLT,2025-01-23,18:00,18:55,Big Lecture Theatre,Physics,2,Booked,Thursday,PHY 255,C.D. Boateng
+SCB-GF18,2025-01-24,13:00,13:55,Classroom,Physics,2,Booked,Friday,PHY 263,C. Subair
+PB-PLT,2025-01-24,17:00,17:55,Physics Lab Theatre,Physics,2,Booked,Friday,MATH 291,G. O. FOSU
+
+
+

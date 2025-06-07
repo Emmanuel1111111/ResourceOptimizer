@@ -1,0 +1,230 @@
+:root {
+  --primary: #4361ee;
+  --secondary: #3f37c9;
+  --success: #4cc9f0;
+  --warning: #f8961e;
+  --danger: #ef476f;
+  --light: #f8f9fa;
+  --dark: #212529;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-800: #343a40;
+  --sidebar-width: 250px;
+  --sidebar-bg: #222;
+}
+
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 100vh;
+  background-color: rgb(210, 229, 246);
+  background-image: url('../../assets/images/flat-illustration-office-worker-standing-front-dashboard-with-chart_979520-43592.avif');
+}
+
+.dashboard-wrapper.sidebar-open .sidebar {
+  width: var(--sidebar-width);
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  color: white;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  transition: width 2s ease;
+  background:rgb(34, 62, 94);
+}
+
+.logo-container {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.logo i {
+  margin-right: 8px;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  color: #f8f9fa;
+  text-decoration: none;
+  transition: background 0.3s, border-left 0.3s;
+  font-size: large;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-left: 3px solid white;
+}
+
+.nav-link i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+/* Sidebar Toggle */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primary);
+  z-index: 1100;
+  cursor: pointer;
+}
+
+/* Main Content */
+.content {
+  margin-left: var(--sidebar-width);
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Card Container */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Custom Card */
+.custom-card {
+  width: 400px;
+  height: 300px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  color: white;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.custom-card mat-card-header {
+  font-weight: bold;
+  font-size: 1.2rem;
+  justify-content: center;
+}
+
+.custom-card mat-card-content {
+  font-size: 1rem;
+  padding: 10px;
+}
+
+.custom-card mat-card-actions {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 15px;
+}
+
+.manage-resources {
+  background: linear-gradient(135deg, black, #0475ff);
+}
+
+.ai-predictions {
+  background:linear-gradient(135deg, rgb(0, 0, 0), #434343);
+}
+
+.adjust-schedules {
+  background: linear-gradient(135deg, white, #e91e63);
+  color: black;
+}
+
+/* Buttons */
+button,
+a[mat-raised-button] {
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+button:hover,
+a[mat-raised-button]:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .sidebar {
+    width: 0;
+    overflow: hidden;
+  }
+
+  .sidebar.open {
+    width: 200px;
+    z-index: 1000;
+    transition: 2s ease-out, width 0.3s ease;
+  } 
+ 
+  .dashboard-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    margin-left: 0;
+  }
+
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .custom-card {
+    width: 100%;
+    max-width: 350px;
+  }
+}
+
+h1{
+  margin-left: 1.3em;
+}
+

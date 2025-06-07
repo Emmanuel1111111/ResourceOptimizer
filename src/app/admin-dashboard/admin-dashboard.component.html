@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<div class="dashboard-wrapper" [ngClass]="{ 'sidebar-open': sidebarOpen }">
+  <!-- Sidebar Toggle Button -->
+  <button mat-icon-button class="sidebar-toggle" (click)="toggleSidebar()" >
+    <i class="fas fa-bars mb-4" ></i>
+  </button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" [ngClass]="{ 'open': sidebarOpen }">
+    <div class="logo-container">
+      <a class="logo" href="#">
+        <i class="fas fa-graduation-cap"></i>
+        KnustResource
+      </a>
+    </div>
+    <mat-nav-list>
+      <a mat-list-item class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/schedules" routerLinkActive="active">
+        <i class="fas fa-calendar"></i> Schedules
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/rooms" routerLinkActive="active">
+        <i class="fas fa-door-open"></i> Rooms
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/analytics" routerLinkActive="active">
+        <i class="fas fa-chart-bar"></i> Analytics
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/courses" routerLinkActive="active">
+        <i class="fas fa-book"></i> Courses
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/departments" routerLinkActive="active">
+        <i class="fas fa-building"></i> Departments
+      </a>
+      <div class="menu-divider"></div>
+      <a mat-list-item class="nav-link" routerLink="/settings" routerLinkActive="active">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+      <a mat-list-item class="nav-link" routerLink="/help" routerLinkActive="active">
+        <i class="fas fa-question-circle"></i> Help
+      </a>
+    </mat-nav-list>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="container">
+      
+     
+
+      <div class="card-container">
+        <!-- Manage Resources Card -->
+        <mat-card class="custom-card manage-resources">
+          <mat-card-header>
+            <mat-card-title>📌 Manage Resources</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            Allocate classrooms, labs, and other resources efficiently.
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-raised-button color="primary" routerLink="/executive-booking">Go to Resources</a>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- AI Predictions Card -->
+        <mat-card class="custom-card ai-predictions">
+          <mat-card-header>
+            <mat-card-title>📊 AI Predictions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            View AI-powered insights on classroom demand and optimize usage.
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-raised-button color="primary" routerLink="/ai-insights">View AI Insights</a>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Adjust Schedules Card -->
+        <mat-card class="custom-card adjust-schedules">
+          <mat-card-header>
+            <mat-card-title>🗓 Adjust Schedules</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            Modify classroom schedules
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-raised-button color="primary" [routerLink]="['/adjust-schedules', Id]">Adjust Schedules</a>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

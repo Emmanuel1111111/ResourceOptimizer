@@ -1,0 +1,123 @@
+.container {
+    max-width: 800px;
+    
+    padding: 2rem 1rem;
+    background:rgb(255, 255, 255);
+    border-radius: 30px;
+    
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh;
+    border: solid 2px rgb(0, 0, 0);
+
+  }
+
+  .welcome-section img.illustration {
+    width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+
+  .spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  z-index: 10000;
+  width: 50em;
+  height: 50em;
+  background: transparent;
+  border: none;
+}
+
+.spinner::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width:100em;
+  height: 50em;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1px);
+  z-index: 9999;
+}
+
+body{
+    background-image: url("../../assets/images/Resource-Optimization-in-Project-Management.png");
+   
+    background-size: cover;
+
+    background-repeat: no-repeat;
+}
+
+  .auth-tabs {
+    background:transparent;
+    border-radius: 20px;
+    color:black;
+    padding: 1.5rem;
+  }
+
+ 
+
+  .form-section mat-form-field {
+    display: block;
+    margin-bottom: 1rem;
+    width: 100%;
+    color:black;
+  }
+
+  .terms-text {
+    font-size: 0.75rem;
+    margin-top: 10px;
+    color:black;
+  }
+
+  .terms-text a {
+    color:black;
+    text-decoration: underline;
+  }
+
+  .submit-btn {
+    margin-top: 1rem;
+    background-color:rgb(2, 7, 12)!important;
+    color: #ffffff;
+  }
+    .submit-btn:hover {
+        background-color: rgb(93, 165, 237)!important;
+        color: #ffffff;
+    }
+
+
+  .social-login {
+    margin-top: 1.5rem;
+  }
+
+  .social-login p {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .fb-btn {
+    background-color: #3b5998;
+    color: white;
+    margin-right: 0.5rem;
+  }
+
+  .google-btn {
+    background-color: #db4437;
+    color: white;
+  }
+
+  .mat-form-field {
+    background-color: black !important;
+    border-radius: 8px;
+  }
+
+  .mat-form-field input {
+    color: black;
+  }
+
+  mat-label {
+    color: black !important;
+  }

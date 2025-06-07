@@ -1,0 +1,162 @@
+<div class="dashboard-wrapper container-fluid p-0">
+  <!-- Sidebar -->
+  <nav class="sidebar bg-white shadow-sm d-flex flex-column align-items-center pt-3 " [ngClass]="{'open': isOpened }">
+    <mat-nav-list>
+      <a mat-nav-item class="nav-link" routerLinkActive="active" [routerLink]="'/admin-dashboard'"><i class="fas fa-home fa-lg"></i>Home</a>
+      <a mat-nav-item class="nav-link" routerLinkActive="active" routerLink="'/"><i class="fas fa-chart-line fa-lg"></i>Schedules</a>
+      <a mat-nav-item class="nav-link" routerLinkActive="active"  routerLink="''"><i class="fas fa-cog fa-lg"></i>Settings</a>
+      <a mat-nav-item class="nav-link" routerLinkActive="active"  routerLink="''"><i class="fas fa-chart-line fa-lg"></i>Executive</a>
+      <a mat-nav-item class="nav-link"  routerLinkActive="active" routerLink="''"><i class="fas fa-user-circle fa-lg"></i>User</a>
+      
+    </mat-nav-list>
+  </nav>
+
+  
+   
+  <main class="dashboard-content px-4 py-3   ">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold mb-0">Welcome Back, {{user.username}}</h3>
+      </div>
+     <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+      <div *ngIf="error_masssage && !isLoading" class="error-message">{{ error_masssage }}</div>
+      
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        
+          <div class="search-container">
+          <input type="text" class="search-bar" placeholder="Search Room ID..." [(ngModel)]="searchQuery" (input)="searchRoom()" matInput />
+          
+        </div>
+          
+          
+        
+      </div>
+    </div>
+
+    <!-- Cards Row -->
+    <div class="row g-4">
+      <!-- Left Card: Chart -->
+      <div class="col-lg-6">
+          <mat-card class="fancy-card shadow-lg h-100">
+            <mat-card-header>
+              <mat-card-title><mat-icon>bar_chart</mat-icon> Daily Demand Insights</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="chart-container">
+                <canvas #barCanvas></canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+      <!-- Right Card: Modify Schedule -->
+      <div class="col-lg-6">
+        <mat-card class="fancy-card shadow-lg h-100">
+          <mat-card-header class="bg-warning text-dark rounded-top">
+            <mat-card-title><mat-icon>edit_calendar</mat-icon> Modify Schedule</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="overflow-auto">
+            <table class="table table-hover text-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Room</th>
+                  <th>Course</th>
+                  <th>Current Schedule</th>
+                  <th>Year</th>
+                  
+                  <th>Department</th>
+               
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let schedule of currentTimeMatches">
+                  <td>{{ schedule?.['Room ID'] }}</td>
+                  <td>{{schedule?.Course}}</td>
+                  <td>
+                    {{ schedule?.Start }} - {{ schedule?.End }}
+                  </td>
+                  <td>
+                    {{schedule?.Year}}
+                  </td>
+                  <td>
+                    {{schedule?.Department}}
+                  </td>
+                 
+                  
+                </tr>
+              </tbody>
+            </table>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+ <section class="conveyor mt-4" *ngIf="selectedRoom">
+    <mat-card class="fancy-card ">
+      <mat-card-header>
+        <mat-card-title><mat-icon>table_chart</mat-icon> Daily Utilization for {{ selectedRoom['Room ID'] }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="filteredDailyUtilization" class="utilization-table">
+          <ng-container matColumnDef="Day">
+            <th mat-header-cell *matHeaderCellDef>Day</th>
+            <td mat-cell *matCellDef="let data">{{ data.Day }}</td>
+          </ng-container>
+          <ng-container matColumnDef="Room ID">
+            <th mat-header-cell *matHeaderCellDef>Room</th>
+            <td mat-cell *matCellDef="let data">{{ data['Room ID'] }}</td>
+          </ng-container>
+          <ng-container matColumnDef="Daily Utilization">
+            <th mat-header-cell *matHeaderCellDef>Utilization (%)</th>
+            <td mat-cell *matCellDef="let data">
+              {{ data.Daily_Utilization | number:'1.1-1' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="Time Slot">
+            <th mat-header-cell *matHeaderCellDef>Time Slot</th>
+            <td mat-cell *matCellDef="let data">{{ data.Time_Slot }}</td>
+          </ng-container>
+          <ng-container matColumnDef="Courses">
+            <th mat-header-cell *matHeaderCellDef>Courses</th>
+            <td mat-cell *matCellDef="let data">{{ data.Courses }}</td>
+          </ng-container>
+          <ng-container matColumnDef="Department">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let data">{{ data.Department }}</td>
+          </ng-container>
+         
+           
+
+           <ng-container matColumnDef="Status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let data">{{ data.Status }}</td>
+          </ng-container> 
+          
+          <ng-container matColumnDef="Year">
+            <th mat-header-cell *matHeaderCellDef>Year</th>
+            <td mat-cell *matCellDef="let data">{{ data.Year }}</td>
+          </ng-container>
+           
+          <tr mat-header-row *matHeaderRowDef="utilizationColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: utilizationColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+    <!-- Footer Buttons -->
+    <div class="text-center mt-4">
+      <button mat-raised-button color="primary" class="mx-2" (click)="saveChanges()">
+        <mat-icon>check_circle</mat-icon> Save All Changes
+      </button>
+      <button mat-raised-button color="warn" class="mx-2" (click)="cancelChanges()">
+        <mat-icon>cancel</mat-icon> Cancel
+      </button>
+    </div>
+
+
+</main>
+</div>

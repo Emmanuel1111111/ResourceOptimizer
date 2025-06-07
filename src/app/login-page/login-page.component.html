@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <body >
+
+   
+
+<div class="container col-lg-6 col-md-8 col-sm-12">
+  <div class="welcome-section">
+     <mat-spinner *ngIf="isloading" class="spinner"></mat-spinner>    
+    
+  
+    <h2>Welcome</h2>
+    <p></p>
+  </div>
+
+  <p></p>
+  <div>
+    * Indicates required fields
+  </div>
+
+  <mat-tab-group class="auth-tabs">
+    <mat-tab label="LOGIN">
+      <form [formGroup]="Profile" class="form-section">
+
+       <mat-form-field appearance="outline" >
+        <mat-label>
+            Username
+        </mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput  formControlName="username" placeholder="Username"/>
+        <mat-error *ngIf="Profile.get('username')?.hasError('required')">
+          Username is required  
+        </mat-error>
+        <mat-error *ngIf="Profile.get('username')?.hasError('minlength')">
+          Username must be at least 3 characters long
+        </mat-error>
+        
+
+       </mat-form-field>
+
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput type="password" placeholder="Password" formControlName="password" />
+          <mat-error *ngIf="Profile.get('password')?.hasError('required')">
+            Password is required
+            </mat-error>
+            <mat-error *ngIf="Profile.get('password')?.hasError('minlength')">
+            Password must be at least 6 characters long
+            </mat-error>
+
+        </mat-form-field>
+
+        <p class="terms-text">
+          By pressing "Submit" you agree to our <a href="#">terms & conditions</a>
+        </p>
+
+        <button mat-fab color="primary" class="submit-btn"  (click)="logIn()" >
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </form>
+    </mat-tab>
+
+    <mat-tab label="SIGNUP">
+       <form [formGroup]="SignUpProfile" class="form-section">
+         <mat-form-field appearance="outline">
+        <mat-label>
+            Username
+        </mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput  formControlName="username" placeholder="Username"/>
+        <mat-error *ngIf="SignUpProfile.get('username')?.hasError('required')">
+          Username is required  
+        </mat-error>
+        <mat-error *ngIf="SignUpProfile.get('username')?.hasError('minlength')">
+          Username must be at least 3 characters long
+        </mat-error>
+
+        
+
+       </mat-form-field>
+
+<mat-form-field appearance="outline">
+          <mat-label>email</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput  type="email" formControlName="email" placeholder="email" />
+            <mat-error *ngIf="SignUpProfile.get('email')?.hasError('required')">
+                Email is required
+            </mat-error>
+            <mat-error *ngIf="SignUpProfile.get('email')?.hasError('email')">
+                Please enter a valid email address      
+            </mat-error>
+        </mat-form-field>
+
+<mat-form-field appearance="outline">
+          <mat-label>password</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput  type="password" formControlName="password" placeholder="password" />
+            <mat-error *ngIf="SignUpProfile.get('password')?.hasError('required')">
+                Password is required
+            </mat-error>
+            <mat-error *ngIf=" SignUpProfile.get('password')?.hasError('minlength')">
+                Password must be at least 6 characters long
+            </mat-error>
+        </mat-form-field>
+
+
+
+        <button mat-fab color="primary" class="submit-btn"  (click)="SingUp()" >
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+       </form>
+    </mat-tab>
+  </mat-tab-group>
+
+  <div class="social-login">
+    <p>Or Signup with</p>
+    <button mat-raised-button class="fb-btn">
+      <i class="fab fa-facebook-f"></i> Facebook
+    </button>
+    <button mat-raised-button class="google-btn">
+      <i class="fab fa-google"></i> Google
+    </button>
+  </div>
+</div>
+ </body>
+</html>

@@ -1,0 +1,52 @@
+py-2{
+    font-size: 2em;
+    
+}
+
+.portal{
+    max-height: 10em;
+}
+
+
+
+h6{
+    
+    font-size: medium;
+    background-color: rgb(195, 195, 195); 
+    border-radius: 4px;
+   
+    max-width: 4em;
+    text-align: center;
+}
+
+
+.second{
+    height: 20em;
+    max-width: 50rem;
+    border: solid 2px;    
+    border-radius: 80px 80px 80px 80px;
+
+
+}
+
+.third{
+    padding: 30px;
+    background-color: rgb(162, 194, 220);
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.btn{
+    max-width: 5em;
+    max-height: 4em;
+}
+
+@media (max-width:678px){
+    .portal{
+        height: fit-content;
+    }
+
+    .second{
+        align-self: center;
+        
+    }
+}
