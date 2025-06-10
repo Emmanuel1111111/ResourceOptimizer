@@ -120,7 +120,8 @@ def signup():
 
     return jsonify({
         
-         "Userinfo": user.to_dict(orient="records")
+         "Userinfo": user.to_dict(orient="records"),
+         "token": token
         
 
         }), 201

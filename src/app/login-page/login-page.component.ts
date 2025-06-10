@@ -86,7 +86,7 @@ SignUpProfile!: FormGroup
  
     
 
-SingUp() {
+SignUp() {
     if (this.SignUpProfile.valid) {
       console.log('Sign Up Form Submitted!', this.SignUpProfile.value);
       this.authService.signup(

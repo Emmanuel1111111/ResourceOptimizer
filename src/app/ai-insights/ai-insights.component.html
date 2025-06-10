@@ -1,5 +1,249 @@
-<mat-card class="chart-container">
-    <h3>📈 AI-Powered Insights</h3>
-    <canvas id="demandChart"></canvas>
-  </mat-card>
-  
+<!-- Sidebar Navigation -->
+<div class="container-fluid">
+  <div class="row">
+
+    <nav class="col-md-2 bg-light sidebar">
+      <mat-nav-list>
+        <a mat-nav-item class="nav-link mb-2 border-bottom" routerLink="#"><i class="fas fa-home fa-lg"></i>Home</a> 
+        <a mat-nav-item class="nav-link mb-2 border-bottom" routerLink="#"> <i class="fas fa-calendar fa-lg"></i> Schedules</a>
+        <a mat-nav-item class="nav-link mb-2 border-bottom" routerLink="#"><i class="fas fa-cog fa-lg"></i>Settings</a>
+        <a mat-nav-item class="nav-link mb-2 border-bottom" routerLink="#"><i class="fas fa-chart-line fa-lg"></i>Executive</a>
+        <a mat-nav-item class="nav-link mb-2 border-bottom" routerLink="#"><i class="fas fa-person fa-lg"></i>User</a>
+      </mat-nav-list>
+    </nav>
+
+    <!-- Main Content -->
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-16 main-content">
+      <!-- Header with gradient background -->
+      <div class="header-section">
+        <div class="d-flex justify-content-between align-items-center pt-4 pb-4">
+          <div>
+            <h1 class="header-title"><i class="bi bi-stars me-2"></i>AI-Powered Insights</h1>
+            <p class="header-subtitle">Smart analytics for optimal room utilization</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Form Card -->
+      <div class="input-card">
+        <div class="card-body p-4">
+          <form class="row g-4">
+            <div class="col-md-3">
+              <label for="roomId" class="form-label">Room ID</label>
+              <input type="text" class="form-control modern-input" id="roomId" [(ngModel)]="roomId" name="roomId" placeholder="e.g., MVBA-GF1">
+            </div>
+            <div class="col-md-3">
+              <label for="period" class="form-label">Period (days)</label>
+              <input type="number" class="form-control modern-input" id="period" [(ngModel)]="period" name="period" min="1" max="30" placeholder="7">
+            </div>
+           
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="button" class="btn btn-generate w-100" (click)="fetchInsights()">
+                <i class="bi bi-lightbulb me-2"></i>Generate Insights
+              </button>
+            </div>
+          </form>
+          <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+        </div>
+      </div>
+
+      <!-- Modern Tabs -->
+      <div class="modern-tabs-container">
+        <div class="modern-tabs">
+          <button class="tab-button" [ngClass]="{'active': selectedTab === 0}" (click)="switchTab(0)">
+            Current Utilization
+          </button>
+          <button class="tab-button" [ngClass]="{'active': selectedTab === 1}" (click)="switchTab(1)">
+            Predicted Demand
+          </button>
+        </div>
+      </div>
+
+   <div class="tab-content-container">
+  <!-- Current Utilization Tab -->
+  <div class="tab-pane" [ngClass]="{'active': selectedTab === 0}">
+    <div *ngIf="current_results.length === 0" class="empty-state">
+      <i class="bi bi-graph-up-arrow display-1 text-muted"></i>
+      <p class="text-muted mt-3">No current utilization data available. Please generate insights.</p>
+    </div>
+
+    <div *ngFor="let result of current_results" class="insight-card">
+      <div class="card-header-modern">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="room-title">{{ result.room_id }}</h3>
+          <span class="status-badge" [ngClass]="getStatusClass(result.utilization_status)">
+            {{ result.utilization_status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body p-4">
+        <!-- Utilization Progress -->
+        <div class="utilization-section mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="utilization-label">Average Utilization</span>
+            <span class="utilization-value">{{ result.utilization_metrics.average_utilization }}%</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" [style.width.%]="result.utilization_metrics.average_utilization"></div>
+          </div>
+          <div class="mt-2">
+            <p><strong>Peak Utilization:</strong> {{ result.utilization_metrics.peak_utilization }}%</p>
+            <p><strong>Minimum Utilization:</strong> {{ result.utilization_metrics.minimum_utilization }}%</p>
+            <p><strong>Trend:</strong> {{ result.utilization_metrics.utilization_trend | titlecase }}</p>
+          </div>
+        </div>
+
+        <!-- Utilization Distribution -->
+        <div class="utilization-distribution mb-4">
+          <h6 class="section-title">Utilization Distribution</h6>
+          <p><strong>Days >70%:</strong> {{ result.utilization_distribution.days_over_70_percent }}</p>
+          <p><strong>Days < 30%:</strong> {{ result.utilization_distribution.days_under_30_percent }}</p>
+          <p><strong>Days Optimal:</strong> {{ result.utilization_distribution.days_optimal_range }}</p>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations-grid">
+          <div class="recommendation-card">
+            <h6 class="recommendation-title">Recommendation</h6>
+            <p class="recommendation-text">{{ result.utilization_tip }}</p>
+          </div>
+          <div class="recommendation-card">
+            <h6 class="recommendation-title">Scheduling Strategy</h6>
+            <ul class="recommendation-text">
+              <li *ngFor="let rec of result.scheduling_recommendations.immediate_opportunities">{{ rec }}</li>
+              <li *ngFor="let rec of result.scheduling_recommendations.redistribution_needed">{{ rec }}</li>
+              <li *ngIf="result.scheduling_recommendations.immediate_opportunities.length === 0 && result.scheduling_recommendations.redistribution_needed.length === 0">
+                No immediate scheduling actions required.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Summary Insights -->
+        <div class="summary-insights mt-4">
+          <h6 class="section-title">Summary Insights</h6>
+          <p><strong>Best Day for Scheduling:</strong> {{ result.summary_insights.best_day_for_scheduling }}</p>
+          <p><strong>Busiest Day:</strong> {{ result.summary_insights.busiest_day }}</p>
+          <p><strong>Total Available Slots/Week:</strong> {{ result.summary_insights.total_available_slots_per_week }}</p>
+          <p><strong>Average Courses/Day:</strong> {{ result.summary_insights.average_courses_per_day }}</p>
+        </div>
+
+        <!-- Daily Analysis Table -->
+        <div class="timeslots-section mt-4">
+          <h6 class="section-title">Daily Schedule Overview</h6>
+          <div class="table-container">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Free Timeslots</th>
+                  <th>Utilization (%)</th>
+                  <th>Booked Hours</th>
+                  <th>Courses Scheduled</th>
+                  <th>Priority Slots</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let slot of result.daily_analysis">
+                  <td class="day-cell">{{ slot.day }}</td>
+                  <td class="timeslots-cell">{{ slot.free_timeslots.join(', ') || 'None' }}</td>
+                  <td class="utilization-cell">{{ slot.utilization_percentage | number: '1.1-1' }}</td>
+                  <td>{{ slot.booked_hours | number: '1.1-1' }}</td>
+                  <td>{{ slot.courses_scheduled.join(', ') || 'None' }}</td>
+                  <td>{{ slot.priority_scheduling_slots.join(', ') || 'None' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Predicted Demand Tab -->
+        <div class="tab-pane" [ngClass]="{'active': selectedTab === 1}">
+          <div *ngIf="predictions.length === 0" class="empty-state">
+            <i class="bi bi-graph-up display-1 text-muted"></i>
+            <p class="text-muted mt-3">No prediction data available. Please generate insights.</p>
+          </div>
+          
+          <div *ngFor="let pred of predictions" class="insight-card">
+            <div class="card-header-modern">
+              <div class="d-flex justify-content-between align-items-center">
+                <h3 class="room-title">{{ pred.room_id }}</h3>
+                <span class="status-badge" [ngClass]="getStatusClass(pred.utilization_status)">
+                  {{ pred.utilization_status }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="card-body p-4">
+              <!-- Utilization Progress -->
+              <div class="utilization-section mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="utilization-label">Average Utilization</span>
+                  <span class="utilization-value">{{ pred.average_utilization }}%</span>
+                </div>
+                <div class="progress-container">
+                  <div class="progress-bar" [style.width.%]="pred.average_utilization"></div>
+                </div>
+              </div>
+
+              <!-- Recommendation -->
+              <div class="recommendation-card mb-4">
+                <h6 class="recommendation-title">Recommendation</h6>
+                <p class="recommendation-text">{{ pred.utilization_tip }}</p>
+              </div>
+
+              <!-- Chart Container -->
+              <div class="chart-section mb-4">
+                <canvas id="chart-{{ pred.room_id }}" class="chart-canvas"></canvas>
+              </div>
+
+              <!-- Predictions Table -->
+              <div class="predictions-section">
+                <h6 class="section-title">Daily Predictions</h6>
+                <div class="table-container">
+                  <table class="modern-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Utilization (%)</th>
+                        <th>Demand Level</th>
+                        <th>Optimization Tip</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let date of pred.dates; let i = index">
+                        <td class="date-cell">{{ date }}</td>
+                        <td class="utilization-cell">{{ pred.utilization[i] | number: '1.1-1' }}</td>
+                        <td class="demand-cell">
+                          <span class="demand-badge" [ngClass]="getDemandClass(pred.demand_levels[i])">
+                            {{ pred.demand_levels[i] }}
+                          </span>
+                        </td>
+                        <td class="tip-cell">{{ pred.optimization_tips[i] }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-save" (click)="fetchInsights()">
+          <i class="bi bi-save me-2"></i>Save Insights
+        </button>
+        <button class="btn btn-clear" (click)="clearInsights()">
+          <i class="bi bi-x-circle me-2"></i>Clear Results
+        </button>
+      </div>
+</main>
+</div>
+  </div>

@@ -100,7 +100,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     gsap.from('.room-card', { opacity: 0, y: 50, duration: 3, stagger: 0.1 });
     gsap.from('.fancy-card', { opacity: 0, y: 20, duration: 3, stagger: 0.2 });
     gsap.from('.conveyor ', { opacity: 0, y: 20, duration: 3, stagger: 0.1 });
-      this.initializeBarGraph();
+      
    
   }
 
@@ -126,20 +126,16 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
         this.weekly_summary = data.weekly_summary;
     
        
-        this.currentTimeMatches = data.current_time_matches.map((s) => ({
-          ...s,
-          newStart: s.Start,
-          newEnd: s.End,
-          
-          
-        }));
+        this.currentTimeMatches = data.current_time_matches;
         this.filteredRooms = [data.room_status];
         this.selectedRoom = data.room_status;
         
-        
+        this.initializeBarGraph();
       
         this.isLoading = false;
-        console.log('Filtered Rooms:', this.dailyUtilization);
+        console.log('Daily Utilization:', this.dailyUtilization);
+        console.log('Current Lecture:', this.currentTimeMatches);
+        
         
       },
       error: (err) => {

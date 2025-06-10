@@ -74,6 +74,7 @@ export interface CurrentSchedule {
   'Year': string;
 }
 
+
 export interface UserInfo{
   Id: string;
   username: string;
@@ -81,4 +82,72 @@ export interface UserInfo{
   token:string
   message:string
   
+}
+
+export interface Prediction {
+  room_id: string;
+  dates: string[];
+  utilization: number[];
+  demand_levels: string[];
+  optimization_tips: string[];
+  trend: string;
+  utilization_status: string;
+  utilization_tip: string;
+  average_utilization: number;
+}
+
+
+
+
+
+export interface DailyAnalysis {
+  day: string;
+  utilization_percentage: number;
+  booked_hours: number;
+  status: string;
+  courses_scheduled: string[];
+  total_courses: number;
+  free_timeslots: string[];
+  free_slots_count: number;
+  priority_scheduling_slots: string[];
+  session_details: any; // Replace with specific type if session_details structure is known
+}
+
+export interface SchedulingRecommendations {
+  immediate_opportunities: string[];
+  redistribution_needed: string[];
+  weekly_strategy: string[];
+  optimal_days_for_new_courses: string[];
+}
+
+export interface UtilizationMetrics {
+  average_utilization: number;
+  peak_utilization: number;
+  minimum_utilization: number;
+  utilization_trend: string;
+}
+
+export interface UtilizationDistribution {
+  days_over_70_percent: number;
+  days_under_30_percent: number;
+  days_optimal_range: number;
+}
+
+export interface SummaryInsights {
+  best_day_for_scheduling: string;
+  busiest_day: string;
+  total_available_slots_per_week: number;
+  average_courses_per_day: number;
+}
+
+export interface AnalysisResult {
+  room_id: string;
+  analysis_period_days: number;
+  utilization_metrics: UtilizationMetrics;
+  utilization_status: string;
+  utilization_tip: string;
+  utilization_distribution: UtilizationDistribution;
+  daily_analysis: DailyAnalysis[];
+  scheduling_recommendations: SchedulingRecommendations;
+  summary_insights: SummaryInsights;
 }

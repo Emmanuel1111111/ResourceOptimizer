@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
-    <body >
+ 
 
    
 
-<div class="container col-lg-6 col-md-8 col-sm-12">
+<div class="container container-fluid justify-content-center mt-50">
+  <div class=" justify-content-center mt-30">
   <div class="welcome-section">
      <mat-spinner *ngIf="isloading" class="spinner"></mat-spinner>    
     
@@ -20,9 +21,10 @@
 
   <mat-tab-group class="auth-tabs">
     <mat-tab label="LOGIN">
+      <p></p>
       <form [formGroup]="Profile" class="form-section">
 
-       <mat-form-field appearance="outline" >
+       <mat-form-field appearance="outline">
         <mat-label>
             Username
         </mat-label>
@@ -60,9 +62,11 @@
           <mat-icon>arrow_forward</mat-icon>
         </button>
       </form>
-    </mat-tab>
 
-    <mat-tab label="SIGNUP">
+      
+    </mat-tab>
+ <mat-tab label="SIGNUP">
+      <p></p>
        <form [formGroup]="SignUpProfile" class="form-section">
          <mat-form-field appearance="outline">
         <mat-label>
@@ -82,9 +86,9 @@
        </mat-form-field>
 
 <mat-form-field appearance="outline">
-          <mat-label>email</mat-label>
+          <mat-label>Email</mat-label>
           <mat-icon matPrefix>email</mat-icon>
-          <input matInput  type="email" formControlName="email" placeholder="email" />
+          <input matInput  type="email" formControlName="email" placeholder="Email" />
             <mat-error *ngIf="SignUpProfile.get('email')?.hasError('required')">
                 Email is required
             </mat-error>
@@ -94,24 +98,25 @@
         </mat-form-field>
 
 <mat-form-field appearance="outline">
-          <mat-label>password</mat-label>
+          <mat-label>Password</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
-          <input matInput  type="password" formControlName="password" placeholder="password" />
+          <input matInput  type="password" formControlName="password" placeholder="Password" />
             <mat-error *ngIf="SignUpProfile.get('password')?.hasError('required')">
                 Password is required
             </mat-error>
-            <mat-error *ngIf=" SignUpProfile.get('password')?.hasError('minlength')">
+            <mat-error *ngIf="SignUpProfile.get('password')?.hasError('minlength')">
                 Password must be at least 6 characters long
             </mat-error>
         </mat-form-field>
 
 
 
-        <button mat-fab color="primary" class="submit-btn"  (click)="SingUp()" >
+        <button mat-fab color="primary" class="submit-btn"  (click)="SignUp()" >
           <mat-icon>arrow_forward</mat-icon>
         </button>
        </form>
     </mat-tab>
+   
   </mat-tab-group>
 
   <div class="social-login">
@@ -124,5 +129,6 @@
     </button>
   </div>
 </div>
- </body>
-</html>
+</div>
+   
+ 

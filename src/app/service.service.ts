@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { CurrentSchedule } from '../Environ';
+import { Prediction } from '../Environ';
+import { AnalysisResult } from '../Environ';
 
 export interface LoginResponse {
   message: string;
@@ -69,18 +71,27 @@ export class AuthService {
     catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch rooms')))
   );
 }
-  predictUtilization(roomId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/predict`, { room_id: roomId }).pipe(
-      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to predict utilization')))
+  predictUtilization(roomId?: string, period: number = 7): Observable<Prediction[]> {
+    let params = new HttpParams().set('period', period.toString());
+    const body = roomId ? { room_id: roomId } : {};
+    return this.http.post<Prediction[]>(`${this.apiUrl}/api/predict`, body, { params }).pipe(
+      catchError(err => throwError(() => err.error?.error || 'Failed to predict utilization'))
     );
   }
-
 
   getUsers(userId:any):Observable<any>{
    return  this.http.get<any>(`${this.apiUrl}/api/logs`, userId)
 
   }
 
+  currentUtilization(roomId: string, days: number): Observable<AnalysisResult[]> {
+    let params = new HttpParams().set('days', days.toString());
+    const body = roomId ? { room_id: roomId } : {};
+      return this.http.post<AnalysisResult[]>(`${this.apiUrl}/current_utilization`, body, { params }).pipe(
+        catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch current utilization')))
+      );
+    }
+  
   loginWithFacebook(): Observable<any> {
     return throwError(() => new Error('Facebook login not implemented'));
   }

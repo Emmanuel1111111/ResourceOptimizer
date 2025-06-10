@@ -1,5 +1,5 @@
 <div class="dashboard-wrapper container-fluid p-0">
-  <!-- Sidebar -->
+ 
   <nav class="sidebar bg-white shadow-sm d-flex flex-column align-items-center pt-3 " [ngClass]="{'open': isOpened }">
     <mat-nav-list>
       <a mat-nav-item class="nav-link" routerLinkActive="active" [routerLink]="'/admin-dashboard'"><i class="fas fa-home fa-lg"></i>Home</a>
@@ -17,28 +17,25 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h3 class="fw-bold mb-0">Welcome Back, {{user.username}}</h3>
+        <h3 class="fw-bold mb-0">Welcome Back , {{user.username}}</h3>
       </div>
      <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
-      <div *ngIf="error_masssage && !isLoading" class="error-message">{{ error_masssage }}</div>
+      <div *ngIf="error_masssage && !isLoading" class="error-message align-items-baseline">{{ error_masssage }}</div>
       
 
-      <!-- Search Bar -->
+      
       <div class="search-container">
         
           <div class="search-container">
           <input type="text" class="search-bar" placeholder="Search Room ID..." [(ngModel)]="searchQuery" (input)="searchRoom()" matInput />
+          </div>
           
-        </div>
-          
-          
-        
-      </div>
+       </div>
     </div>
 
-    <!-- Cards Row -->
+    
     <div class="row g-4">
-      <!-- Left Card: Chart -->
+      
       <div class="col-lg-6">
           <mat-card class="fancy-card shadow-lg h-100">
             <mat-card-header>
@@ -52,11 +49,11 @@
           </mat-card>
         </div>
 
-      <!-- Right Card: Modify Schedule -->
+      
       <div class="col-lg-6">
         <mat-card class="fancy-card shadow-lg h-100">
           <mat-card-header class="bg-warning text-dark rounded-top">
-            <mat-card-title><mat-icon>edit_calendar</mat-icon> Modify Schedule</mat-card-title>
+            <mat-card-title ><mat-icon>edit_calendar</mat-icon> Ongoing Schedule </mat-card-title>
           </mat-card-header>
           <mat-card-content class="overflow-auto">
             <table class="table table-hover text-sm">
@@ -85,8 +82,7 @@
                     {{schedule?.Department}}
                   </td>
                  
-                  
-                </tr>
+      </tr>
               </tbody>
             </table>
           </mat-card-content>
@@ -147,7 +143,7 @@
     </mat-card>
   </section>
 
-    <!-- Footer Buttons -->
+   
     <div class="text-center mt-4">
       <button mat-raised-button color="primary" class="mx-2" (click)="saveChanges()">
         <mat-icon>check_circle</mat-icon> Save All Changes
@@ -156,7 +152,6 @@
         <mat-icon>cancel</mat-icon> Cancel
       </button>
     </div>
-
 
 </main>
 </div>

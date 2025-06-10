@@ -1,3 +1,4 @@
+
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import {MatCardModule} from '@angular/material/card';
@@ -31,6 +32,9 @@ import {MatTab} from '@angular/material/tabs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DATE_FORMATS, MatOption } from '@angular/material/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressBar } from '@angular/material/progress-bar';
+
 
 
 import { MatListModule, MatNavList } from '@angular/material/list';
@@ -72,7 +76,10 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     MatTab,
     MatTabsModule,
     ReactiveFormsModule,
-    MatNavList
+    MatNavList,
+    MatProgressBarModule,
+    MatProgressBar
+    
    
   
     

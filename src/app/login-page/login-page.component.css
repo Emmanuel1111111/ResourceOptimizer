@@ -1,13 +1,14 @@
 .container {
-    max-width: 800px;
+    max-width: 600px;
     
     padding: 2rem 1rem;
     background:rgb(255, 255, 255);
     border-radius: 30px;
+margin-top: auto;
     
     text-align: center;
     font-family: 'Segoe UI', sans-serif;
-    height: 100vh;
+    
     border: solid 2px rgb(0, 0, 0);
 
   }
@@ -45,10 +46,11 @@
 
 body{
     background-image: url("../../assets/images/Resource-Optimization-in-Project-Management.png");
-   
-    background-size: cover;
-
     background-repeat: no-repeat;
+    min-height: 100vh;
+    background-size: contain;
+   
+   
 }
 
   .auth-tabs {
