@@ -25,8 +25,7 @@ timetables_collection = db.timetables
 def get_available_rooms():
     try:
         room_id = request.args.get('room_id')
-        # identity = get_jwt_identity()
-        print("User identity from JWT:")
+       
 
         # Fetch data from MongoDB
         query = {}
@@ -48,15 +47,15 @@ def get_available_rooms():
         # Time-based filtering
         now_time = datetime.now().time()
         now_day = datetime.now().strftime('%A')  # e.g., 'Monday', 'Tuesday', etc.
-        buffer = timedelta(minutes=10)
+        buffer = timedelta(minutes=5)
 
         df['Start_dt'] = pd.to_datetime(df['Start'], format='%H:%M', errors='coerce').dt.time
         df['End_dt'] = pd.to_datetime(df['End'], format='%H:%M', errors='coerce').dt.time
 
         def is_within_time_and_day(start, end, day, current_time, current_day):
             try:
-                start_buffer = (datetime.combine(datetime.today(), start) - buffer).time()
-                end_buffer = (datetime.combine(datetime.today(), end) + buffer).time()
+                start_buffer = (datetime.combine(datetime.today(), start) ).time()
+                end_buffer = (datetime.combine(datetime.today(), end) ).time()
                 # Check both day and time
                 return (day == current_day) and (start_buffer <= current_time <= end_buffer)
             except Exception:
@@ -119,7 +118,7 @@ def predict_utilization():
     try:
         data = request.get_json()
         room_id = data.get('room_id')
-        period = int(request.args.get('period', 7))
+        period = int(request.args.get('period', 30))
         
         if period < 1 or period > 30:
             return jsonify({"error": "Period must be between 1 and 30 days"}), 400
@@ -226,30 +225,45 @@ def current_utilization():
     try:
         data = request.get_json()
         room_id = data.get('room_id')
-        days = int(request.args.get('days', 7))
         
-        if days < 1 or days > 300:
-            return jsonify({'error': "Days must be between 1 and 300"}), 400
-
-        # Fetch recent data
-        cutoff = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        query = {'Room ID': room_id, 'Date': {'$gte': cutoff}} if room_id else {'Date': {'$gte': cutoff}}
+        query = {'Room ID': room_id} if room_id else {}
         raw_data = list(timetables_collection.find(query, {'_id': 0}))
         
         if not raw_data:
-            return jsonify({"error": "No data found for the given filters"}), 404
+            
+            try:
+                total_records = timetables_collection.count_documents({})
+                return jsonify({
+                    "error": f"No data found for the specified room.",
+                    "details": {
+                        "room_id": room_id,
+                        "total_records_in_db": total_records,
+                        "suggestion": "Check if the room ID exists in the database or try without specifying a room_id to see all rooms"
+                    }
+                }), 404
+            except:
+                return jsonify({"error": "No data found for the specified criteria"}), 404
 
-        # Convert to DataFrame and preprocess
+        
         df = pd.DataFrame(raw_data)
         if df.empty:
             return jsonify({"error": "No data found after processing"}), 404
 
+        
+        df_temp = df.copy()
+        df_temp['Date'] = pd.to_datetime(df_temp['Date'])
+        earliest_date = df_temp['Date'].min().strftime('%Y-%m-%d')
+        latest_date = df_temp['Date'].max().strftime('%Y-%m-%d')
+        total_days_in_period = (df_temp['Date'].max() - df_temp['Date'].min()).days + 1
+        
+        print(f"Analyzing complete schedule period: {earliest_date} to {latest_date} ({total_days_in_period} days)")
+
         df, daily_summary, _ = preprocess_data(df)
 
-        # Generate timeslots
+       
         timeslots = [f"{h:02d}:00-{h+1:02d}:00" for h in range(8, 20)]
         
-        # Define day order for consistent display
+        
         day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
         results = []
@@ -260,7 +274,7 @@ def current_utilization():
             if room_df.empty:
                 continue
 
-            # Get daily summary for this room
+            
             room_daily = daily_summary[daily_summary['Room ID'] == rid].copy()
             
             if room_daily.empty:
@@ -271,15 +285,18 @@ def current_utilization():
                 days_over_70_percent = 0
                 days_under_30_percent = 0
             else:
-                # Calculate comprehensive utilization metrics
-                avg_utilization = room_daily['Daily_Utilization'].mean()
-                peak_utilization = room_daily['Daily_Utilization'].max()
-                min_utilization = room_daily['Daily_Utilization'].min()
-                total_days_analyzed = len(room_daily)
-                days_over_70_percent = len(room_daily[room_daily['Daily_Utilization'] > 70])
-                days_under_30_percent = len(room_daily[room_daily['Daily_Utilization'] < 30])
                 
-            # Handle NaN values
+                util_col = 'Daily_Utilization' if 'Daily_Utilization' in room_daily.columns else 'Daily Utilization'
+                booked_col = 'Daily_Booked_Hours' if 'Daily_Booked_Hours' in room_daily.columns else 'Daily Booked Hours'
+                
+                avg_utilization = room_daily[util_col].mean()
+                peak_utilization = room_daily[util_col].max()
+                min_utilization = room_daily[util_col].min()
+                total_days_analyzed = len(room_daily)
+                days_over_70_percent = len(room_daily[room_daily[util_col] > 70])
+                days_under_30_percent = len(room_daily[room_daily[util_col] < 30])
+                
+            
             if pd.isna(avg_utilization):
                 avg_utilization = 0
             if pd.isna(peak_utilization):
@@ -287,7 +304,7 @@ def current_utilization():
             if pd.isna(min_utilization):
                 min_utilization = 0
 
-            # Determine overall utilization status
+            
             if avg_utilization > 70:
                 utilization_status = "Over-Utilized"
                 utilization_tip = f"High demand ({days_over_70_percent}/{total_days_analyzed} days >70%); consider scheduling classes in alternative rooms or splitting sessions."
@@ -298,15 +315,15 @@ def current_utilization():
                 utilization_status = "Optimal"
                 utilization_tip = f"Balanced usage across {total_days_analyzed} days analyzed; continue current scheduling strategy."
 
-            # Generate detailed daily analysis with recommendations
+            
             daily_analysis = []
             weekly_recommendations = []
             
             for day in day_order:
-                # Get all sessions for this day across the time period
+                
                 day_sessions = room_df[room_df['Day'] == day]
                 
-                # Get daily utilization summary for this day
+                
                 day_summary = room_daily[room_daily['Day'] == day]
                 
                 if day_summary.empty:
@@ -314,14 +331,18 @@ def current_utilization():
                     booked_hours = 0
                     courses = []
                 else:
-                    day_utilization = day_summary['Daily_Utilization'].mean()
-                    booked_hours = day_summary['Daily_Booked_Hours'].mean()
+                    
+                    util_col = 'Daily_Utilization' if 'Daily_Utilization' in day_summary.columns else 'Daily Utilization'
+                    booked_col = 'Daily_Booked_Hours' if 'Daily_Booked_Hours' in day_summary.columns else 'Daily Booked Hours'
+                    
+                    day_utilization = day_summary[util_col].mean()
+                    booked_hours = day_summary[booked_col].mean()
                     courses = []
                     for courses_str in day_summary['Courses'].dropna():
                         courses.extend([c.strip() for c in courses_str.split(',') if c.strip()])
-                    courses = list(set(courses))  # Remove duplicates
+                    courses = list(set(courses))  
                 
-                # Calculate free timeslots for this day
+                
                 booked_slots = set()
                 session_details = []
                 
@@ -336,7 +357,7 @@ def current_utilization():
                             'department': session.get('Department', 'Unknown')
                         })
                         
-                        # Find which timeslots are occupied
+                        
                         for slot in timeslots:
                             slot_start = pd.to_datetime(slot.split('-')[0], format='%H:%M').time()
                             slot_end = pd.to_datetime(slot.split('-')[1], format='%H:%M').time()
@@ -348,7 +369,7 @@ def current_utilization():
                 
                 free_slots = [slot for slot in timeslots if slot not in booked_slots]
                 
-                # Generate day-specific recommendations
+                
                 day_status = ""
                 day_recommendation = ""
                 
@@ -365,16 +386,16 @@ def current_utilization():
                     day_status = "Under Utilized"
                     day_recommendation = f"Low usage at {day_utilization:.1f}%. Priority day for new class scheduling with {len(free_slots)} available slots."
                 
-                # Suggest specific time slots for scheduling
+                
                 priority_slots = []
                 if len(free_slots) > 0:
-                    # Prioritize morning and afternoon slots
+                    
                     morning_slots = [slot for slot in free_slots if slot.startswith(('08:', '09:', '10:', '11:'))]
                     afternoon_slots = [slot for slot in free_slots if slot.startswith(('14:', '15:', '16:', '17:'))]
                     
-                    priority_slots = morning_slots[:2] + afternoon_slots[:2]  # Top 2 from each period
+                    priority_slots = morning_slots[:2] + afternoon_slots[:2]  
                     if not priority_slots:
-                        priority_slots = free_slots[:3]  # Fallback to first 3 available
+                        priority_slots = free_slots[:3]  
                 
                 daily_analysis.append({
                     'day': day,
@@ -390,7 +411,7 @@ def current_utilization():
                     'recommendation': day_recommendation
                 })
                 
-                # Collect weekly recommendations
+                
                 if day_utilization < 30 and len(priority_slots) > 0:
                     weekly_recommendations.append(f"{day}: Schedule in {', '.join(priority_slots[:2])}")
 
@@ -416,8 +437,9 @@ def current_utilization():
             # Calculate utilization trend (if we have enough data)
             utilization_trend = "stable"
             if len(room_daily) >= 7:  # At least a week of data
-                recent_days = room_daily.tail(3)['Daily_Utilization'].mean()
-                earlier_days = room_daily.head(3)['Daily_Utilization'].mean()
+                util_col = 'Daily_Utilization' if 'Daily_Utilization' in room_daily.columns else 'Daily Utilization'
+                recent_days = room_daily.tail(3)[util_col].mean()
+                earlier_days = room_daily.head(3)[util_col].mean()
                 
                 if recent_days > earlier_days + 10:
                     utilization_trend = "increasing"
@@ -426,7 +448,12 @@ def current_utilization():
 
             results.append({
                 'room_id': rid,
-                'analysis_period_days': total_days_analyzed,
+                'schedule_period': {
+                    'start_date': earliest_date,
+                    'end_date': latest_date,
+                    'total_days': total_days_in_period,
+                    'days_with_classes': total_days_analyzed
+                },
                 'utilization_metrics': {
                     'average_utilization': round(avg_utilization, 2),
                     'peak_utilization': round(peak_utilization, 2),
@@ -451,8 +478,13 @@ def current_utilization():
             })
 
         return jsonify({
-            'message': 'Enhanced utilization analysis completed',
-            'analysis_period': f'{days} days',
+            'message': 'Complete schedule utilization analysis completed',
+            'analysis_scope': 'Full scheduled period for each room',
+            'schedule_period': {
+                'earliest_date': earliest_date,
+                'latest_date': latest_date,
+                'total_days_in_period': total_days_in_period
+            },
             'total_rooms_analyzed': len(results),
             'results': results
         })
@@ -461,4 +493,3 @@ def current_utilization():
         return jsonify({'error': f'Key error: {str(e)}'}), 500
     except Exception as e:
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
-     

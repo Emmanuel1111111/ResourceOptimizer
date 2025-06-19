@@ -11,7 +11,8 @@ db = client.EduResourceDB
 timetables_collection = db.timetables
 
 
-timetables_collection= timetables_collection.delete_many({})  
+# Clear the collection before inserting new data
+timetables_collection.delete_many({})  
 
 csv_file = "room_data_large.csv"  
 try:

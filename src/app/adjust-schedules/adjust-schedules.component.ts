@@ -58,6 +58,9 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   weekly_summary: WeeklyUtilization[] = [];
   sidebarCollapsed: boolean = false;
   private searchSubject = new Subject<string>();
+
+
+  ;
   isOpened:Boolean=false
   User!:UserInfo
   @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
@@ -80,12 +83,12 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
      this.service.getUsers(this.userId).subscribe({
       next: (data)=>{
         this.user= data.find((x:any)=> x.user_id===this.userId)
-        console.log(this.user );
+        console.log('user:' ,this.user );
         
         
       },
       error: (error)=>{
-        console.log(`Error ${error}`);
+        console.log(`Error ${error}`)
         
       }
      })
@@ -191,6 +194,8 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     }, {} as { [key: string]: number });
     const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const values = labels.map((day) => barData[day] || 0);
+    console.log(values);
+    
     this.chart = new Chart(this.barCanvas.nativeElement, {
       type: 'bar',
       data: {

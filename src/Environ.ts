@@ -110,7 +110,8 @@ export interface DailyAnalysis {
   free_timeslots: string[];
   free_slots_count: number;
   priority_scheduling_slots: string[];
-  session_details: any; // Replace with specific type if session_details structure is known
+  session_details: any;
+  Totalrooms:number
 }
 
 export interface SchedulingRecommendations {

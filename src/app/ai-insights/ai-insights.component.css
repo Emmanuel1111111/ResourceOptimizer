@@ -5,6 +5,100 @@
   padding-top: 20px;
 }
 
+
+
+.loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .utilization-chart {
+            position: relative;
+            height: 60px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .utilization-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #667eea 100%);
+            border-radius: 8px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+        
+        .utilization-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 0;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #666;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+
 .nav-link {
   color: white;
   transition: all 0.3s ease;
@@ -481,3 +575,9 @@
   }
 }
 
+
+
+.table-container{
+  overflow-x: auto;
+  overflow-y: auto;
+}

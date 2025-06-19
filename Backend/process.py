@@ -3,11 +3,13 @@ from datetime import datetime
 
 total_availableHrs = 12
 
+
+
 def preprocess_data(df):
     # Convert Date to proper format
     df['Date'] = pd.to_datetime(df['Date'])
     
-    df = df.drop_duplicates(subset=['Room ID', 'Date', 'Start', 'End'])
+    df = df.drop_duplicates(subset=['Room ID', 'Date', 'Start', 'End','Course'])
 
     df['Start_dt'] = pd.to_datetime(df['Date'].dt.strftime('%Y-%m-%d') + ' ' + df['Start'], errors='coerce')
     df['End_dt'] = pd.to_datetime(df['Date'].dt.strftime('%Y-%m-%d') + ' ' + df['End'], errors='coerce')
@@ -33,7 +35,8 @@ def preprocess_data(df):
         Time_Slot=('TimeSlot', lambda x: ', '.join(x.dropna())),
         Department=('Department', lambda x: ', '.join(x.dropna().unique())),
         Status=('Status', lambda x: ', '.join(x.dropna().unique())),
-        Year=('Year', lambda x: ', '.join(x.dropna().astype(str)))
+        Year=('Year', lambda x: ', '.join(x.dropna().astype(str))),
+        Totalrooms=('Room ID', 'count')
     ).reset_index()
     daily_summary = daily_summary.rename(columns={'Date_only' : 'Date'})
 

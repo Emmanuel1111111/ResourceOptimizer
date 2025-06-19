@@ -32,8 +32,8 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(username: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, { username, password }).pipe(
+  login(username: string, password: string, rememberMe: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, { username, password, rememberMe }).pipe(
       tap(response => {
         if (response.token) {
           localStorage.setItem('token', response.token);
@@ -61,11 +61,7 @@ export class AuthService {
   if (roomId) params = params.set('room_id', roomId);
 
   const token = this.getToken();
-  // let headers = new HttpHeaders();
 
-  // if (token) {
-  //   headers = headers.set('Authorization', `Bearer ${token}`);
-  // }
 
   return this.http.get(`${this.apiUrl}/available_rooms`, { params }).pipe(
     catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch rooms')))
@@ -84,10 +80,10 @@ export class AuthService {
 
   }
 
-  currentUtilization(roomId: string, days: number): Observable<AnalysisResult[]> {
-    let params = new HttpParams().set('days', days.toString());
+  currentUtilization(roomId: string): Observable<AnalysisResult[]> {
+   
     const body = roomId ? { room_id: roomId } : {};
-      return this.http.post<AnalysisResult[]>(`${this.apiUrl}/current_utilization`, body, { params }).pipe(
+      return this.http.post<AnalysisResult[]>(`${this.apiUrl}/api/current_utilization`, body).pipe(
         catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch current utilization')))
       );
     }

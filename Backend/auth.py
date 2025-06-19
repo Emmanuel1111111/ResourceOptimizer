@@ -7,6 +7,7 @@ from pymongo import MongoClient
 import os
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
+from bson import ObjectId
 load_dotenv()
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,27 +21,12 @@ logs_collection = db.logs
 # JWT Secret Key
 SECRET_KEY = os.getenv("JWT_SECRET")
 
-def generate_token(user_id, username):
-    payload = {
-        'user_id': user_id,
-        'username': username,
-        'exp': datetime.utcnow() + timedelta(hours=24)
-    }
-    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-    if isinstance(token, bytes):
-        token = token.decode('utf-8')
-    return token
-
-@auth_bp.before_app_request
-def log_headers():
-    print("🔍 Incoming Headers:", dict(request.headers))
-
-
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    remember_me = data.get('rememberMe', False)  
 
     log_entry = {
         'timestamp': datetime.utcnow().isoformat(),
@@ -48,7 +34,8 @@ def login():
         'username': username,
         'success': False,
         'message': '',
-        'user_id': None
+        'user_id': None,
+        'remember_me': remember_me  
     }
 
     if not username or not password:
@@ -59,7 +46,9 @@ def login():
     user = users_collection.find_one({'username': username})
 
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-        token = generate_token(user['Id'], username)
+      
+        exp_hours = 168 if remember_me else 24  
+        token = generate_token(user['Id'], username, exp_hours)
         log_entry['success'] = True
         log_entry['message'] = 'Login successful'
         log_entry['user_id'] = user['Id']
@@ -74,6 +63,18 @@ def login():
         log_entry['message'] = 'Invalid credentials'
         logs_collection.insert_one(log_entry)
         return jsonify({'error': log_entry['message']}), 401
+
+
+def generate_token(user_id, username, exp_hours=24):
+    payload = {
+        'user_id': user_id,
+        'username': username,
+        'exp': datetime.utcnow() + timedelta(hours=exp_hours)
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+    if isinstance(token, bytes):
+        token = token.decode('utf-8')
+    return token
 
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
@@ -104,27 +105,38 @@ def signup():
 
     user_id = str(uuid.uuid4())
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
     user = {
         'Id': user_id,
         'username': username,
         'email': email,
         'password': hashed_password
     }
+    
     users_collection.insert_one(user)
 
+    def serialized_object(obj):
+       
+        obj = dict(obj)
+        if '_id' in obj:
+            obj['_id'] = str(obj['_id'])  
+        return obj
+
+    
+    user_response = {k: v for k, v in user.items() if k != 'password'}
+    user_response = serialized_object(user_response)
+
     token = generate_token(user_id, username)
+    
     log_entry['success'] = True
     log_entry['message'] = 'Signup successful'
     log_entry['user_id'] = user_id
     logs_collection.insert_one(log_entry)
 
     return jsonify({
-        
-         "Userinfo": user.to_dict(orient="records"),
-         "token": token
-        
-
-        }), 201
+        "user": user_response,
+        "token": token
+    }), 201
 
 @auth_bp.route('/logs', methods=['GET', 'POST'])
 def manage_logs():

@@ -18,6 +18,7 @@ const routes: Routes = [
     {path:'notification', component:NotificationComponent},
     {path:'resource-list', component:ResourceListComponent},
     {path:'adjust-schedules/:id', component:AdjustSchedulesComponent},
+    {path:'adjust-schedules', component:AdjustSchedulesComponent},
     {path:'login-page', component:LoginPageComponent},
    
 ]
