@@ -23,6 +23,7 @@
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@shadcn/ui": "^0.0.4",
     "@types/chart.js": "^4.0.1",
     "aframe": "^1.7.1",
     "boostrap": "^2.0.0",

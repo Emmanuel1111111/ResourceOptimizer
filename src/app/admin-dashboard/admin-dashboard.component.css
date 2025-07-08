@@ -43,7 +43,7 @@
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: rgb(66, 154, 255);
+  background:rgb(255, 255, 255) ;
   color: var(--gray-900);
   line-height: 1.6;
 }
@@ -70,7 +70,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
-  background-color: rgb(0, 87, 163);
+  background-color: rgb(53, 53, 126);
   color: white;
   height: 100vh;
   position: fixed;
@@ -225,7 +225,7 @@ body {
   position: fixed;
   top: 1rem;
   left: 1rem;
-  background: white;
+  background: rgb(200, 173, 173);
   border: none;
   border-radius: 50%;
   width: 48px;
@@ -327,6 +327,8 @@ body {
 
 .stats-section {
   margin-bottom: 3rem;
+  border-radius: 2px;
+  
   
 }
 
@@ -335,11 +337,25 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 
+  
+
  
 }
 
+.cards{
+  border-radius: 
+  8px !important;
+}
+
+mat-card{
+
+ border-radius: 
+  8px !important;
+  box-shadow: 31x 5px  1px rgb(255, 102, 0);
+}
+
 .stat-card {
-  background: white;
+  background:rgb(30, 27, 27);
   padding: 1.5rem;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
@@ -349,6 +365,8 @@ body {
   gap: 1rem;
   transition: var(--transition-fast);
    border-radius: 9px;
+   border: solid 1px rgb(198, 76, 0);
+   color: rgb(216, 69, 24);
 }
 
 .stat-card:hover {
@@ -419,7 +437,7 @@ body {
   gap: 2rem;
 }
 
-/* Custom Cards */
+
 .custom-card {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-lg);

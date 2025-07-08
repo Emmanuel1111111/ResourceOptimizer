@@ -8,18 +8,19 @@ import { NotificationComponent } from './notification/notification.component';
 import { ResourceListComponent } from './resource-list/resource-list.component';
 import { AdjustSchedulesComponent } from './adjust-schedules/adjust-schedules.component';
 import { LoginPageComponent } from './login-page/login-page.component';
-import { canActivate } from './guard/auth.guard';
+import { canActivate} from './guard/auth.guard';
 
 const routes: Routes = [
   {path: '', redirectTo: 'login-page', pathMatch: 'full'},
-  {path: 'admin-dashboard', component: AdminDashboardComponent},  
+  {path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [canActivate]},  
   {path: 'executive-booking', component: ExecutiveBookingComponent},
-    {path:'ai-insights', component:AiInsightsComponent},
-    {path:'notification', component:NotificationComponent},
-    {path:'resource-list', component:ResourceListComponent},
-    {path:'adjust-schedules/:id', component:AdjustSchedulesComponent},
-    {path:'adjust-schedules', component:AdjustSchedulesComponent},
+    {path:'ai-insights', component:AiInsightsComponent, canActivate:[canActivate]},
+    {path:'notification', component:NotificationComponent   , canActivate:[canActivate]},
+    {path:'resource-list', component:ResourceListComponent , canActivate:[canActivate]},
+    {path:'adjust-schedules/:id', component:AdjustSchedulesComponent, canActivate:[canActivate]},
+    {path:'adjust-schedules', component:AdjustSchedulesComponent, canActivate:[canActivate]},
     {path:'login-page', component:LoginPageComponent},
+    {path:'**', redirectTo: 'login-page' ,} 
    
 ]
 

@@ -24,7 +24,9 @@ SECRET_KEY = os.getenv("JWT_SECRET")
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+   
     username = data.get('username')
+  
     password = data.get('password')
     remember_me = data.get('rememberMe', False)  
 
@@ -44,6 +46,7 @@ def login():
         return jsonify({'error': log_entry['message']}), 400
 
     user = users_collection.find_one({'username': username})
+    
 
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
       
@@ -65,7 +68,7 @@ def login():
         return jsonify({'error': log_entry['message']}), 401
 
 
-def generate_token(user_id, username, exp_hours=24):
+def generate_token(user_id, username, exp_hours=13):
     payload = {
         'user_id': user_id,
         'username': username,

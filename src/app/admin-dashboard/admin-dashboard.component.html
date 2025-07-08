@@ -91,7 +91,7 @@
       
       <!-- Header Section -->
       <header class="dashboard-header">
-        <div class="header-content" style="color: white;">
+        <div class="header-content" style="color: rgb(191, 64, 0);">
           <h1 class="dashboard-title">
             <i class="fas fa-tachometer-alt" style="color: black;"></i>
             Admin Dashboard
@@ -100,8 +100,8 @@
           <p class="dashboard-subtitle"  style="margin-top: 10px;">Manage your university resources efficiently</p>
         </div>
         <div class="header-actions">
-          <button mat-icon-button class="notification-btn" matTooltip="Notifications">
-            <i class="fas fa-bell"></i>
+          <button mat-icon-button class="notification-btn" matTooltip="Notifications" style="background-color: rgb(112, 46, 112);">
+            <i class="fas fa-bell" style="color: white;"></i>
             <span class="notification-badge" style="margin-bottom: 3px; background-color: brown;">3</span>
           </button>
         </div>
@@ -158,7 +158,7 @@
       <section class="cards-section" aria-labelledby="actions-heading">
         <h2 id="actions-heading" class="section-title">Quick Actions</h2>
         <div class="card-container">
-          <mat-card *ngFor="let card of dashboardCards; trackBy: trackByFn" 
+          <mat-card class="cards" *ngFor="let card of dashboardCards; trackBy: trackByFn" 
                     class="custom-card"
                     [style.background]="card.gradient"
                     [style.color]="card.textColor"

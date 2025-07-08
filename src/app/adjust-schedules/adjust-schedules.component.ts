@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../service.service';
 import { RoomAvailabilityRespone, WeeklyUtilization, Room, DailyUtilization, CurrentSchedule } from '../../Environ';
-import { Chart } from 'chart.js';
+import { Chart } from 'chart.js/auto';
 import * as AFrame from 'aframe';
 import { gsap } from 'gsap';
 import { Subject } from 'rxjs';
@@ -10,7 +10,7 @@ import { NgModule } from '@angular/core';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHome, faChartBar, faCalendar } from '@fortawesome/free-solid-svg-icons';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UserInfo } from '../../Environ';
+import { UserInfo } from '../../Environ';  
 
 
 // Register Chart.js components
@@ -23,48 +23,49 @@ Chart.register(...registerables);
   styleUrls: ['./adjust-schedules.component.css'],
 })
 export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestroy {
-  userId= localStorage.getItem('userId')
-  error_masssage!: string;
-  user!: UserInfo;
-  dailyUtilization: DailyUtilization[] = [];
-  currentTimeMatches: CurrentSchedule[] = [];
-  filteredRooms: Room[] = [];
-  selectedRoom: Room | null = null;
+  @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
+  private chart: Chart<'bar'> | null = null;
+  
+  // Properties
+  selectedRoom: any = null;
+  rooms: any[] = [];
+  availableRooms: any[] = [];
+  filteredRooms: any[] = [];
+  dailyUtilization: any[] = [];
+  filteredDailyUtilization: any[] = [];
+  weekly_summary: any[] = [];
+  allSchedules: any[] = [];
+  utilizationColumns: string[] = ['Day', 'Room ID', 'Daily Utilization', 'Time Slot', 'Courses', 'Department', 'Status', 'Year'];
+  scheduleColumns: string[] = ['Day', 'Course', 'Time', 'Department', 'Year', 'Status'];
+  currentTimeMatches: any[] = [];
+  isLoading: boolean = false;
+  isLoadingSchedules: boolean = false;
+  error_masssage: string = '';
+  scheduleError: string = '';
   searchQuery: string = '';
+  user: any = { username: 'User' };
+  isOpened: boolean = false;
+  userId: string = localStorage.getItem('userId') || '';
   chatMessages: { sender: string; text: string }[] = [];
   chatInput: string = '';
   isMobile: boolean = /Mobi|Android/i.test(navigator.userAgent);
   displayedColumns: string[] = [
     'Room ID',
     'Course',
-    'Status',
-    'Current Schedule',
-    'Department',
+    'Time',
     'Year',
-    'New Schedule',
-    'Action',
-  ];
-  utilizationColumns: string[] = [
-    'Day',
-    'Room ID',
-    'Daily Utilization',
-    'Time Slot',
-    'Courses',
     'Department',
-    'Status',
-    'Year',
   ];
-  isLoading: boolean = false;
-  weekly_summary: WeeklyUtilization[] = [];
   sidebarCollapsed: boolean = false;
   private searchSubject = new Subject<string>();
-
-
-  ;
-  isOpened:Boolean=false
-  User!:UserInfo
-  @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
-  private chart: Chart<'bar'> | null = null;
+  // Define day order for sorting
+  private dayOrder: { [key: string]: number } = {
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5
+  };
 
   constructor(private service: AuthService, private router: Router, private route: ActivatedRoute) {
     this.searchSubject
@@ -76,27 +77,34 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       });
   }
 
-  ngOnInit() {
-    this.fetchSchedules('SCB-GF1');
-    this.setupAR();
-    this.chatInput = '';
-     this.service.getUsers(this.userId).subscribe({
-      next: (data)=>{
-        this.user= data.find((x:any)=> x.user_id===this.userId)
-        console.log('user:' ,this.user );
-        
-        
-      },
-      error: (error)=>{
-        console.log(`Error ${error}`)
-        
-      }
-     })
-   
-
+  ngOnInit(): void {
+    this.user = {
+      username: localStorage.getItem('username') || 'User'
+    };
     
+    this.route.queryParams.subscribe(params => {
+      this.selectedRoom = params['room'] || null;
+      if (this.selectedRoom) {
+        this.loadRoomData();
+      }
+    });
 
-  
+    this.service.getAvailableRooms().subscribe({
+      next: (data) => {
+        this.rooms = data.rooms;
+        this.availableRooms = data.rooms; 
+        this.filteredRooms = data.rooms; // Populate filteredRooms
+        if (this.rooms.length > 0 && !this.selectedRoom) {
+          this.selectedRoom = this.rooms[0];
+          this.loadRoomData();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching rooms:', err);
+        this.error_masssage = 'Failed to load rooms. Please try again.';
+      }
+    });
+    this.fetchSchedules('SCB-TF34')
   }
 
   ngAfterViewInit() {
@@ -111,12 +119,6 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     if (this.chart) {
       this.chart.destroy();
     }
-  }
-
-  get filteredDailyUtilization(): DailyUtilization[] {
-    return this.dailyUtilization.filter(
-      (d) => d['Room ID'] === this.selectedRoom?.['Room ID']
-    );
   }
 
   fetchSchedules(roomId: string) {
@@ -134,6 +136,8 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
         this.selectedRoom = data.room_status;
         
         this.initializeBarGraph();
+        this.filterDailyUtilization();
+        this.fetchAllSchedules(roomId);
       
         this.isLoading = false;
         console.log('Daily Utilization:', this.dailyUtilization);
@@ -172,9 +176,11 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     gsap.to('.room-card.active', { scale: 1.1, duration: 0.3 });
     gsap.to('.utilization-table tr', { opacity: 1, x: 0, duration: 0.5, stagger: 0.1 });
     this.updateBarGraph();
+    
+    // Fetch all schedules for this room
+    this.fetchAllSchedules(room['Room ID']);
+    this.refreshUtilizationData(room['Room ID']);
   }
-
-
 
   getUtilizationClass(utilization: number): string {
     if (utilization > 80) return 'high-utilization';
@@ -182,9 +188,20 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     return 'low-utilization';
   }
 
+  // Helper method to sort time slots
+  private sortTimeSlots(a: string, b: string): number {
+    const getHours = (timeSlot: string): number => {
+      const match = timeSlot.match(/(\d+):(\d+)\s*-\s*(\d+):(\d+)/);
+      if (match) {
+        return parseInt(match[1]);
+      }
+      return 0;
+    };
+    
+    return getHours(a) - getHours(b);
+  }
 
-
- initializeBarGraph() {
+  initializeBarGraph() {
     if (this.chart) {
       this.chart.destroy();
     }
@@ -341,5 +358,136 @@ sideBar(){
     this.currentTimeMatches.forEach((s) => {
       
     });
+  }
+
+  // New method to fetch all schedules for a room
+  fetchAllSchedules(roomId: string) {
+    this.isLoadingSchedules = true;
+    this.scheduleError = '';
+    
+    this.service.getRoomSchedules(roomId).subscribe({
+      next: (response) => {
+        console.log('All Schedules Response:', response);
+        // Sort schedules by day order and then by time slot
+        this.allSchedules = response.schedules.sort((a: any, b: any) => {
+          // First sort by day
+          const dayDiff = (this.dayOrder[a.Day] || 99) - (this.dayOrder[b.Day] || 99);
+          if (dayDiff !== 0) return dayDiff;
+          
+          // Then sort by time slot
+          return this.sortTimeSlots(a.Start, b.Start);
+        });
+        this.isLoadingSchedules = false;
+      },
+      error: (err) => {
+        console.error('Error fetching schedules:', err);
+        this.scheduleError = 'Failed to load schedules. Please try again.';
+        this.isLoadingSchedules = false;
+      }
+    });
+  }
+
+  // Method to refresh utilization data
+  refreshUtilizationData(roomId: string) {
+    this.isLoading = true;
+    this.error_masssage = '';
+    
+    // Try the day-based schedules endpoint first
+    this.service.getDayBasedSchedules(roomId).subscribe({
+      next: (data) => {
+        console.log('Day-based Schedules Data:', data);
+        if (data.daily_utilization && data.daily_utilization.length > 0) {
+          // Update the component data with day-based data
+          this.dailyUtilization = data.daily_utilization;
+          
+          // Filter for the selected room
+          this.filterDailyUtilization();
+          
+          // Also fetch the latest individual schedules
+          this.fetchAllSchedules(roomId);
+          
+          // Update the graph
+          this.updateBarGraph();
+          
+          this.isLoading = false;
+        } else {
+          // Fall back to regular refresh if no day-based data
+          this.fallbackToRegularRefresh(roomId);
+        }
+      },
+      error: (err) => {
+        console.error('Error getting day-based schedules:', err);
+        // Fall back to regular refresh on error
+        this.fallbackToRegularRefresh(roomId);
+      }
+    });
+  }
+  
+  // Fallback method to use the original refresh endpoint
+  fallbackToRegularRefresh(roomId: string) {
+    this.service.refreshAggregatedData(roomId).subscribe({
+      next: (data) => {
+        console.log('Refreshed Utilization Data (fallback):', data);
+        // Update the component data with refreshed data
+        this.dailyUtilization = data.daily_utilization;
+        this.weekly_summary = data.weekly_summary;
+        
+        // Filter for the selected room
+        this.filterDailyUtilization();
+        
+        // Also fetch the latest individual schedules
+        this.fetchAllSchedules(roomId);
+        
+        // Update the graph
+        this.updateBarGraph();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error refreshing utilization data:', err);
+        this.error_masssage = 'Failed to refresh utilization data. Please try again.';
+        this.isLoading = false;
+      }
+    });
+  }
+  
+  // Helper method to show a snackbar message
+  showSnackBar(message: string, isError: boolean = false) {
+    // You can implement this with Angular Material's MatSnackBar if available
+    // For now, we'll just use a simple alert
+    console.log(`${isError ? 'ERROR: ' : ''}${message}`);
+  }
+
+  // Method to handle room change
+  onRoomChange() {
+    if (this.selectedRoom) {
+      this.loadRoomData();
+    }
+  }
+
+  // Load room data
+  loadRoomData() {
+    if (this.selectedRoom && this.selectedRoom['Room ID']) {
+      this.refreshUtilizationData(this.selectedRoom['Room ID']);
+      this.fetchAllSchedules(this.selectedRoom['Room ID']);
+    }
+  }
+
+  // Filter dailyUtilization by selected room
+  filterDailyUtilization() {
+    if (this.selectedRoom && this.dailyUtilization) {
+      // Filter by room ID and sort by day and time slot
+      this.filteredDailyUtilization = this.dailyUtilization
+        .filter(d => d['Room ID'] === this.selectedRoom?.['Room ID'])
+        .sort((a: any, b: any) => {
+          // First sort by day
+          const dayDiff = (this.dayOrder[a.Day] || 99) - (this.dayOrder[b.Day] || 99);
+          if (dayDiff !== 0) return dayDiff;
+          
+          // Then sort by time slot
+          return this.sortTimeSlots(a.Time_Slot, b.Time_Slot);
+        });
+    } else {
+      this.filteredDailyUtilization = [];
+    }
   }
 }

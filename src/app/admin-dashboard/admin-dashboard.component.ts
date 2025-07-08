@@ -32,6 +32,7 @@ interface UserStats {
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+
   
   sidebarOpen: boolean = false;
   isMobile: boolean = false;
@@ -50,8 +51,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       description: 'Allocate classrooms, labs, and other resources efficiently. Monitor availability and optimize resource distribution.',
       route: '/executive-booking',
       buttonText: 'Go to Resources',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      textColor: 'white'
+      gradient: 'linear-gradient(135deg,rgb(236, 89, 31) 0%,rgb(127, 69, 184) 100%)',
+      textColor: 'white',
+     
     },
     {
       title: 'AI Predictions',
@@ -59,7 +61,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       description: 'View AI-powered insights on classroom demand, usage patterns, and optimization recommendations.',
       route: '/ai-insights',
       buttonText: 'View AI Insights',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      gradient: 'linear-gradient(135deg,rgb(196, 38, 214) 0%,rgb(0, 0, 0) 100%)',
       textColor: 'white'
     },
     {
@@ -68,7 +70,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       description: 'Modify classroom schedules, resolve conflicts, and manage time slot allocations effectively.',
       route: '/adjust-schedules',
       buttonText: 'Adjust Schedules',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      gradient: 'linear-gradient(135deg,rgb(24, 53, 180) 0%,rgb(179, 83, 217) 100%)',
       textColor: 'white'
     },
 

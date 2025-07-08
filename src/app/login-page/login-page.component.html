@@ -13,7 +13,7 @@
         </div>
 
 
-        <div class="message-container" *ngIf="errorMessage || successMessage">
+        <div class="message-container" *ngIf="errorMessage || successMessage" style="margin-bottom: .5em;">
           <mat-card class="message-card error-card" *ngIf="errorMessage">
             <mat-icon class="message-icon">error</mat-icon>
             <span>{{ errorMessage }}</span>
@@ -23,6 +23,7 @@
             <span>{{ successMessage }}</span>
           </mat-card>
         </div>
+
 
         <div class="required-fields-note">
           <mat-icon class="info-icon">info</mat-icon>

@@ -1,4 +1,3 @@
-
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import {MatCardModule} from '@angular/material/card';
@@ -31,9 +30,10 @@ import { LoginPageComponent } from './login-page/login-page.component';
 import {MatTab} from '@angular/material/tabs';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MAT_DATE_FORMATS, MatOption } from '@angular/material/core';
+import { MAT_DATE_FORMATS, MatOption, MatNativeDateModule } from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 
 
@@ -78,7 +78,13 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     ReactiveFormsModule,
     MatNavList,
     MatProgressBarModule,
-    MatProgressBar
+    MatProgressBar,
+    MatChipListbox,
+    MatChip,
+    MatOption,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
     
    
   

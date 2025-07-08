@@ -1,4 +1,3 @@
-
 export interface Room {
   'Room ID': string;
   'Room Type': string;
@@ -151,4 +150,149 @@ export interface AnalysisResult {
   daily_analysis: DailyAnalysis[];
   scheduling_recommendations: SchedulingRecommendations;
   summary_insights: SummaryInsights;
+}
+
+
+
+
+
+
+export interface SmartAvailabilityRequest {
+  operation: 'smart_availability';
+  date?: string; // YYYY-MM-DD, optional (defaults to current date)
+  start_time?: string; // HH:MM, optional
+  end_time?: string; // HH:MM, optional
+  department?: string; // Optional department filter
+}
+
+export interface OptimizeResourcesRequest {
+  operation: 'optimize_resources';
+}
+
+export interface RoomInfo {
+  room_id: string;
+  department: string;
+  utilization: number;
+  score?: number; // Only in smart_availability
+  status?: 'Over-utilized' | 'Under-utilized' | 'Well-utilized'; // Only in optimize_resources
+}
+
+export interface SmartAvailabilityResponse {
+  message: string;
+  date: string;
+  day: string;
+  time_slot: string;
+  total_available: number;
+  recommended_rooms: RoomInfo[];
+}
+
+export interface OptimizeResourcesResponse {
+  message: string;
+  total_rooms: number;
+  over_utilized_rooms: number;
+  under_utilized_rooms: number;
+  room_analysis: RoomInfo[];
+  recommendations: {
+    redistribute_from: string[];
+    redistribute_to: string[];
+  };
+}
+
+export interface ErrorResponse {
+  error: string;
+}
+
+
+// Base response interface
+export interface ApiResponse<T = any> {
+  message?: string;
+  error?: string;
+  [key: string]: any;
+}
+
+// Check Overlap Operation Response
+export interface CheckOverlapResponse extends ApiResponse {
+  room_id: string;
+  date: string;
+  proposed_time: string;
+  has_conflict: boolean;
+  conflicts: ConflictInfo[];
+}
+
+export interface ConflictInfo {
+  schedule_id: string;
+  course: string;
+  time: string;
+}
+
+// Reallocate Operation Response
+export interface ReallocateResponse extends ApiResponse {
+  schedule_id: string;
+  new_schedule: NewSchedule;
+}
+
+// Inject Schedule Operation Response
+export interface InjectScheduleResponse extends ApiResponse {
+  schedule_id: string;
+  schedule: ScheduleDocument;
+  refreshed_data?: {
+    daily_utilization: DailyUtilization[];
+    weekly_summary: WeeklyUtilization[];
+  };
+}
+
+// Suggest Rooms Operation Response
+export interface SuggestRoomsResponse extends ApiResponse {
+  date: string;
+  day: string;
+  time: string;
+  suggested_rooms: SuggestedRoom[];
+}
+
+export interface SuggestedRoom {
+  room_id: string;
+  department: string;
+}
+
+// Request payload interfaces
+export interface ManageResourcesRequest {
+  operation: 'check_overlap' | 'reallocate' | 'inject_schedule' | 'suggest_rooms';
+  room_id?: string;
+  date?: string;
+  start_time?: string;
+  end_time?: string;
+  day?: string;
+  schedule_id?: string;
+  new_schedule?: NewSchedule;
+  department?: string;
+  course?: string;
+  lecturer?: string;
+  level?: string;
+  program?: string;
+}
+
+export interface NewSchedule {
+  room_id: string;
+  date?: string;
+  start_time: string;
+  end_time: string;
+  day: string;
+  course?: string;
+  department?: string;
+  year?: string;
+  status?: string;
+  lecturer?: string;
+}
+
+export interface ScheduleDocument {
+  'Room ID': string;
+  Date: string;
+  Start: string;
+  End: string;
+  Day: string;
+  Course: string;
+  Department: string;
+  Lecturer: string;
+  Level: string;
+  Program: string;
 }

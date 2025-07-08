@@ -1,6 +1,6 @@
 <div class="dashboard-wrapper container-fluid p-0">
  
-  <nav class="sidebar bg-white shadow-sm d-flex flex-column align-items-center pt-3 " [ngClass]="{'open': isOpened }">
+  <nav class="sidebar shadow-sm d-flex flex-column align-items-center pt-3 " [ngClass]="{'open': isOpened }">
     <mat-nav-list>
       <a mat-nav-item class="nav-link" routerLinkActive="active" [routerLink]="'/admin-dashboard'"><i class="fas fa-home fa-lg"></i>Home</a>
       <a mat-nav-item class="nav-link" routerLinkActive="active" routerLink="'/"><i class="fas fa-chart-line fa-lg"></i>Schedules</a>
@@ -17,7 +17,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h3 class="fw-bold mb-0">Welcome Back ,</h3>
+        <h3 class="fw-bold mb-0">Welcome Back , {{user.username}}</h3>
       </div>
      <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
       <div *ngIf="error_masssage && !isLoading" class="error-message align-items-baseline">{{ error_masssage }}</div>
@@ -38,7 +38,7 @@
       
       <div class="col-lg-6">
           <mat-card class="fancy-card shadow-lg h-100">
-            <mat-card-header>
+            <mat-card-header style="background-color: brown;">
               <mat-card-title><mat-icon>bar_chart</mat-icon> Daily Demand Insights</mat-card-title>
             </mat-card-header>
             <mat-card-content>
@@ -93,7 +93,12 @@
  <section class="conveyor mt-4" *ngIf="selectedRoom">
     <mat-card class="fancy-card ">
       <mat-card-header>
-        <mat-card-title><mat-icon>table_chart</mat-icon> Daily Utilization for {{ selectedRoom['Room ID'] }}</mat-card-title>
+        <mat-card-title>
+          <mat-icon>table_chart</mat-icon> Daily Utilization for {{ selectedRoom['Room ID'] }}
+          <span class="auto-update-badge" matTooltip="Data auto-updates when room changes">
+            <mat-icon>autorenew</mat-icon> Auto-updated
+          </span>
+        </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <table mat-table [dataSource]="filteredDailyUtilization" class="utilization-table">
@@ -154,4 +159,71 @@
     </div>
 
 </main>
+
+<!-- New section to display all schedules -->
+<section class="conveyor mt-4" *ngIf="selectedRoom">
+  <mat-card class="fancy-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>list_alt</mat-icon> All Schedules for {{ selectedRoom['Room ID'] }}
+        <span class="auto-update-badge" matTooltip="Data auto-updates when room changes">
+          <mat-icon>autorenew</mat-icon> Auto-updated
+        </span>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="isLoadingSchedules" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading schedules...</p>
+      </div>
+      <div *ngIf="scheduleError" class="error-message">
+        {{ scheduleError }}
+      </div>
+      <table mat-table [dataSource]="allSchedules" class="utilization-table" *ngIf="!isLoadingSchedules">
+        <ng-container matColumnDef="Day">
+          <th mat-header-cell *matHeaderCellDef>Day</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Day }}</td>
+        </ng-container>
+        <ng-container matColumnDef="Course">
+          <th mat-header-cell *matHeaderCellDef>Course</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Course }}</td>
+        </ng-container>
+        <ng-container matColumnDef="Time">
+          <th mat-header-cell *matHeaderCellDef>Time</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Start }}–{{ schedule.End }}</td>
+        </ng-container>
+        <ng-container matColumnDef="Department">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Department }}</td>
+        </ng-container>
+        <ng-container matColumnDef="Year">
+          <th mat-header-cell *matHeaderCellDef>Year</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Year }}</td>
+        </ng-container>
+        <ng-container matColumnDef="Status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let schedule">{{ schedule.Status }}</td>
+        </ng-container>
+        
+        <tr mat-header-row *matHeaderRowDef="scheduleColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: scheduleColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</section>
+
+<!-- Room selection and refresh buttons -->
+<div class="room-selection-container">
+  <div class="room-select">
+    <label for="roomSelect">Select Room:</label>
+    <select id="roomSelect" [(ngModel)]="selectedRoom" (change)="onRoomChange()">
+      <option *ngFor="let room of filteredRooms" [value]="room">{{ room['Room ID'] }}</option>
+    </select>
+  </div>
+  <div class="action-buttons">
+    <div class="auto-update-info">
+      <i class="fas fa-info-circle"></i> Data automatically updates when room changes
+    </div>
+  </div>
+</div>
 </div>

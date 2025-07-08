@@ -7,9 +7,7 @@ export const canActivate: CanActivateFn= (route,state)=>{
 const router=inject(Router)
 const authService= inject(AuthService)
  if (authService.isLoggedIn()) {
-   router.navigate(['/admin-dashboard'])
-
-   return true
+ return true
  }
  else{
   router.navigate(['/login'])

@@ -4,6 +4,7 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AuthService } from '../service.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { timer, Observable, tap, debounce } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -161,11 +162,20 @@ export class LoginPageComponent implements OnInit {
             localStorage.setItem('token', token);
             localStorage.setItem('userId', Id);
             this.successMessage = 'Login successful!';
-            this.router.navigate(['/admin-dashboard']);
+
+            debounceTime(2500).pipe(
+              tap(() => {
+                this.router.navigate(['/admin-dashboard']);
+              })
+            ).subscribe();
+            console.log('userId:', Id);
+            console.log('Api response', response);
+            
           },
           error: (error: any) => {
             this.errorMessage = 'Login failed. Please check your credentials and try again.';
             console.error('Login error:', error);
+            this.isloading=false
           },
           complete: () => {
             this.isloading = false;
@@ -204,10 +214,16 @@ export class LoginPageComponent implements OnInit {
             const Id = response.Id;
             localStorage.setItem('token', token);
             localStorage.setItem('userId', Id);
-            this.successMessage = 'Signup successful! Please log in.';
+            this.successMessage = 'Signup successful!, Redirecting to dashboard...';
             this.router.navigate(['/admin-dashboard']);
             console.log('userId:', Id);
             console.log('Api response', response);
+
+            debounceTime(5000).pipe(
+              tap(() => {
+                this.router.navigate(['/admin-dashboard']);
+              })
+            ).subscribe();
             
             
           },
@@ -300,4 +316,9 @@ export class LoginPageComponent implements OnInit {
       }, 2000); 
     });
   }
+}
+
+function debounceTime(delay:number): Observable<number>{
+ return  timer(delay)
+
 }

@@ -5,6 +5,7 @@ import os
 from auth import auth_bp
 from routes import routes_bp
 from dotenv import load_dotenv
+from manage_resources import manage_resources_bp
 from flask_jwt_extended import JWTManager
 load_dotenv()
 
@@ -22,6 +23,7 @@ CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://local
 
 # MongoDB Atlas Configuration
 MONGO_URI= os.getenv('MONGO_URI')
+print("MONGO_URI:", MONGO_URI)
 client= MongoClient(MONGO_URI)
 db=client.EduResourceDB
 
@@ -30,6 +32,7 @@ db=client.EduResourceDB
 
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(routes_bp)
+app.register_blueprint(manage_resources_bp, url_prefix='/api')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

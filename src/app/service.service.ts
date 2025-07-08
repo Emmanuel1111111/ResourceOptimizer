@@ -1,10 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, tap, switchMap, map } from 'rxjs/operators';
 import { CurrentSchedule } from '../Environ';
 import { Prediction } from '../Environ';
 import { AnalysisResult } from '../Environ';
+import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ';
+import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
+
+// Define environment if it doesn't exist in Environ.ts
+const environment = {
+  apiUrl: 'http://localhost:5000'
+};
 
 export interface LoginResponse {
   message: string;
@@ -25,10 +32,18 @@ export interface SignupResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  updateSchedule(schedule: CurrentSchedule) :Observable<any> {
-    throw new Error('Method not implemented.');
+  updateSchedule(schedule: CurrentSchedule):Observable<any> {
+   throw new Error('Method not implemented.');
+   
   }
-  private apiUrl = 'http://localhost:5000';
+  private loadingSubject = new BehaviorSubject<boolean>(false)
+  public loading$ = this.loadingSubject.asObservable()
+  
+
+  private errorSubject = new BehaviorSubject<string | null>(null)
+  public error$ = this.errorSubject.asObservable()
+  private apiUrl = environment.apiUrl;
+  private apiUrl2 = 'http://localhost:5000/api/manage_resources';
 
   constructor(private http: HttpClient) {}
 
@@ -87,6 +102,18 @@ export class AuthService {
         catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch current utilization')))
       );
     }
+
+    private setLoading(loading: boolean): void {
+    this.loadingSubject.next(loading)
+  }
+
+  private setError(error: string | null): void {
+    this.errorSubject.next(error)
+  }
+
+  private clearError(): void {
+    this.errorSubject.next(null)
+  }
   
   loginWithFacebook(): Observable<any> {
     return throwError(() => new Error('Facebook login not implemented'));
@@ -111,6 +138,111 @@ export class AuthService {
 
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    return token !== null && token !== '';
+  }
+
+  manageResources(operation: string, data: any): Observable<SmartAvailabilityResponse | OptimizeResourcesResponse> {
+    this.setLoading(true);
+    this.clearError();
+
+    let url = `${this.apiUrl2}`;
+    if (operation === 'smart_availability') {
+      url += '/smart_availability';
+    } else if (operation === 'optimize_resources') {
+      url += '/optimize_resources';
+    } else {
+      return throwError(() => new Error('Invalid operation'));
+    }
+
+    return this.http.post<SmartAvailabilityResponse | OptimizeResourcesResponse>(url, data).pipe(
+      tap(() => this.setLoading(false)),
+      catchError(err => {
+        this.setLoading(false);
+        this.setError(err.error?.error || 'Failed to manage resources');
+        return throwError(() => new Error(err.error?.error || 'Failed to manage resources'));
+      })
+    );
+  }
+
+  // Inject a new schedule
+  injectSchedule(scheduleData: any): Observable<any> {
+    const payload = {
+      operation: 'inject_schedule',
+      ...scheduleData
+    };
+    
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to inject schedule')))
+    );
+  }
+
+  // Get room schedules
+  getRoomSchedules(roomId: string, day?: string): Observable<any> {
+    let params = new HttpParams().set('room_id', roomId);
+    if (day) {
+      params = params.set('day', day);
+    }
+    
+    return this.http.get(`${this.apiUrl}/get_room_schedules`, { params }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch room schedules')))
+    );
+  }
+
+  // Refresh aggregated data
+  refreshAggregatedData(roomId?: string, prioritizeDay: boolean = true): Observable<any> {
+    let params = new HttpParams();
+    if (roomId) {
+      params = params.set('room_id', roomId);
+    }
+    params = params.set('prioritize_day', prioritizeDay.toString());
+    
+    return this.http.get(`${this.apiUrl}/refresh_aggregated_data`, { params }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to refresh aggregated data')))
+    );
+  }
+
+  // Inject schedule and refresh data in one operation
+  injectScheduleAndRefresh(scheduleData: any): Observable<any> {
+    const payload = {
+      operation: 'inject_schedule',
+      ...scheduleData
+    };
+    
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+      switchMap(response => {
+        return this.refreshAggregatedData(scheduleData.room_id).pipe(
+          map(refreshResponse => {
+            return {
+              injection: response,
+              refresh: refreshResponse
+            };
+          })
+        );
+      }),
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to inject schedule')))
+    );
+  }
+
+  // Get day-based schedules
+  getDayBasedSchedules(roomId: string): Observable<any> {
+    const url = `${this.apiUrl}/get_day_based_schedules?room_id=${roomId}`;
+    return this.http.get<any>(url).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get day-based schedules')))
+    );
+  }
+
+  // Get daily utilization data
+  getDailyUtilization(roomId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/daily_utilization/${roomId}`).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch daily utilization')))
+    );
+  }
+
+  // Get weekly utilization data
+  getWeeklyUtilization(roomId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/weekly_utilization/${roomId}`).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch weekly utilization')))
+    );
   }
 }

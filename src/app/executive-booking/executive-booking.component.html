@@ -1,39 +1,378 @@
-<div class="container-fluid row ">
-<mat-card class="portal ">
-  <div class="d-flex ">
-
-    <h6 class="text-center ">Resource Booking</h6>
-    <div class=" d-flex ms-auto ">
-
-  
-    <div class="py-2 " style="margin-right: 2px; font-size: large;">Student:[Username]</div>
-    <button  class="btn btn-danger text-white ">LogOut</button>
-  </div>
-  </div>
-
-
-  </mat-card>
-
-
-  <mat-card class="second d-flex justify-content-center col-12 ">
-    <div class="d-flex   button  py-5">
-     <h6 class=" text md-text-small" style="border: solid 2px black;  ">Type:Class Room</h6>
-     <h6 class="text md-text-small" style="border: solid 2px black;  " >Date: Mon</h6>
-
-     <div class="ms-auto">
-      <button class="btn btn-secondary">Search</button>
+<div class="executive-booking-container">
+  <mat-card class="booking-card">
+    <mat-card-header>
+      <mat-card-title>Executive Resource Management</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+        <!-- Check Overlap Tab -->
+        <mat-tab label="Check Overlap">
+          <form [formGroup]="form" class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Room ID</mat-label>
+              <input matInput formControlName="roomId" placeholder="Enter room ID">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            
+            <div class="time-fields">
+              <mat-form-field appearance="fill">
+                <mat-label>Start Time</mat-label>
+                <mat-select formControlName="startTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="fill">
+                <mat-label>End Time</mat-label>
+                <mat-select formControlName="endTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Day</mat-label>
+              <input matInput formControlName="day" readonly>
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="executeOperation('check_overlap')" [disabled]="loading">
+              Check Overlap
+            </button>
+          </form>
+        </mat-tab>
+        
+        <!-- Suggest Rooms Tab -->
+        <mat-tab label="Suggest Rooms">
+          <form [formGroup]="form" class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Date (Optional)</mat-label>
+              <input matInput [matDatepicker]="suggestPicker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="suggestPicker"></mat-datepicker-toggle>
+              <mat-datepicker #suggestPicker></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Day (Required)</mat-label>
+              <mat-select formControlName="day">
+                <mat-option value="Monday">Monday</mat-option>
+                <mat-option value="Tuesday">Tuesday</mat-option>
+                <mat-option value="Wednesday">Wednesday</mat-option>
+                <mat-option value="Thursday">Thursday</mat-option>
+                <mat-option value="Friday">Friday</mat-option>
+                <mat-option value="Saturday">Saturday</mat-option>
+                <mat-option value="Sunday">Sunday</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <div class="time-fields">
+              <mat-form-field appearance="fill">
+                <mat-label>Start Time</mat-label>
+                <mat-select formControlName="startTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="fill">
+                <mat-label>End Time</mat-label>
+                <mat-select formControlName="endTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Department (Optional)</mat-label>
+              <input matInput formControlName="department" placeholder="Enter department">
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="executeOperation('suggest_rooms')" [disabled]="loading">
+              Suggest Rooms
+            </button>
+          </form>
+        </mat-tab>
+        
+        <!-- Inject Schedule Tab -->
+        <mat-tab label="Inject Schedule">
+          <form [formGroup]="form" class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Room ID</mat-label>
+              <input matInput formControlName="roomId" placeholder="Enter room ID">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="injectPicker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="injectPicker"></mat-datepicker-toggle>
+              <mat-datepicker #injectPicker></mat-datepicker>
+            </mat-form-field>
+            
+            <div class="time-fields">
+              <mat-form-field appearance="fill">
+                <mat-label>Start Time</mat-label>
+                <mat-select formControlName="startTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="fill">
+                <mat-label>End Time</mat-label>
+                <mat-select formControlName="endTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Day</mat-label>
+              <input matInput formControlName="day" readonly>
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Course</mat-label>
+              <input matInput formControlName="course" placeholder="Enter course name">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Department</mat-label>
+              <input matInput formControlName="department" placeholder="Enter department">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Lecturer</mat-label>
+              <input matInput formControlName="lecturer" placeholder="Enter lecturer name">
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="executeOperation('inject_schedule')" [disabled]="loading">
+              Inject Schedule
+            </button>
+          </form>
+        </mat-tab>
+        
+        <!-- Reallocate Tab -->
+        <mat-tab label="Reallocate">
+          <form [formGroup]="form" class="form-container">
+            <mat-form-field appearance="fill">
+              <mat-label>Schedule ID</mat-label>
+              <input matInput formControlName="scheduleId" placeholder="Enter schedule ID">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>New Room ID</mat-label>
+              <input matInput formControlName="roomId" placeholder="Enter new room ID">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Date (Optional - will use original date if not provided)</mat-label>
+              <input matInput [matDatepicker]="reallocatePicker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="reallocatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #reallocatePicker></mat-datepicker>
+            </mat-form-field>
+            
+            <div class="time-fields">
+              <mat-form-field appearance="fill">
+                <mat-label>Start Time</mat-label>
+                <mat-select formControlName="startTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="fill">
+                <mat-label>End Time</mat-label>
+                <mat-select formControlName="endTime">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Day</mat-label>
+              <input matInput formControlName="day">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Course</mat-label>
+              <input matInput formControlName="course" placeholder="Enter course (e.g., CSM 477)">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Department</mat-label>
+              <input matInput formControlName="department" placeholder="Enter department (e.g., Computer Science)">
+            </mat-form-field>
+            
+            <mat-form-field appearance="fill">
+              <mat-label>Year</mat-label>
+              <input matInput formControlName="level" placeholder="Enter year (e.g., 4)">
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="executeOperation('reallocate')" [disabled]="loading">
+              Reallocate Schedule
+            </button>
+          </form>
+        </mat-tab>
+      </mat-tab-group>
       
-     </div>
-    
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Processing request...</p>
+      </div>
       
-
-  </div>
-
-    
-
-    <div class="third"></div>
-    
+      <!-- Results display -->
+      <div *ngIf="results && !loading" class="results-container">
+        <div class="results-header">
+          <h3>Results</h3>
+          <button mat-raised-button color="accent" (click)="refreshData(results.new_schedule?.room_id || results.room_id)" [disabled]="loading">
+            <mat-icon>refresh</mat-icon> Refresh Data
+          </button>
+        </div>
+        <pre>{{ results | json }}</pre>
+        
+        <!-- Display refreshed data if available -->
+        <div *ngIf="results.refreshed_data" class="refreshed-data">
+          <h3>Daily Utilization</h3>
+          <div *ngIf="results.refreshed_data.daily_utilization && results.refreshed_data.daily_utilization.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Room ID</th>
+                  <th>Daily Utilization</th>
+                  <th>Time Slot</th>
+                  <th>Courses</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let util of results.refreshed_data.daily_utilization">
+                  <td>{{ util.Day }}</td>
+                  <td>{{ util['Room ID'] }}</td>
+                  <td>{{ util.Daily_Utilization }}%</td>
+                  <td>{{ util.Time_Slot }}</td>
+                  <td>{{ util.Courses }}</td>
+                  <td>{{ util.Department }}</td>
+                  <td>{{ util.Status }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!results.refreshed_data.daily_utilization || results.refreshed_data.daily_utilization.length === 0">
+            <p>No daily utilization data available.</p>
+          </div>
+          
+          <h3>All Schedules</h3>
+          <div *ngIf="results.refreshed_data.all_schedules && results.refreshed_data.all_schedules.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Room ID</th>
+                  <th>Course</th>
+                  <th>Time</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let schedule of results.refreshed_data.all_schedules">
+                  <td>{{ schedule.Day }}</td>
+                  <td>{{ schedule['Room ID'] }}</td>
+                  <td>{{ schedule.Course }}</td>
+                  <td>{{ schedule.Start }} - {{ schedule.End }}</td>
+                  <td>{{ schedule.Department }}</td>
+                  <td>{{ schedule.Status }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!results.refreshed_data.all_schedules || results.refreshed_data.all_schedules.length === 0">
+            <p>No schedule data available.</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
   </mat-card>
+</div>
 
- </div>
+<style>
+  .executive-booking-container {
+    padding: 20px;
+  }
   
+  .booking-card {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+  
+  .time-fields {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .results-container {
+    margin-top: 20px;
+    padding: 16px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    overflow: auto;
+  }
+  
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .refreshed-data {
+    margin-top: 20px;
+    padding: 16px;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .data-table th, .data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .data-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  .data-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f1f1f1;
+  }
+</style>
