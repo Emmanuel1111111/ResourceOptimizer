@@ -11,9 +11,6 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHome, faChartBar, faCalendar } from '@fortawesome/free-solid-svg-icons';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UserInfo } from '../../Environ';  
-
-
-// Register Chart.js components
 import { registerables } from 'chart.js';
 Chart.register(...registerables);
 
@@ -26,7 +23,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   @ViewChild('barCanvas') barCanvas!: ElementRef<HTMLCanvasElement>;
   private chart: Chart<'bar'> | null = null;
   
-  // Properties
+  
   selectedRoom: any = null;
   rooms: any[] = [];
   availableRooms: any[] = [];
@@ -43,7 +40,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   error_masssage: string = '';
   scheduleError: string = '';
   searchQuery: string = '';
-  user: any = { username: 'User' };
+  user: any =''
   isOpened: boolean = false;
   userId: string = localStorage.getItem('userId') || '';
   chatMessages: { sender: string; text: string }[] = [];
@@ -58,7 +55,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   ];
   sidebarCollapsed: boolean = false;
   private searchSubject = new Subject<string>();
-  // Define day order for sorting
+
   private dayOrder: { [key: string]: number } = {
     'Monday': 1,
     'Tuesday': 2,
@@ -78,14 +75,25 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnInit(): void {
-    this.user = {
-      username: localStorage.getItem('username') || 'User'
-    };
+    // Initialize user with default values to prevent undefined errors
+    this.user = { username: 'User' };
     
-    this.route.queryParams.subscribe(params => {
-      this.selectedRoom = params['room'] || null;
-      if (this.selectedRoom) {
-        this.loadRoomData();
+    this.service.getUsers().subscribe({
+      next: (data:any) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const foundUser = data.find((x:any) => x.user_id === this.userId);
+          if (foundUser) {
+            this.user = foundUser;
+          }
+        }
+        console.log('User Info:', this.user);
+      },
+      error: (err) => {
+        console.error('Error fetching user info:', err);
+       
+        if (err.status !== 401 && err.status !== 422) {
+          this.error_masssage = 'Failed to load user information. Please try again.';
+        }
       }
     });
 
@@ -93,7 +101,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       next: (data) => {
         this.rooms = data.rooms;
         this.availableRooms = data.rooms; 
-        this.filteredRooms = data.rooms; // Populate filteredRooms
+        this.filteredRooms = data.rooms; 
         if (this.rooms.length > 0 && !this.selectedRoom) {
           this.selectedRoom = this.rooms[0];
           this.loadRoomData();
@@ -177,7 +185,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     gsap.to('.utilization-table tr', { opacity: 1, x: 0, duration: 0.5, stagger: 0.1 });
     this.updateBarGraph();
     
-    // Fetch all schedules for this room
+   
     this.fetchAllSchedules(room['Room ID']);
     this.refreshUtilizationData(room['Room ID']);
   }
@@ -188,7 +196,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     return 'low-utilization';
   }
 
-  // Helper method to sort time slots
+  
   private sortTimeSlots(a: string, b: string): number {
     const getHours = (timeSlot: string): number => {
       const match = timeSlot.match(/(\d+):(\d+)\s*-\s*(\d+):(\d+)/);
@@ -423,19 +431,18 @@ sideBar(){
     });
   }
   
-  // Fallback method to use the original refresh endpoint
+
   fallbackToRegularRefresh(roomId: string) {
     this.service.refreshAggregatedData(roomId).subscribe({
       next: (data) => {
         console.log('Refreshed Utilization Data (fallback):', data);
-        // Update the component data with refreshed data
+      
         this.dailyUtilization = data.daily_utilization;
         this.weekly_summary = data.weekly_summary;
         
-        // Filter for the selected room
         this.filterDailyUtilization();
         
-        // Also fetch the latest individual schedules
+        
         this.fetchAllSchedules(roomId);
         
         // Update the graph
@@ -450,21 +457,20 @@ sideBar(){
     });
   }
   
-  // Helper method to show a snackbar message
+
   showSnackBar(message: string, isError: boolean = false) {
-    // You can implement this with Angular Material's MatSnackBar if available
-    // For now, we'll just use a simple alert
+    
     console.log(`${isError ? 'ERROR: ' : ''}${message}`);
   }
 
-  // Method to handle room change
+
   onRoomChange() {
     if (this.selectedRoom) {
       this.loadRoomData();
     }
   }
 
-  // Load room data
+ 
   loadRoomData() {
     if (this.selectedRoom && this.selectedRoom['Room ID']) {
       this.refreshUtilizationData(this.selectedRoom['Room ID']);
@@ -472,18 +478,18 @@ sideBar(){
     }
   }
 
-  // Filter dailyUtilization by selected room
+ 
   filterDailyUtilization() {
     if (this.selectedRoom && this.dailyUtilization) {
-      // Filter by room ID and sort by day and time slot
+     
       this.filteredDailyUtilization = this.dailyUtilization
         .filter(d => d['Room ID'] === this.selectedRoom?.['Room ID'])
         .sort((a: any, b: any) => {
-          // First sort by day
+         
           const dayDiff = (this.dayOrder[a.Day] || 99) - (this.dayOrder[b.Day] || 99);
           if (dayDiff !== 0) return dayDiff;
           
-          // Then sort by time slot
+          
           return this.sortTimeSlots(a.Time_Slot, b.Time_Slot);
         });
     } else {

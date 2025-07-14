@@ -1,378 +1,675 @@
-<div class="executive-booking-container">
-  <mat-card class="booking-card">
-    <mat-card-header>
-      <mat-card-title>Executive Resource Management</mat-card-title>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+<div class="modern-container">
+  <!-- Database Connection Error Alert -->
+  <div *ngIf="dbConnectionError" class="database-error-alert">
+    <div class="error-icon">⚠️</div>
+    <div class="error-content">
+      <h3>Database Connection Error</h3>
+      <p>{{dbErrorMessage}}</p>
+      <div class="error-actions">
+        <button class="action-button secondary" (click)="retryDatabaseConnection()">
+          <span class="button-icon">↻</span> Retry Connection
+        </button>
+        <button class="action-button primary" (click)="showTroubleshootingGuide = !showTroubleshootingGuide">
+          <span class="button-icon">🔧</span> {{showTroubleshootingGuide ? 'Hide' : 'Show'}} Troubleshooting Guide
+        </button>
+      </div>
+      
+      <!-- Troubleshooting Guide -->
+      <div *ngIf="showTroubleshootingGuide" class="troubleshooting-guide">
+        <h4>MongoDB Connection Troubleshooting Guide</h4>
+        <ol>
+          <li><strong>Check MongoDB URI:</strong> Verify that the MONGO_URI environment variable is correctly set in your .env file.</li>
+          <li><strong>Network Issues:</strong> Ensure your network allows connections to MongoDB Atlas or your local MongoDB server.</li>
+          <li><strong>Local MongoDB:</strong> If using a local MongoDB, make sure the MongoDB service is running:
+            <pre>brew services start mongodb-community</pre>
+            or
+            <pre>sudo systemctl start mongod</pre>
+          </li>
+          <li><strong>Firewall Settings:</strong> Check if your firewall is blocking MongoDB connections (default port: 27017).</li>
+          <li><strong>DNS Resolution:</strong> The error "no nameservers" indicates a DNS resolution issue. Try using a direct connection string instead of SRV format.</li>
+          <li><strong>MongoDB Atlas:</strong> Verify that your IP address is whitelisted in MongoDB Atlas Network Access settings.</li>
+          <li><strong>Credentials:</strong> Ensure your username and password are correct in the connection string.</li>
+        </ol>
+        
+        <h4>MongoDB URI Format</h4>
+        <p>Make sure your MongoDB URI follows the correct format:</p>
+        <div class="code-block">
+          <p><strong>MongoDB Atlas (SRV):</strong></p>
+          <pre>mongodb+srv://&lt;username&gt;:&lt;password&gt;&#64;&lt;cluster&gt;.mongodb.net/&lt;database&gt;?retryWrites=true&amp;w=majority</pre>
+          
+          <p><strong>MongoDB Atlas (Direct):</strong></p>
+          <pre>mongodb://&lt;username&gt;:&lt;password&gt;&#64;&lt;host1&gt;:&lt;port1&gt;,&lt;host2&gt;:&lt;port2&gt;/&lt;database&gt;?replicaSet=&lt;replicaSetName&gt;</pre>
+          
+          <p><strong>Local MongoDB:</strong></p>
+          <pre>mongodb://localhost:27017/&lt;database&gt;</pre>
+        </div>
+        
+        <p><strong>Note:</strong> After fixing the issue, restart both the backend and frontend applications.</p>
+      </div>
+    </div>
+    <button class="close-button" (click)="dbConnectionError = false">×</button>
+  </div>
+
+  <div class="header-section">
+    <h1 class="title animated-text">
+      <span class="resource-text">Resource</span> 
+      <span class="optimization-text">Optimization</span>
+    </h1>
+    <p class="subtitle">Executive Management Console</p>
+  </div>
+
+  <div class="content-card">
+    <div class="tab-navigation">
+      <div class="tab-wrapper">
+        <button 
+          *ngFor="let tab of tabs; let i = index;" 
+          [class.active]="activeTab.includes(tab)"
+          (click)="onTabChange(i)"
+          class="tab-button">
+          {{tab}}
+        </button> 
+      </div>
+    </div>
+ 
         <!-- Check Overlap Tab -->
-        <mat-tab label="Check Overlap">
-          <form [formGroup]="form" class="form-container">
-            <mat-form-field appearance="fill">
-              <mat-label>Room ID</mat-label>
-              <input matInput formControlName="roomId" placeholder="Enter room ID">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Date</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-            
-            <div class="time-fields">
-              <mat-form-field appearance="fill">
-                <mat-label>Start Time</mat-label>
-                <mat-select formControlName="startTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+    <div *ngIf="activeTab === 'Check Overlap'" class="tab-content">
+      <div class="tab-pane fade-in">
+        <div class="form-section">
+          <form [formGroup]="form" class="modern-form">
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Room ID</label>
+                <input class="form-input" formControlName="roomId" placeholder="Enter room ID" required>
+                <div *ngIf="form.get('roomId')?.hasError('required') && form.get('roomId')?.touched" class="error-message">
+                  Room ID is required
+                </div>
+              </div>
               
-              <mat-form-field appearance="fill">
-                <mat-label>End Time</mat-label>
-                <mat-select formControlName="endTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-group highlighted-field animate-on-hover">
+                <label class="form-label">Day</label>
+                <select class="form-select" formControlName="day" required>
+                  <option value="" disabled selected>Select day</option>
+                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                </select>
+                <div *ngIf="form.get('day')?.hasError('required') && form.get('day')?.touched" class="error-message">
+                  Day is required
+                </div>
+                <div class="form-hint">Day-based scheduling is prioritized</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Date (Optional)</label>
+                <input class="form-input" type="date" formControlName="date">
+                <div class="form-hint">Only used if day-based scheduling fails</div>
+              </div>
+            </div>
+
+            <div class="form-row time-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Start Time</label>
+                <select class="form-select" formControlName="startTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+                <div *ngIf="form.get('startTime')?.hasError('required') && form.get('startTime')?.touched" class="error-message">
+                  Start time is required
+                </div>
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">End Time</label>
+                <select class="form-select" formControlName="endTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+                <div *ngIf="form.get('endTime')?.hasError('required') && form.get('endTime')?.touched" class="error-message">
+                  End time is required
+                </div>
+              </div>
             </div>
             
-            <mat-form-field appearance="fill">
-              <mat-label>Day</mat-label>
-              <input matInput formControlName="day" readonly>
-            </mat-form-field>
-            
-            <button mat-raised-button color="primary" (click)="executeOperation('check_overlap')" [disabled]="loading">
-              Check Overlap
-            </button>
+            <div class="form-actions">
+              <button 
+                class="action-button primary pulse-animation" 
+                (click)="executeOperation('check_overlap')" 
+                [disabled]="loading || !form.get('roomId')?.valid || !form.get('day')?.valid || !form.get('startTime')?.valid || !form.get('endTime')?.valid">
+                <span class="button-icon">🔍</span> Check Overlap
+              </button>
+            </div>
           </form>
-        </mat-tab>
+        </div>
+
+        <!-- Results Section for Check Overlap -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Processing request...</p>
+        </div>
+
+        <div *ngIf="results && !loading" class="results-section fade-in">
+          <div class="results-header">
+            <h2>Overlap Check Results</h2>
+            <button class="refresh-button" (click)="refreshData(results.room_id)">
+              <span class="button-icon">↻</span> Refresh
+            </button>
+          </div>
+
+          <div class="results-summary">
+            <div class="summary-card" [ngClass]="{'conflict': results.has_conflict, 'no-conflict': !results.has_conflict}">
+              <div class="summary-icon">
+                <span *ngIf="results.has_conflict">⚠️</span>
+                <span *ngIf="!results.has_conflict">✓</span>
+              </div>
+              <div class="summary-details">
+                <h3>{{results.has_conflict ? 'Conflicts Detected' : 'No Conflicts'}}</h3>
+                <p><strong>Department:</strong> {{results.department}}</p>
+                <p>Room: <strong>{{results.room_id}}</strong></p>
+                <p>Day: <strong>{{results.day}}</strong></p>
+                <p>Time: <strong>{{results.proposed_time}}</strong></p>
+                <p>Schedules checked: <strong>{{results.schedules_checked}}</strong></p>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="results.has_conflict" class="conflicts-container">
+            <h3>Conflicting Schedules</h3>
+            <div class="conflicts-grid">
+              <div *ngFor="let conflict of results.conflicts; let i = index" class="conflict-card animate-in" [style.animation-delay]="i * 0.1 + 's'">
+                <div class="conflict-header">
+                  <span class="conflict-course">{{conflict.course}}</span>
+                </div>
+                <div class="conflict-details">
+                  <p><span class="detail-label">Time:</span> {{conflict.time}}</p>
+                  <p><span class="detail-label">Day:</span> {{conflict.day}}</p>
+                  <p><span class="detail-label">Date:</span> {{conflict.date || 'Not specified'}}</p>
+                  <p><span class="detail-label">Room:</span> {{conflict.schedule_id}}</p>
+                  <p><span class="detail-label">Department:</span> {{conflict.department || 'Not specified'}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!results.has_conflict" class="available-slot">
+            <div class="available-slot-card bounce-in">
+              <h3>This Time Slot is Available</h3>
+              <p>You can proceed with scheduling for:</p>
+              <p class="slot-details">
+                <span class="slot-room">{{results.room_id}}</span>
+                <span class="slot-day">{{results.day}}</span>
+                <span class="slot-time">{{results.proposed_time}}</span>
+              </p>
+              <button class="action-button secondary pulse-animation">
+                Book This Slot
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
         
         <!-- Suggest Rooms Tab -->
-        <mat-tab label="Suggest Rooms">
-          <form [formGroup]="form" class="form-container">
-            <mat-form-field appearance="fill">
-              <mat-label>Date (Optional)</mat-label>
-              <input matInput [matDatepicker]="suggestPicker" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="suggestPicker"></mat-datepicker-toggle>
-              <mat-datepicker #suggestPicker></mat-datepicker>
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Day (Required)</mat-label>
-              <mat-select formControlName="day">
-                <mat-option value="Monday">Monday</mat-option>
-                <mat-option value="Tuesday">Tuesday</mat-option>
-                <mat-option value="Wednesday">Wednesday</mat-option>
-                <mat-option value="Thursday">Thursday</mat-option>
-                <mat-option value="Friday">Friday</mat-option>
-                <mat-option value="Saturday">Saturday</mat-option>
-                <mat-option value="Sunday">Sunday</mat-option>
-              </mat-select>
-            </mat-form-field>
-            
-            <div class="time-fields">
-              <mat-form-field appearance="fill">
-                <mat-label>Start Time</mat-label>
-                <mat-select formControlName="startTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+    <div *ngIf="activeTab === 'Suggest Rooms'" class="tab-content">
+      <div class="tab-pane fade-in">
+        <div class="form-section">
+          <form [formGroup]="form" class="modern-form">
+            <div class="form-row">
+              <div class="form-group highlighted-field animate-on-hover">
+                <label class="form-label">Day</label>
+                <select class="form-select" formControlName="day" required>
+                  <option value="" disabled selected>Select day</option>
+                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                </select>
+                <div *ngIf="form.get('day')?.hasError('required') && form.get('day')?.touched" class="error-message">
+                  Day is required
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row time-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Start Time</label>
+                <select class="form-select" formControlName="startTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
               
-              <mat-form-field appearance="fill">
-                <mat-label>End Time</mat-label>
-                <mat-select formControlName="endTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-group animate-on-hover">
+                <label class="form-label">End Time</label>
+                <select class="form-select" formControlName="endTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
             </div>
             
-            <mat-form-field appearance="fill">
-              <mat-label>Department (Optional)</mat-label>
-              <input matInput formControlName="department" placeholder="Enter department">
-            </mat-form-field>
-            
-            <button mat-raised-button color="primary" (click)="executeOperation('suggest_rooms')" [disabled]="loading">
-              Suggest Rooms
-            </button>
-          </form>
-        </mat-tab>
-        
-        <!-- Inject Schedule Tab -->
-        <mat-tab label="Inject Schedule">
-          <form [formGroup]="form" class="form-container">
-            <mat-form-field appearance="fill">
-              <mat-label>Room ID</mat-label>
-              <input matInput formControlName="roomId" placeholder="Enter room ID">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Date</mat-label>
-              <input matInput [matDatepicker]="injectPicker" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="injectPicker"></mat-datepicker-toggle>
-              <mat-datepicker #injectPicker></mat-datepicker>
-            </mat-form-field>
-            
-            <div class="time-fields">
-              <mat-form-field appearance="fill">
-                <mat-label>Start Time</mat-label>
-                <mat-select formControlName="startTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-              
-              <mat-form-field appearance="fill">
-                <mat-label>End Time</mat-label>
-                <mat-select formControlName="endTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+           
+
+            <div class="form-actions">
+              <button class="action-button primary pulse-animation" (click)="executeOperation('suggest_rooms')" [disabled]="loading">
+                <span class="button-icon">🏢</span> Suggest Rooms
+              </button>
             </div>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Day</mat-label>
-              <input matInput formControlName="day" readonly>
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Course</mat-label>
-              <input matInput formControlName="course" placeholder="Enter course name">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Department</mat-label>
-              <input matInput formControlName="department" placeholder="Enter department">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Lecturer</mat-label>
-              <input matInput formControlName="lecturer" placeholder="Enter lecturer name">
-            </mat-form-field>
-            
-            <button mat-raised-button color="primary" (click)="executeOperation('inject_schedule')" [disabled]="loading">
-              Inject Schedule
-            </button>
           </form>
-        </mat-tab>
-        
-        <!-- Reallocate Tab -->
-        <mat-tab label="Reallocate">
-          <form [formGroup]="form" class="form-container">
-            <mat-form-field appearance="fill">
-              <mat-label>Schedule ID</mat-label>
-              <input matInput formControlName="scheduleId" placeholder="Enter schedule ID">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>New Room ID</mat-label>
-              <input matInput formControlName="roomId" placeholder="Enter new room ID">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Date (Optional - will use original date if not provided)</mat-label>
-              <input matInput [matDatepicker]="reallocatePicker" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="reallocatePicker"></mat-datepicker-toggle>
-              <mat-datepicker #reallocatePicker></mat-datepicker>
-            </mat-form-field>
-            
-            <div class="time-fields">
-              <mat-form-field appearance="fill">
-                <mat-label>Start Time</mat-label>
-                <mat-select formControlName="startTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-              
-              <mat-form-field appearance="fill">
-                <mat-label>End Time</mat-label>
-                <mat-select formControlName="endTime">
-                  <mat-option *ngFor="let time of timeOptions" [value]="time">{{time}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Day</mat-label>
-              <input matInput formControlName="day">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Course</mat-label>
-              <input matInput formControlName="course" placeholder="Enter course (e.g., CSM 477)">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Department</mat-label>
-              <input matInput formControlName="department" placeholder="Enter department (e.g., Computer Science)">
-            </mat-form-field>
-            
-            <mat-form-field appearance="fill">
-              <mat-label>Year</mat-label>
-              <input matInput formControlName="level" placeholder="Enter year (e.g., 4)">
-            </mat-form-field>
-            
-            <button mat-raised-button color="primary" (click)="executeOperation('reallocate')" [disabled]="loading">
-              Reallocate Schedule
-            </button>
-          </form>
-        </mat-tab>
-      </mat-tab-group>
-      
-      <!-- Loading indicator -->
-      <div *ngIf="loading" class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Processing request...</p>
-      </div>
-      
-      <!-- Results display -->
-      <div *ngIf="results && !loading" class="results-container">
-        <div class="results-header">
-          <h3>Results</h3>
-          <button mat-raised-button color="accent" (click)="refreshData(results.new_schedule?.room_id || results.room_id)" [disabled]="loading">
-            <mat-icon>refresh</mat-icon> Refresh Data
-          </button>
         </div>
-        <pre>{{ results | json }}</pre>
-        
-        <!-- Display refreshed data if available -->
-        <div *ngIf="results.refreshed_data" class="refreshed-data">
-          <h3>Daily Utilization</h3>
-          <div *ngIf="results.refreshed_data.daily_utilization && results.refreshed_data.daily_utilization.length > 0">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Day</th>
-                  <th>Room ID</th>
-                  <th>Daily Utilization</th>
-                  <th>Time Slot</th>
-                  <th>Courses</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let util of results.refreshed_data.daily_utilization">
-                  <td>{{ util.Day }}</td>
-                  <td>{{ util['Room ID'] }}</td>
-                  <td>{{ util.Daily_Utilization }}%</td>
-                  <td>{{ util.Time_Slot }}</td>
-                  <td>{{ util.Courses }}</td>
-                  <td>{{ util.Department }}</td>
-                  <td>{{ util.Status }}</td>
-                </tr>
-              </tbody>
-            </table>
+
+        <!-- Results Section for Suggest Rooms -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Finding available rooms...</p>
+        </div>
+
+        <div *ngIf="results && !loading" class="results-section fade-in">
+          <div class="results-header">
+            <h2>Room Suggestions</h2>
           </div>
-          <div *ngIf="!results.refreshed_data.daily_utilization || results.refreshed_data.daily_utilization.length === 0">
-            <p>No daily utilization data available.</p>
+
+          <div class="results-summary">
+            <div class="summary-card no-conflict">
+              <div class="summary-icon">
+                <span>🏢</span>
+              </div>
+              <div class="summary-details">
+                <h3>Available Rooms Found</h3>
+                <p>Day: <strong>{{results.day}}</strong></p>
+                <p>Time: <strong>{{results.time}}</strong></p>
+                <p>Total rooms: <strong>{{results.total_rooms || 0}}</strong></p>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="results.suggested_rooms && results.suggested_rooms.length > 0" class="suggestions-container">
+            <h3>Suggested Rooms</h3>
+            
+            <!-- Room filtering options -->
+            <div class="filter-options">
+              <div class="search-box">
+                <input 
+                  type="text" 
+                  placeholder="Search room ID..." 
+                  [(ngModel)]="roomSearchQuery"
+                  (input)="filterRooms()"
+                  class="search-input"
+                >
+                <span class="search-icon">🔍</span>
+              </div>
+              
+              <div class="sort-options">
+                <label>Sort by: </label>
+                <select [(ngModel)]="roomSortOption" (change)="sortRooms()">
+                  <option value="room_id">Room ID</option>
+                  <option value="free_slots">Available Time</option>
+                  <option value="department">Department</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Display rooms with pagination -->
+            <div class="suggestions-grid">
+              <div *ngFor="let room of displayedRooms; let i = index" class="suggestion-card animate-in" [style.animation-delay]="i * 0.1 + 's'">
+                <div class="suggestion-header">
+                  <span class="suggestion-room">{{room.room_id}}</span>
+                </div>
+                
+                <div class="free-slots-container">
+                  <h4>Free Time Slots</h4>
+                  <div class="free-slots-list">
+                    <div *ngFor="let slot of room.free_slots" class="free-slot-item">
+                      <div class="time-range">
+                        <span class="time-start">{{slot.start}}</span>
+                        <span class="time-separator">→</span>
+                        <span class="time-end">{{slot.end}}</span>
+                      </div>
+                      <span class="duration-badge">{{slot.duration}}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="suggestion-details">
+                  <div class="requested-slot" *ngIf="room.requested_slot">
+                    <p><span class="detail-label">Requested Time:</span> {{room.requested_slot.start}} - {{room.requested_slot.end}}</p>
+                    <p><span class="detail-label">Duration:</span> {{room.requested_slot.duration}}</p>
+                  </div>
+                </div>
+                
+                <div class="card-footer">
+                  <button class="action-button secondary" (click)="selectRoom(room)">
+                    Select Room
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination-controls" *ngIf="results.suggested_rooms.length > 8">
+              <div class="pagination-info">
+                Showing {{displayedRooms.length}} of {{filteredRooms.length}} rooms
+              </div>
+              <div class="pagination-buttons">
+                <button 
+                  *ngIf="currentPage > 1" 
+                  class="pagination-button" 
+                  (click)="changePage(currentPage - 1)">
+                  Previous
+                </button>
+                
+                <div class="page-indicators">
+                  <span *ngFor="let page of getPageNumbers()" 
+                    [class.active]="page === currentPage"
+                    (click)="changePage(page)"
+                    class="page-number">
+                    {{page}}
+                  </span>
+                </div>
+                
+                <button 
+                  *ngIf="currentPage < totalPages" 
+                  class="pagination-button" 
+                  (click)="changePage(currentPage + 1)">
+                  Next
+                </button>
+                
+                <button 
+                  *ngIf="displayedRooms.length < filteredRooms.length && currentPage === totalPages" 
+                  class="pagination-button show-more" 
+                  (click)="showAllRooms()">
+                  Show All ({{filteredRooms.length - displayedRooms.length}} more)
+            </button>
+              </div>
+            </div>
           </div>
           
-          <h3>All Schedules</h3>
-          <div *ngIf="results.refreshed_data.all_schedules && results.refreshed_data.all_schedules.length > 0">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Day</th>
-                  <th>Room ID</th>
-                  <th>Course</th>
-                  <th>Time</th>
-                  <th>Department</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let schedule of results.refreshed_data.all_schedules">
-                  <td>{{ schedule.Day }}</td>
-                  <td>{{ schedule['Room ID'] }}</td>
-                  <td>{{ schedule.Course }}</td>
-                  <td>{{ schedule.Start }} - {{ schedule.End }}</td>
-                  <td>{{ schedule.Department }}</td>
-                  <td>{{ schedule.Status }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="!results.refreshed_data.all_schedules || results.refreshed_data.all_schedules.length === 0">
-            <p>No schedule data available.</p>
+          <div *ngIf="!results.suggested_rooms || results.suggested_rooms.length === 0" class="no-results">
+            <div class="no-results-card">
+              <div class="no-results-icon">🔍</div>
+              <h3>No Available Rooms Found</h3>
+              <p>No rooms are available for the selected time and day.</p>
+              <p>Try selecting a different time or day.</p>
+            </div>
           </div>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+        
+        <!-- Inject Schedule Tab -->
+    <div *ngIf="activeTab === 'Inject Schedule'" class="tab-content">
+      <div class="tab-pane fade-in">
+        <div class="form-section">
+          <form [formGroup]="form" class="modern-form">
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Room ID</label>
+                <input class="form-input" formControlName="roomId" placeholder="Enter room ID" required>
+              </div>
+              
+              <div class="form-group highlighted-field animate-on-hover">
+                <label class="form-label">Day</label>
+                <select class="form-select" formControlName="day" required>
+                  <option value="" disabled selected>Select day</option>
+                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Date</label>
+                <input class="form-input" type="date" formControlName="date">
+              </div>
+            </div>
+
+            <div class="form-row time-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Start Time</label>
+                <select class="form-select" formControlName="startTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">End Time</label>
+                <select class="form-select" formControlName="endTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Course</label>
+                <input class="form-input" formControlName="course" placeholder="Enter course name">
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Department</label>
+                <input class="form-input" formControlName="department" placeholder="Enter department">
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Year</label>
+                <input class="form-input" formControlName="level" placeholder="Enter year">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="action-button primary pulse-animation" (click)="executeOperation('inject_schedule')" [disabled]="loading">
+                <span class="button-icon">➕</span> Inject Schedule
+            </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Results Section for Inject Schedule -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Adding schedule...</p>
+        </div>
+
+        <div *ngIf="results && !loading" class="results-section fade-in">
+          <div class="results-header">
+            <h2>Schedule Injection Results</h2>
+          </div>
+
+          <div class="results-summary">
+            <div class="summary-card no-conflict">
+              <div class="summary-icon">
+                <span>✅</span>
+              </div>
+              <div class="summary-details">
+                <h3>Schedule Added Successfully</h3>
+                <p>Schedule ID: <strong>{{results.schedule_id}}</strong></p>
+                <p>Room: <strong>{{results.room_id}}</strong></p>
+                <p>Day: <strong>{{results.day}}</strong></p>
+                <p>Time: <strong>{{results.time_range}}</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+        
+        <!-- Reallocate Tab -->
+    <div *ngIf="activeTab === 'Reallocate'" class="tab-content">
+      <div class="tab-pane fade-in">
+        <div class="form-section">
+          <form [formGroup]="form" class="modern-form">
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Schedule ID</label>
+                <input class="form-input" formControlName="scheduleId" placeholder="Enter schedule ID" required>
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">New Room ID</label>
+                <input class="form-input" formControlName="roomId" placeholder="Enter new room ID" required>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group highlighted-field animate-on-hover">
+                <label class="form-label">Day</label>
+                <select class="form-select" formControlName="day" required>
+                  <option value="" disabled selected>Select day</option>
+                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                </select>
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Date (Optional)</label>
+                <input class="form-input" type="date" formControlName="date">
+              </div>
+            </div>
+      
+            <div class="form-row time-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Start Time</label>
+                <select class="form-select" formControlName="startTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">End Time</label>
+                <select class="form-select" formControlName="endTime" required>
+                  <option value="" disabled selected>Select time</option>
+                  <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Course</label>
+                <input class="form-input" formControlName="course" placeholder="Enter course name">
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Department</label>
+                <input class="form-input" formControlName="department" placeholder="Enter department">
+              </div>
+              
+              <div class="form-group animate-on-hover">
+                <label class="form-label">Year</label>
+                <input class="form-input" formControlName="level" placeholder="Enter year">
+              </div>
+            </div>
+          
+            <div class="form-actions">
+              <button class="action-button primary pulse-animation" (click)="executeOperation('reallocate')" [disabled]="loading">
+                <span class="button-icon">🔄</span> Reallocate Schedule
+            </button>
+            </div>
+          </form>
+      </div>
+      
+        <!-- Results Section for Reallocate -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Reallocating schedule...</p>
+        </div>
+
+        <div *ngIf="results && !loading" class="results-section fade-in">
+          <div class="results-header">
+            <h2>Reallocation Results</h2>
+          </div>
+          
+          <div class="results-summary">
+            <div class="summary-card no-conflict">
+              <div class="summary-icon">
+                <span>🔄</span>
+              </div>
+              <div class="summary-details">
+                <h3>Schedule Reallocated Successfully</h3>
+                <p>Schedule ID: <strong>{{results.schedule_id}}</strong></p>
+                <p>New Room: <strong>{{results.new_room_id}}</strong></p>
+                <p>Day: <strong>{{results.day}}</strong></p>
+                <p>Time: <strong>{{results.time_range}}</strong></p>
+              </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<style>
-  .executive-booking-container {
-    padding: 20px;
-  }
-  
-  .booking-card {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0;
-  }
-  
-  .time-fields {
-    display: flex;
-    gap: 16px;
-  }
-  
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  .results-container {
-    margin-top: 20px;
-    padding: 16px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    overflow: auto;
-  }
-  
-  .results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .refreshed-data {
-    margin-top: 20px;
-    padding: 16px;
-    background-color: #e8f5e9;
-    border-radius: 4px;
-  }
-  
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
-  .data-table th, .data-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .data-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-  }
-  
-  .data-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .data-table tr:hover {
-    background-color: #f1f1f1;
-  }
-</style>
+<!-- Room Selection Popup Modal -->
+<div *ngIf="showRoomSelectionModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Inject Schedule for Room {{selectedRoom?.room_id}}</h2>
+      <button class="close-button" (click)="closeRoomSelectionModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="injectScheduleForm" class="modern-form">
+        <div class="form-row">
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Room ID</label>
+            <input class="form-input" formControlName="roomId" readonly>
+          </div>
+          
+          <div class="form-group highlighted-field animate-on-hover">
+            <label class="form-label">Day</label>
+            <input class="form-input" formControlName="day" readonly>
+          </div>
+        </div>
+
+        <div class="form-row time-row">
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Start Time</label>
+            <select class="form-select" formControlName="startTime" required (change)="updateEndTimeOptions()">
+              <option value="" disabled selected>Select time</option>
+              <option *ngFor="let slot of availableTimeSlots" [value]="slot.start">{{slot.start}}</option>
+            </select>
+          </div>
+          
+          <div class="form-group animate-on-hover">
+            <label class="form-label">End Time</label>
+            <select class="form-select" formControlName="endTime" required>
+              <option value="" disabled selected>Select time</option>
+              <option *ngFor="let time of endTimeOptions" [value]="time">{{time}}</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Course</label>
+            <input class="form-input" formControlName="course" placeholder="Enter course name" required>
+          </div>
+          
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Department</label>
+            <input class="form-input" formControlName="department" placeholder="Enter department" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Year</label>
+            <input class="form-input" formControlName="level" placeholder="Enter year" required>
+          </div>
+          
+          <div class="form-group animate-on-hover">
+            <label class="form-label">Lecturer (Optional)</label>
+            <input class="form-input" formControlName="lecturer" placeholder="Enter lecturer name">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="action-button secondary" (click)="closeRoomSelectionModal()">Cancel</button>
+      <button class="action-button primary pulse-animation" 
+              [disabled]="injectScheduleForm.invalid || injectLoading" 
+              (click)="injectScheduleForSelectedRoom()">
+        <span *ngIf="!injectLoading">Inject Schedule</span>
+        <span *ngIf="injectLoading" class="spinner-small"></span>
+      </button>
+    </div>
+  </div>
+</div>
+

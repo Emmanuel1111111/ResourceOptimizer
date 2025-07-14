@@ -10,12 +10,13 @@ import {
   SuggestRoomsResponse,
   ApiResponse
 } from '../Environ';
+import { api } from '../api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ResourceManagementService {
-  private readonly API_BASE_URL = 'http://your-backend-url'; // Replace with your actual backend URL
+  private readonly API_BASE_URL = 'http://localhost:5000/api'; // Using correct backend URL
   private readonly ENDPOINT = '/manage_resources';
 
   private httpOptions = {
@@ -33,7 +34,8 @@ export class ResourceManagementService {
     roomId: string,
     date: string,
     startTime: string,
-    endTime: string
+    endTime: string,
+    day?: string
   ): Observable<CheckOverlapResponse> {
     const payload: ManageResourcesRequest = {
       operation: 'check_overlap',
@@ -42,6 +44,13 @@ export class ResourceManagementService {
       start_time: startTime,
       end_time: endTime
     };
+    
+    // Add day parameter if provided (prioritize day-based scheduling)
+    if (day) {
+      payload.day = day;
+    }
+
+    console.log('Check overlap payload:', payload);
 
     return this.http.post<CheckOverlapResponse>(
       `${this.API_BASE_URL}${this.ENDPOINT}`,
@@ -100,6 +109,7 @@ export class ResourceManagementService {
       lecturer?: string;
       level?: string;
       program?: string;
+      year?: string; // Add year property
     }
   ): Observable<InjectScheduleResponse> {
     const payload: ManageResourcesRequest = {
@@ -129,20 +139,33 @@ export class ResourceManagementService {
     startTime: string,
     endTime: string,
     day: string,
+    roomId?: string,
     department?: string
   ): Observable<SuggestRoomsResponse> {
     const payload: ManageResourcesRequest = {
       operation: 'suggest_rooms',
       start_time: startTime,
       end_time: endTime,
-      day: day,
-      department: department
+      day: day
     };
 
     // Only add date to payload if it's provided
     if (date) {
       payload.date = date;
     }
+    
+    // Add roomId if provided (for filtering by specific room)
+    if (roomId) {
+      payload.room_id = roomId;
+    }
+    
+    // Add department if provided
+    if (department) {
+      payload.department = department;
+    }
+
+    console.log('Suggest rooms payload:', payload);
+    console.log('API URL:', `${this.API_BASE_URL}${this.ENDPOINT}`);
 
     return this.http.post<SuggestRoomsResponse>(
       `${this.API_BASE_URL}${this.ENDPOINT}`,
@@ -181,6 +204,7 @@ export class ResourceManagementService {
     }
     
     console.error('ResourceManagementService Error:', errorMessage);
+    console.error('Full error object:', error);
     return throwError(() => new Error(errorMessage));
   }
 

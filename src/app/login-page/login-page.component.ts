@@ -228,7 +228,7 @@ export class LoginPageComponent implements OnInit {
             
           },
           error: (error: any) => {
-            this.errorMessage = 'Signup failed. Please try again.';
+            this.errorMessage = `SignUp failed, ${error}`;
             console.error('Signup error:', error);
             this.isloading = false;
           },

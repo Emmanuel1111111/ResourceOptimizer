@@ -9,19 +9,31 @@ import os
 from process import preprocess_data
 load_dotenv()
 
-# Setup Flask blueprint and MongoDB
-manage_resources_bp = Blueprint('routes_bp', __name__)
-MONGO_URI = os.getenv("MONGO_URI")
-client = MongoClient(MONGO_URI)
-db = client['EduResourceDB']
-timetables = db['timetables']
- # Assuming you have a rooms collection
-# Note: You'll need to define preprocess_data and is_within_time_and_day functions
 
+manage_resources_bp = Blueprint('manage_resources', __name__)
+MONGO_URI = os.getenv("MONGO_URI")
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=8000)
+    client.server_info()
+    print("MongoDB connection successful in manage_resources")
+    db = client['EduResourceDB']
+    timetables = db['timetables']
+except Exception as e:
+    print(f"MongoDB connection error in manage_resources: {e}")
+    try:
+        client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
+        client.server_info()
+        print("Connected to local MongoDB in manage_resources")
+        db = client['EduResourceDB']
+        timetables = db['timetables']
+    except Exception as local_e:
+        print(f"Local MongoDB connection failed in manage_resources: {local_e}")
+        print("WARNING: Resource management operations will not function correctly")
+        db = None
+        timetables = None
+ 
 def validate_time_format(time_str):
-    """
-    Validate time format and return True if valid, False otherwise.
-    """
+   
     if not isinstance(time_str, str):
         return False
     
@@ -49,17 +61,14 @@ def validate_time_format(time_str):
         return False
 
 def normalize_time_format(time_str):
-    """
-    Normalize different time formats to HH:MM format.
-    Handles formats like "8:00", "08:00", "8:00–9:55" (with en dash)
-    """
+   
     if not time_str or not isinstance(time_str, str):
         return time_str
     
     print(f"Normalizing time format: '{time_str}'")
     
     # Handle special characters like en dash or em dash that might be in the data
-    if '–' in time_str:  # en dash (common in the provided data)
+    if '–' in time_str:  
         time_str = time_str.split('–')[0].strip()
         print(f"  → Split at en dash: '{time_str}'")
     elif '-' in time_str and ':' in time_str:  # hyphen used as separator
@@ -74,15 +83,14 @@ def normalize_time_format(time_str):
         print(f"  → Already valid: '{time_str}'")
         return time_str
     
-    # Try to parse hour and minute
+  
     try:
-        # If it's just a number, assume it's hours
         if time_str.isdigit():
             result = f"{int(time_str):02d}:00"
             print(f"  → Converted digit to time: '{result}'")
             return result
         
-        # If it has a colon, try to format properly
+       
         if ':' in time_str:
             hour, minute = time_str.split(':')
             result = f"{int(hour):02d}:{int(minute):02d}"
@@ -91,23 +99,12 @@ def normalize_time_format(time_str):
     except (ValueError, TypeError) as e:
         print(f"  → Error parsing time: {e}")
     
-    # If we can't normalize it, return as is
+ 
     print(f"  → Could not normalize, returning as is: '{time_str}'")
     return time_str
 
 def has_time_overlap(start1, end1, start2, end2):
-    """
-    A more robust helper function to check if two time periods overlap.
-    This function specifically handles the case where one period ends exactly 
-    when another begins (which should NOT count as an overlap).
     
-    Args:
-        start1, end1: Start and end times of first period (HH:MM format)
-        start2, end2: Start and end times of second period (HH:MM format)
-        
-    Returns:
-        bool: True if there is an overlap, False otherwise
-    """
     try:
         # Convert strings to datetime.time objects
         s1 = datetime.strptime(start1, '%H:%M').time()
@@ -119,8 +116,7 @@ def has_time_overlap(start1, end1, start2, end2):
         if s1 == e1 or s2 == e2:
             return False
             
-        # IMPORTANT: The key comparison - specifically exclude the case
-        # where one period ends exactly when another begins
+       
         if e1 == s2 or e2 == s1:
             return False
             
@@ -129,58 +125,43 @@ def has_time_overlap(start1, end1, start2, end2):
         
     except (ValueError, TypeError) as e:
         print(f"Error in has_time_overlap: {e}")
-        # Return True to be safe
+        
         return True
 
 def serialize_mongo_doc(doc):
-    """
-    Serialize a MongoDB document for JSON response.
-    Converts ObjectId to string and handles other non-serializable types.
-    
-    Args:
-        doc: MongoDB document (dict)
-        
-    Returns:
-        dict: Serialized document safe for JSON conversion
-    """
+  
     if not doc:
         return doc
         
     serialized = {}
     for key, value in doc.items():
-        # Handle ObjectId
+       
         if key == '_id' and isinstance(value, ObjectId):
             serialized[key] = str(value)
-        # Handle nested documents
+        
         elif isinstance(value, dict):
             serialized[key] = serialize_mongo_doc(value)
-        # Handle lists of documents
+        
         elif isinstance(value, list) and all(isinstance(item, dict) for item in value):
             serialized[key] = [serialize_mongo_doc(item) for item in value]
-        # Handle other types
+       
         else:
             serialized[key] = value
             
     return serialized
 
 def check_overlap(start1, end1, start2, end2):
-    """
-    Check if two time periods overlap.
-    Returns True if there is an overlap, False otherwise.
-    Also returns False if any time format is invalid.
-    """
+   
     try:
-        # Validate all time strings first
+        
         time_strings = [start1, end1, start2, end2]
         for time_str in time_strings:
             if not validate_time_format(time_str):
                 print(f"Invalid time format detected: {time_str}")
-                # Return True to be safe (assume there could be an overlap)
-                # This prevents scheduling when we can't validate times
+                
                 return True
         
-        # Convert to datetime.time objects for proper comparison
-        # Use datetime.strptime instead of pandas for more reliable parsing
+       
         s1 = datetime.strptime(start1, '%H:%M').time()
         e1 = datetime.strptime(end1, '%H:%M').time()
         s2 = datetime.strptime(start2, '%H:%M').time()
@@ -188,23 +169,28 @@ def check_overlap(start1, end1, start2, end2):
         
         # Special case: if any period has zero duration
         if s1 == e1 or s2 == e2:
-            # Zero duration periods can't overlap
+          
             return False
         
-        # Check overlap: two periods overlap if:
-        # (start1 < end2) AND (end1 > start2)
-        # This excludes the case where one period starts exactly when another ends
-        return s1 < e2 and e1 > s2
-        
+
+        return s1 <= e2 and e1 >= s2
+
     except (ValueError, TypeError) as e:
         print(f"Error in check_overlap: {e}")
-        # Return True to be safe (assume there could be an overlap)
+       
         return True
 
-@manage_resources_bp.route('/manage_resources', methods=['POST'])
+@manage_resources_bp.route('/manage_resources', methods=['POST', 'GET'])
 def manage_resources():
    
     try:
+        
+        if db is None or timetables is None:
+            return jsonify({
+                'status': 'error', 
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  
+            
         data = request.get_json()
         if not data or 'operation' not in data:
             return jsonify({'error': 'Missing operation in request'}), 400
@@ -220,16 +206,16 @@ def manage_resources():
         department = data.get('department')
 
         
-        # Check if day parameter was explicitly provided in the request
+        
         day_provided_in_request = 'day' in data and data['day']
         
-        # If date is provided, validate it and get the day of week
+        
         if date:
             try:
                 date_obj = datetime.strptime(date, '%Y-%m-%d')
                 inferred_day = date_obj.strftime('%A')
                 
-                # Only override the day if it wasn't explicitly provided in the request
+               
                 if not day_provided_in_request:
                     day = inferred_day
                     print(f"Day not provided in request, using inferred day: {day}")
@@ -238,7 +224,7 @@ def manage_resources():
             except ValueError:
                 return jsonify({'error': 'Invalid date format, use YYYY-MM-DD'}), 400
         
-        # Ensure day is valid
+        
         valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         if day not in valid_days:
             return jsonify({'error': f'Invalid day format. Must be one of: {", ".join(valid_days)}'}), 400
@@ -246,7 +232,7 @@ def manage_resources():
         print(f"Final day used for scheduling: {day}")
 
         
-        # Operation: Check availability
+       
         
         if operation == 'check_overlap':
             if not all([room_id, date, start_time, end_time]):
@@ -256,19 +242,17 @@ def manage_resources():
             if not validate_time_format(start_time) or not validate_time_format(end_time):
                 return jsonify({'status': 'error', 'error': 'Invalid time format for start_time or end_time. Use HH:MM format.'}), 400
 
-            # Use the day parameter that was already processed above
-            # This will be either the explicitly provided day or the one inferred from the date
+           
             
             print(f"Checking for conflicts on {day} for room {room_id}")
                 
-            # IMPORTANT: Since the schedule is primarily organized by day of week,
-            # we should prioritize day-based scheduling over specific dates
             
-            # First query by day of week - using the provided/inferred day
+            
+            
             query_day = {'Room ID': room_id, 'Day': day}
             existing_schedules_by_day = list(timetables.find(query_day, {'_id': 0}))
             
-            # Only if no day-based schedules are found, check for date-specific schedules
+            
             if not existing_schedules_by_day:
                 query_date = {'Room ID': room_id, 'Date': date}
                 existing_schedules_by_date = list(timetables.find(query_date, {'_id': 0}))
@@ -285,19 +269,19 @@ def manage_resources():
                 schedule_end = schedule.get('End')
                 schedule_day = schedule.get('Day', 'Unknown')
                 schedule_date = schedule.get('Date', 'Unknown')
-                schedule_course = schedule.get('Course', 'Unknown')
+                schedule_course = schedule.get('Course', 'Unknown'),
+                schedule_department= schedule.get('Department', 'Unknown')
                 
-                # Handle different time formats - normalize to HH:MM if needed
-                # For the specific format in your data "08:00–09:55", we need to extract both parts
+               
                 if isinstance(schedule_start, str) and '–' in schedule_start:
                     time_parts = schedule_start.split('–')
                     if len(time_parts) == 2:
                         schedule_start = time_parts[0].strip()
-                        # Only update end time if it's not already set
+                       
                         if not schedule_end or not isinstance(schedule_end, str):
                             schedule_end = time_parts[1].strip()
                 
-                # Now normalize both times
+                
                 schedule_start = normalize_time_format(schedule_start)
                 schedule_end = normalize_time_format(schedule_end)
                 
@@ -305,14 +289,14 @@ def manage_resources():
                       f"Time={schedule_start}-{schedule_end}, Course={schedule_course}")
                 
                 if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
-                    # Skip schedules with invalid time formats
+                    
                     print(f"  → Skipping due to invalid time format")
                     continue
                 
                 overlap = check_overlap(start_time, end_time, schedule_start, schedule_end)
                 print(f"  → Overlap result: {overlap}")
                 
-                # Make sure we're checking the right day
+               
                 if schedule_day != day and schedule_day != "Unknown":
                     print(f"  → Skipping due to day mismatch: schedule day '{schedule_day}' != requested day '{day}'")
                     continue
@@ -323,7 +307,8 @@ def manage_resources():
                         'course': schedule_course,
                         'time': f"{schedule_start}-{schedule_end}",
                         'day': schedule_day,
-                        'date': schedule_date
+                        'date': schedule_date,
+                        'department': schedule_department
                     }
                     conflicts.append(conflict_info)
                     print(f"  → CONFLICT DETECTED: {conflict_info}")
@@ -332,7 +317,7 @@ def manage_resources():
             
             # Pagination parameters
             page = int(data.get('page', 1))
-            per_page = int(data.get('per_page', 10))  # Default 10 items per page
+            per_page = int(data.get('per_page', 10))  
             
             # Ensure valid pagination parameters
             if page < 1:
@@ -351,12 +336,12 @@ def manage_resources():
             has_next = page < total_pages
             has_prev = page > 1
 
-            # Create a clear response with day of week as the primary factor
+            
             return jsonify({
                 'status': 'success',
                 'message': 'Overlap check completed',
                 'room_id': room_id,
-                'day': day,  # List day first as it's more important
+                'day': day,  
                 'date': date,
                 'proposed_time': f'{start_time}-{end_time}',
                 'has_conflict': bool(conflicts),
@@ -373,13 +358,12 @@ def manage_resources():
                 }
             }), 200
 
-        # Operation: Reallocate schedule
+        
         elif operation == 'reallocate':
             if not schedule_id or not new_schedule:
                 return jsonify({'status': 'error', 'error': 'Missing schedule_id or new_schedule'}), 400
 
-            # No need to convert to ObjectId if we're using Room ID
-            # First, retrieve the original schedule to get its date
+    
             original_schedule = timetables.find_one({'Room ID': schedule_id})
             if not original_schedule:
                 return jsonify({'status': 'error', 'error': 'Schedule not found'}), 404
@@ -388,7 +372,7 @@ def manage_resources():
 
             # Validate new schedule
             new_room_id = new_schedule.get('room_id')
-            # Use original date if not provided in new_schedule
+            
             new_date = new_schedule.get('date', original_date)
             new_start_time = new_schedule.get('start_time')
             new_end_time = new_schedule.get('end_time')
@@ -515,7 +499,7 @@ def manage_resources():
                 if not validate_time_format(start_time) or not validate_time_format(end_time):
                     return jsonify({'status': 'error', 'error': 'Invalid time format for start_time or end_time. Use HH:MM format.'}), 400
     
-                # Check for conflicts before injection - use the day parameter instead of date
+                
                 print(f"Checking for conflicts on {day} for room {room_id} from {start_time} to {end_time}")
                 
                 # Query by day of week - using the provided day
@@ -548,7 +532,7 @@ def manage_resources():
                         print(f"  → Skipping due to invalid time format")
                         continue
                     
-                    # Use our robust overlap detection
+                    
                     has_overlap = has_time_overlap(start_time, end_time, schedule_start, schedule_end)
                     print(f"  → Overlap check result: {has_overlap}")
                     
@@ -571,7 +555,7 @@ def manage_resources():
                 # Create new schedule document
                 new_schedule_doc = {
                     'Room ID': room_id,
-                    'Date': date if date else datetime.now().strftime('%Y-%m-%d'),  # Use current date if not provided
+                    'Date': date if date else datetime.now().strftime('%Y-%m-%d'),  
                     'Start': start_time,
                     'End': end_time,
                     'Day': day,
@@ -582,28 +566,28 @@ def manage_resources():
                     'Status': data.get('status', 'Booked')
                 }
     
-                # Insert into database
+               
                 result = timetables.insert_one(new_schedule_doc)
                 
-                # Serialize the document for JSON response
+               
                 response_doc = serialize_mongo_doc(new_schedule_doc)
                 
-                # Refresh aggregated data for this room
+               
                 try:
-                    # Get all schedules for this room to recalculate aggregations
+                   
                     all_room_schedules = list(timetables.find({'Room ID': room_id}, {'_id': 0}))
                     
                     if all_room_schedules:
                         # Convert to DataFrame
                         df = pd.DataFrame(all_room_schedules)
-                        # Apply preprocessing to regenerate aggregated data
+                     
                         _, daily_summary, weekly_summary = preprocess_data(df)
                         
                         # Filter for just this room
                         daily_summary_df = daily_summary[daily_summary['Room ID'] == room_id]
                         weekly_summary_df = weekly_summary[weekly_summary['Room ID'] == room_id]
                         
-                        # Add the refreshed data to the response
+                       
                         return jsonify({
                             'status': 'success',
                             'message': 'Schedule injected successfully',
@@ -616,9 +600,7 @@ def manage_resources():
                         }), 201
                 except Exception as e:
                     print(f"Warning: Failed to refresh aggregated data: {str(e)}")
-                    # If refresh fails, still return success for the injection
                 
-                # Default response if refresh fails
                 return jsonify({
                     'status': 'success',
                     'message': 'Schedule injected successfully',
@@ -638,18 +620,17 @@ def manage_resources():
                 
                 # Pagination parameters
                 page = int(data.get('page', 1))
-                per_page = int(data.get('per_page', 10))  # Default 10 items per page
+                per_page = int(data.get('per_page', 10))  
                 
-                # Ensure valid pagination parameters
                 if page < 1:
                     page = 1
-                if per_page < 1 or per_page > 50:  # Limit max items per page
+                if per_page < 1 or per_page > 50:  
                     per_page = 10
                 
                 # Calculate skip value for pagination
                 skip = (page - 1) * per_page
                 
-                # Use day if provided, otherwise get all schedules
+                
                 query = {'Room ID': room_id}
                 if day:
                     query['Day'] = day
@@ -657,7 +638,7 @@ def manage_resources():
                 # Get total count for pagination info
                 total_count = timetables.count_documents(query)
                 
-                # Get paginated schedules for this room and day
+               
                 schedules = list(timetables.find(query, {'_id': 0}).skip(skip).limit(per_page))
                 
                 # Format times consistently for display
@@ -665,13 +646,13 @@ def manage_resources():
                     start = schedule.get('Start', '')
                     end = schedule.get('End', '')
                     if start and end:
-                        schedule['Time'] = f"{start}–{end}"  # Using en dash for consistency
+                        schedule['Time'] = f"{start}–{end}"  
                 
                 # Serialize for JSON response
                 serialized_schedules = [serialize_mongo_doc(s) for s in schedules]
                 
-                # Calculate pagination metadata
-                total_pages = (total_count + per_page - 1) // per_page  # Ceiling division
+                
+                total_pages = (total_count + per_page - 1) // per_page  
                 has_next = page < total_pages
                 has_prev = page > 1
                 
@@ -698,145 +679,139 @@ def manage_resources():
         # Operation: Suggest rooms
         elif operation == 'suggest_rooms':
             try:
-                # Check required parameters
-                if not day or not room_id:
-                    return jsonify({'status': 'error', 'error': 'Missing required fields: day, room_id'}), 400
+                # Validate required fields
+                if not day or not start_time or not end_time:
+                    return jsonify({'status': 'error', 'error': 'Missing required fields: day, start_time, end_time'}), 400
 
-                # If date is provided, validate it
-                if date:
-                    try:
-                        date_obj = datetime.strptime(date, '%Y-%m-%d')
-                        # Skip weekends if date is provided
-                        if date_obj.weekday() >= 5:  # Saturday=5, Sunday=6
-                            return jsonify({'status': 'success', 'message': 'No room suggestions for weekends', 'free_slots': []}), 200
-                    except ValueError:
-                        return jsonify({'status': 'error', 'error': 'Invalid date format'}), 400
-                else:
-                    # If no date provided, use current date
-                    date = datetime.now().strftime('%Y-%m-%d')
+                
 
-                # Validate time formats if provided
-                if start_time and not validate_time_format(start_time):
+                # Validate time formats
+                if not validate_time_format(start_time):
                     return jsonify({'status': 'error', 'error': 'Invalid time format for start_time. Use HH:MM format.'}), 400
-                if end_time and not validate_time_format(end_time):
+                if not validate_time_format(end_time):
                     return jsonify({'status': 'error', 'error': 'Invalid time format for end_time. Use HH:MM format.'}), 400
 
-                # Define standard time slots for the day (8:00 AM to 8:00 PM in 1-hour blocks)
-                standard_slots = []
-                for hour in range(8, 20):  # 8 AM to 8 PM
-                    start = f"{hour:02d}:00"
-                    end = f"{hour+1:02d}:00"
-                    standard_slots.append({
-                        'start': start,
-                        'end': end,
-                        'slot': f"{start}-{end}"
-                    })
-
-                # Fetch schedules for the specified room and day
-                query = {'Room ID': room_id, 'Day': day}
-                schedules = list(timetables.find(query, {'_id': 0}))
+                # Get all rooms or filter by specified room_id
+                if room_id:
+                    all_rooms = [room_id]
+                else:
+                    all_rooms = list(timetables.distinct('Room ID'))
                 
-                # Get room details
-                room_details = timetables.find_one({'Room ID': room_id}, {'_id': 0})
-                if not room_details:
-                    return jsonify({'status': 'error', 'error': f'Room {room_id} not found'}), 404
+                # Find available rooms with their free time slots
+                available_rooms = []
                 
-                # Find booked slots
-                booked_slots = []
-                for schedule in schedules:
-                    schedule_start = schedule.get('Start')
-                    schedule_end = schedule.get('End')
+                for room in all_rooms:
+                    # Get all schedules for this room on the specified day
+                    query = {'Room ID': room, 'Day': day}
+                    schedules = list(timetables.find(query, {'_id': 0}))
                     
-                    # Skip schedules with invalid time formats
-                    if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
-                        print(f"Skipping schedule with invalid time format: Start={schedule_start}, End={schedule_end}")
-                        continue
+                    # Calculate free time slots for this room
+                    free_slots = []
                     
-                    booked_slots.append({
-                        'start': schedule_start,
-                        'end': schedule_end,
-                        'slot': f"{schedule_start}-{schedule_end}",
-                        'course': schedule.get('Course', 'Unknown'),
-                        'lecturer': schedule.get('Lecturer', 'Unknown')
-                    })
-                
-                # Find free slots by checking each standard slot against booked slots
-                free_slots = []
-                for slot in standard_slots:
-                    is_free = True
-                    for booked in booked_slots:
-                        if has_time_overlap(slot['start'], slot['end'], booked['start'], booked['end']):
-                            is_free = False
+                    # Define standard business hours
+                    business_start = '08:00'
+                    business_end = '20:00'
+                    
+                    # Convert all schedules to time slots
+                    occupied_slots = []
+                    for schedule in schedules:
+                        schedule_start = schedule.get('Start')
+                        schedule_end = schedule.get('End')
+                        
+                        if validate_time_format(schedule_start) and validate_time_format(schedule_end):
+                            occupied_slots.append({
+                                'start': schedule_start,
+                                'end': schedule_end,
+                                'course': schedule.get('Course', 'Unknown')
+                            })
+                    
+                    # Sort occupied slots by start time
+                    occupied_slots.sort(key=lambda x: x['start'])
+                    
+                    # Find free slots
+                    if not occupied_slots:
+                        # If no occupied slots, the entire day is free
+                        free_slots.append({
+                            'start': business_start,
+                            'end': business_end,
+                            'duration': format_duration(time_diff_minutes(business_start, business_end))
+                        })
+                    else:
+                        # Check if there's free time before the first occupied slot
+                        first_occupied = occupied_slots[0]
+                        if first_occupied['start'] > business_start:
+                            duration_mins = time_diff_minutes(business_start, first_occupied['start'])
+                            free_slots.append({
+                                'start': business_start,
+                                'end': first_occupied['start'],
+                                'duration': format_duration(duration_mins)
+                            })
+                        
+                        # Check for gaps between occupied slots
+                        for i in range(len(occupied_slots) - 1):
+                            current_end = occupied_slots[i]['end']
+                            next_start = occupied_slots[i + 1]['start']
+                            
+                            if current_end < next_start:
+                                duration_mins = time_diff_minutes(current_end, next_start)
+                                free_slots.append({
+                                    'start': current_end,
+                                    'end': next_start,
+                                    'duration': format_duration(duration_mins)
+                                })
+                        
+                        # Check if there's free time after the last occupied slot
+                        last_occupied = occupied_slots[-1]
+                        if last_occupied['end'] < business_end:
+                            duration_mins = time_diff_minutes(last_occupied['end'], business_end)
+                            free_slots.append({
+                                'start': last_occupied['end'],
+                                'end': business_end,
+                                'duration': format_duration(duration_mins)
+                            })
+                    
+                    # Check if the room is available during the requested time
+                    is_available = True
+                    for schedule in schedules:
+                        schedule_start = schedule.get('Start')
+                        schedule_end = schedule.get('End')
+                        
+                        # Skip schedules with invalid time formats
+                        if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
+                            continue
+                            
+                        if has_time_overlap(start_time, end_time, schedule_start, schedule_end):
+                            is_available = False
                             break
                     
-                    if is_free:
-                        free_slots.append(slot)
-                
-                # If specific start_time and end_time are provided, check if that slot is free
-                specific_slot_status = None
-                if start_time and end_time:
-                    is_specific_slot_free = True
-                    for booked in booked_slots:
-                        if has_time_overlap(start_time, end_time, booked['start'], booked['end']):
-                            is_specific_slot_free = False
-                            specific_slot_status = {
-                                'is_free': False,
-                                'conflicting_booking': booked
+                    if is_available:
+                        # Add room to available rooms list with free slots
+                        room_info = {
+                            'room_id': room,
+                            'status': 'Available',
+                            'free_slots': free_slots,
+                            'requested_slot': {
+                                'start': start_time,
+                                'end': end_time,
+                                'duration': format_duration(time_diff_minutes(start_time, end_time))
                             }
-                            break
-                    
-                    if is_specific_slot_free:
-                        specific_slot_status = {
-                            'is_free': True,
-                            'start': start_time,
-                            'end': end_time,
-                            'slot': f"{start_time}-{end_time}"
                         }
+                        
+                        available_rooms.append(room_info)
                 
-                # Pagination parameters for free slots
-                page = int(data.get('page', 1))
-                per_page = int(data.get('per_page', 10))  # Default 10 items per page
-                
-                # Ensure valid pagination parameters
-                if page < 1:
-                    page = 1
-                if per_page < 1 or per_page > 50:  # Limit max items per page
-                    per_page = 10
-                
-                # Apply pagination
-                total_count = len(free_slots)
-                start_idx = (page - 1) * per_page
-                end_idx = start_idx + per_page
-                paginated_slots = free_slots[start_idx:end_idx]
-                
-                # Calculate pagination metadata
-                total_pages = (total_count + per_page - 1) // per_page if total_count > 0 else 1  # Ceiling division
-                has_next = page < total_pages
-                has_prev = page > 1
-                
-                # Return room details with free slots
                 return jsonify({
                     'status': 'success',
-                    'message': f'Found {len(free_slots)} free time slots for room {room_id} on {day}',
-                    'room_id': room_id,
-                    'department': room_details.get('Department', 'Unknown'),
-                    'day': day,
+                    'message': f'Found {len(available_rooms)} available rooms',
                     'date': date,
-                    'free_slots': paginated_slots,
-                    'booked_slots': booked_slots,
-                    'specific_slot_status': specific_slot_status,
-                    'pagination': {
-                        'page': page,
-                        'per_page': per_page,
-                        'total_items': total_count,
-                        'total_pages': total_pages,
-                        'has_next': has_next,
-                        'has_prev': has_prev
-                    }
+                    'day': day,
+                    'time': f"{start_time}-{end_time}",
+                    'suggested_rooms': available_rooms,
+                    'total_rooms': len(available_rooms)
                 }), 200
+                
             except Exception as e:
                 print(f"Error in suggest_rooms: {str(e)}")
-                return jsonify({'status': 'error', 'error': f'Unexpected error in suggest_rooms: {str(e)}'}), 500
+                return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
 
         else:
             return jsonify({'status': 'error', 'error': f'Invalid operation: {operation}'}), 400
@@ -848,5 +823,30 @@ def manage_resources():
     except Exception as e:
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
 
+
+# Helper function to calculate time difference in minutes
+def time_diff_minutes(start_time, end_time):
+    try:
+        start_dt = datetime.strptime(start_time, '%H:%M')
+        end_dt = datetime.strptime(end_time, '%H:%M')
+        
+        # Calculate difference in minutes
+        diff = (end_dt - start_dt).total_seconds() / 60
+        return max(0, diff)  # Ensure non-negative
+    except Exception as e:
+        print(f"Error calculating time difference: {e}")
+        return 0
+
+# Helper function to format duration
+def format_duration(minutes):
+    hours = int(minutes // 60)
+    mins = int(minutes % 60)
+    
+    if hours > 0 and mins > 0:
+        return f"{hours}h {mins}m"
+    elif hours > 0:
+        return f"{hours}h"
+    else:
+        return f"{mins}m"
 
     

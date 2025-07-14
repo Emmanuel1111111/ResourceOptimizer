@@ -7,8 +7,8 @@ import { Prediction } from '../Environ';
 import { AnalysisResult } from '../Environ';
 import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ';
 import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
+import { api } from '../api.config';
 
-// Define environment if it doesn't exist in Environ.ts
 const environment = {
   apiUrl: 'http://localhost:5000'
 };
@@ -43,7 +43,7 @@ export class AuthService {
   private errorSubject = new BehaviorSubject<string | null>(null)
   public error$ = this.errorSubject.asObservable()
   private apiUrl = environment.apiUrl;
-  private apiUrl2 = 'http://localhost:5000/api/manage_resources';
+ 
 
   constructor(private http: HttpClient) {}
 
@@ -90,10 +90,7 @@ export class AuthService {
     );
   }
 
-  getUsers(userId:any):Observable<any>{
-   return  this.http.get<any>(`${this.apiUrl}/api/logs`, userId)
-
-  }
+ 
 
   currentUtilization(roomId: string): Observable<AnalysisResult[]> {
    
@@ -146,7 +143,7 @@ export class AuthService {
     this.setLoading(true);
     this.clearError();
 
-    let url = `${this.apiUrl2}`;
+    let url = `${this.apiUrl}`;
     if (operation === 'smart_availability') {
       url += '/smart_availability';
     } else if (operation === 'optimize_resources') {
@@ -165,7 +162,7 @@ export class AuthService {
     );
   }
 
-  // Inject a new schedule
+
   injectSchedule(scheduleData: any): Observable<any> {
     const payload = {
       operation: 'inject_schedule',
@@ -191,7 +188,7 @@ export class AuthService {
 
   // Refresh aggregated data
   refreshAggregatedData(roomId?: string, prioritizeDay: boolean = true): Observable<any> {
-    let params = new HttpParams();
+    let params= new HttpParams()
     if (roomId) {
       params = params.set('room_id', roomId);
     }
@@ -224,25 +221,51 @@ export class AuthService {
     );
   }
 
-  // Get day-based schedules
+
   getDayBasedSchedules(roomId: string): Observable<any> {
-    const url = `${this.apiUrl}/get_day_based_schedules?room_id=${roomId}`;
-    return this.http.get<any>(url).pipe(
+    let params = new HttpParams().set('room_id', roomId);
+    const url = `${this.apiUrl}/get_day_based_schedules`;
+    return this.http.get<any>(url, { params }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get day-based schedules')))
     );
   }
 
-  // Get daily utilization data
+
   getDailyUtilization(roomId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/daily_utilization/${roomId}`).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch daily utilization')))
     );
   }
 
-  // Get weekly utilization data
+
   getWeeklyUtilization(roomId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/weekly_utilization/${roomId}`).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch weekly utilization')))
     );
   }
+  
+  // Check database connection status
+  checkDatabaseStatus(): Observable<{status: string, message: string, connection_type: string, error_details?: string}> {
+    return this.http.get<{status: string, message: string, connection_type: string, error_details?: string}>(`${this.apiUrl}/api/db_status`).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to check database status')))
+    );
+  }
+
+getUsers():Observable<any>{
+  
+  const token = this.getToken();
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    })
+  };
+  
+  return this.http.get(`${this.apiUrl}/api/logs`, httpOptions).pipe(
+    catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch users')))
+  );  
+}
+
+
+
 }

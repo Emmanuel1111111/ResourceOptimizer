@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required
 import os
 from process import preprocess_data
-from flask import current_app
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -16,13 +16,40 @@ routes_bp = Blueprint('routes', __name__)
 # MongoDB Atlas Connection
 MONGO_URI = os.getenv("MONGO_URI")
 
-client = MongoClient(MONGO_URI)
-db = client.EduResourceDB
-timetables_collection = db.timetables
+try:
+    # Use direct connection to avoid SRV resolution issues
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    # Test the connection
+    client.server_info()
+    print("MongoDB connection successful in routes")
+    db = client.EduResourceDB
+    timetables_collection = db.timetables
+except Exception as e:
+    print(f"MongoDB connection error in routes: {e}")
+    # Fallback to local MongoDB if available
+    try:
+        client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
+        client.server_info()
+        print("Connected to local MongoDB in routes")
+        db = client.EduResourceDB
+        timetables_collection = db.timetables
+    except Exception as local_e:
+        print(f"Local MongoDB connection failed in routes: {local_e}")
+        print("WARNING: Route operations will not function correctly")
+        db = None
+        timetables_collection = None
+
 
 @routes_bp.route('/available_rooms', methods=['GET'])
 def get_available_rooms():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+
         room_id = request.args.get('room_id')
        
         # Fetch data from MongoDB
@@ -65,7 +92,7 @@ def get_available_rooms():
             ),
             axis=1
         )
-        print(f"Current time matches found: {df['Matches_Current_Time']}")
+        print(f"Current time matches found: {df['Matches_Current_Time'].sum()}")
 
         current_time_df = df[df['Matches_Current_Time'] == True][
             ['Room ID', 'Course', 'Start', 'End', 'Day', 'Status', 'Year', 'Department']
@@ -117,6 +144,13 @@ def get_available_rooms():
 @routes_bp.route('/api/predict', methods=['POST'])
 def predict_utilization():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+            
         data = request.get_json()
         room_id = data.get('room_id')
         period = int(request.args.get('period', 7))
@@ -225,6 +259,13 @@ def predict_utilization():
 @routes_bp.route('/api/current_utilization', methods=['POST'])
 def current_utilization():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+            
         data = request.get_json()
         room_id = data.get('room_id')
         
@@ -411,34 +452,40 @@ def current_utilization():
 @routes_bp.route('/get_room_schedules', methods=['GET'])
 def get_room_schedules():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+            
         room_id = request.args.get('room_id')
         day = request.args.get('day')
         
         # Pagination parameters
         page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))  # Default 10 items per page
+        per_page = int(request.args.get('per_page', 10))  
         
         # Ensure valid pagination parameters
         if page < 1:
             page = 1
-        if per_page < 1 or per_page > 50:  # Limit max items per page
+        if per_page < 1 or per_page > 50:  
             per_page = 10
         
         if not room_id:
             return jsonify({'status': 'error', 'error': 'Missing required parameter: room_id'}), 400
         
-        # Use day if provided, otherwise get all schedules
+      
         query = {'Room ID': room_id}
         if day:
             query['Day'] = day
         
-        # Get total count for pagination info
+        
         total_count = db.timetables.count_documents(query)
         
-        # Calculate skip value for pagination
         skip = (page - 1) * per_page
         
-        # Get paginated schedules for this room and day
+        
         schedules = list(db.timetables.find(query, {'_id': 0}).skip(skip).limit(per_page))
         
         # Format times consistently for display
@@ -477,6 +524,13 @@ def get_room_schedules():
 @routes_bp.route('/refresh_aggregated_data', methods=['GET'])
 def refresh_aggregated_data():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+            
         room_id = request.args.get('room_id')
         prioritize_day = request.args.get('prioritize_day', 'true').lower() == 'true'
         
@@ -503,7 +557,6 @@ def refresh_aggregated_data():
         # Apply preprocessing to regenerate aggregated data
         df, daily_summary, weekly_summary = preprocess_data(df)
         
-        # If prioritizing day-based data, filter daily_summary to only include day-based entries
         if prioritize_day:
             # Check if we have day-based entries for this room
             if room_id:
@@ -541,6 +594,13 @@ def refresh_aggregated_data():
 @routes_bp.route('/get_day_based_schedules', methods=['GET'])
 def get_day_based_schedules():
     try:
+        # Check if database connection is available
+        if db is None or timetables_collection is None:
+            return jsonify({
+                'status': 'error',
+                'error': 'Database connection is not available. Please check your MongoDB connection.'
+            }), 503  # 503 Service Unavailable
+            
         room_id = request.args.get('room_id')
         
         # Pagination parameters
@@ -589,7 +649,7 @@ def get_day_based_schedules():
                     'Daily_Booked_Hours': 0
                 }
             
-            # Add unique values only
+           
             if course not in day_schedules[day]['Courses']:
                 day_schedules[day]['Courses'].append(course)
             

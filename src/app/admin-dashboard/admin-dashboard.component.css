@@ -3,7 +3,7 @@
 /* CSS Custom Properties */
 :root {
   --primary: #4361ee;
-  --primary-dark: #3730a3;
+  --primary-dark: #1a2b5c
   --secondary: #3f37c9;
   --success: #10b981;
   --warning: #f59e0b;
@@ -70,7 +70,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
-  background-color: rgb(53, 53, 126);
+  background-color: #1a2b5c;
   color: white;
   height: 100vh;
   position: fixed;

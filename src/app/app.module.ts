@@ -25,7 +25,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatTableModule } from '@angular/material/table';
 import {MatInputModule} from '@angular/material/input';
 import { MatInput } from '@angular/material/input';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoginPageComponent } from './login-page/login-page.component';
 import {MatTab} from '@angular/material/tabs';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -34,10 +34,14 @@ import { MAT_DATE_FORMATS, MatOption, MatNativeDateModule } from '@angular/mater
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-
-
-
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatListModule, MatNavList } from '@angular/material/list';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -47,7 +51,6 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     AiInsightsComponent,
     ResourceListComponent,
     NotificationComponent,
-  
     LoginPageComponent,
     AdjustSchedulesComponent
   ],
@@ -73,6 +76,7 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     MatInput,
     MatInputModule,
     MatProgressSpinner,
+    MatProgressSpinnerModule,
     MatTab,
     MatTabsModule,
     ReactiveFormsModule,
@@ -85,14 +89,16 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     MatDatepickerModule,
     MatNativeDateModule,
     MatListModule,
-    
-   
-  
-    
+    MatSelectModule,
+    MatFormFieldModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    BrowserAnimationsModule
   ],
   providers: [
     provideAnimationsAsync()
-    
   ],
   bootstrap: [AppComponent]
 })

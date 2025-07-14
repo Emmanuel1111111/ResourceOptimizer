@@ -3,8 +3,6 @@ from datetime import datetime
 
 total_availableHrs = 12
 
-
-
 def preprocess_data(df):
     
     # Print input data for debugging

@@ -251,7 +251,22 @@ export interface SuggestRoomsResponse extends ApiResponse {
 
 export interface SuggestedRoom {
   room_id: string;
-  department: string;
+  department?: string;
+  status: string;
+  free_slots: FreeTimeSlot[];
+  requested_slot?: RequestedTimeSlot;
+}
+
+export interface FreeTimeSlot {
+  start: string;
+  end: string;
+  duration: string;
+}
+
+export interface RequestedTimeSlot {
+  start: string;
+  end: string;
+  duration: string;
 }
 
 // Request payload interfaces
