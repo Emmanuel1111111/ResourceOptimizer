@@ -2,18 +2,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 /* CSS Variables for Theme Colors */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+/* CSS Variables for Theme Colors */
 :root {
-  --bg-primary: rgb(242, 242, 242);
-  --bg-secondary: rgb(255, 255, 255);
-  --accent-orange: rgb(255, 102, 0);
-  --accent-purple: rgb(102, 51, 153);
-  --text-primary: rgb(241, 241, 241);
-  --text-secondary: rgb(0, 51, 102);
-  --text-muted: rgb(107, 114, 128);
-  --border-light: rgba(0, 0, 0, 0.1);
-  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --accent-orange: #ff6b35;
+  --accent-red-orange: #ff4500;
+  --accent-purple: #8b5a96;
+  --text-primary: #333333;
+  --text-secondary: #1a2b5c;
+  --text-muted: #666666;
+  --border-light: rgba(26, 43, 92, 0.1);
+  --shadow-light: 0 4px 6px -1px rgba(26, 43, 92, 0.1);
+  --shadow-medium: 0 10px 15px -3px rgba(26, 43, 92, 0.1);
+  --shadow-large: 0 25px 50px -12px rgba(26, 43, 92, 0.25);
   --gradient-primary: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-orange) 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   --blur-glass: blur(20px);
@@ -21,11 +25,12 @@
 
 /* Dark Mode Variables */
 .dark-mode {
-  --bg-primary: rgb(15, 42, 111);
-  --bg-secondary: rgb(15, 23, 42);
-  --text-primary: rgb(21, 19, 19);
-  --text-muted: rgb(148, 163, 184);
-  --border-light: rgba(255, 255, 255, 0.1);
+  --bg-primary: #1a2b5c;
+  --bg-secondary: #2a3f6b;
+  --text-primary: #f5f5f5;
+  --text-secondary: #ffffff;
+  --text-muted: #cccccc;
+  --border-light: rgba(245, 245, 245, 0.1);
   --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
   --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -40,7 +45,7 @@
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, rgb(255, 94, 31) 0%, rgb(191, 191, 245) 100%);
+  background: linear-gradient(135deg, rgb(247, 251, 254)  );
   color: var(--text-primary);
   line-height: 1.6;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -59,7 +64,7 @@ body {
 /* Enhanced Sidebar */
 .modern-sidebar {
   width: 280px;
-  background: rgb(53, 53, 126);
+  background: #1a2b5c;
   -webkit-backdrop-filter: var(--blur-glass);
   backdrop-filter: var(--blur-glass);
   border-right: 1px solid var(--border-light);
@@ -82,10 +87,15 @@ body {
   gap: 1rem;
 }
 
+
+
+.utilization-section{
+  background-color: #1a2b5c !important;
+}
 .logo-icon {
   width: 3rem;
   height: 3rem;
-  background: linear-gradient(135deg, var(--accent-orange) 0%, rgba(255, 102, 0, 0.8) 100%);
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #1a2b5c 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -202,7 +212,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  color: black;
 }
+
 
 .header-content {
   display: flex;
@@ -219,6 +231,10 @@ body {
   gap: 1.5rem;
 }
 
+.empty-state{
+  background-color:#1a2b5c !important ;
+}
+
 .header-icon {
   width: 4rem;
   height: 4rem;
@@ -227,7 +243,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: rgb(0, 0, 0);
   font-size: 2rem;
   box-shadow: var(--shadow-large);
   animation: pulse-glow 3s ease-in-out infinite;
@@ -244,7 +260,13 @@ body {
 }
 
 .header-text {
-  color: white;
+  color: rgb(0, 0, 0) !important;
+  background-color: #1a2b5c ;
+}
+
+.header-left{
+  background-color: #1a2b5c;
+  border-radius: 6px;
 }
 
 .header-title {
@@ -256,6 +278,7 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.025em;
+ 
 }
 
 .header-subtitle {
@@ -335,7 +358,7 @@ body {
 
 .search-wrapper {
   position: relative;
-  background: var(--bg-secondary);
+  background: #1a2b5c;
   border: 2px solid var(--border-light);
   border-radius: 20px;
   box-shadow: var(--shadow-medium);
@@ -360,6 +383,11 @@ body {
   color: var(--text-muted);
   font-size: 1.25rem;
   transition: all 0.3s ease;
+  color: #f5f5f5;
+}
+
+.fourth-metric{
+  background-color: #333333 !important;
 }
 
 .search-wrapper.focused .search-icon {
@@ -383,7 +411,7 @@ body {
 }
 
 .search-btn {
-  background: var(--gradient-primary);
+  background: #ff4500;
   border: none;
   border-radius: 12px;
   padding: 0.75rem 1.5rem;
@@ -401,6 +429,7 @@ body {
 .search-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
+  background-color: #ff6b35;
 }
 
 .search-btn:disabled {
@@ -593,14 +622,18 @@ body {
   transition: all 0.3s ease;
 }
 
-.tab-button.active .tab-title {
-  color: white;
+.tab-button:hover{
+  background: #ff4500;
+  cursor: pointer;
+}
+.tab-button.active  {
+  background-color: #1a2b5c;
 }
 
 .tab-subtitle {
   font-size: 0.875rem;
   color: var(--text-muted);
-  transition: all 0.3s ease;
+  transition: var(--accent-orange) 0.3s ease;
 }
 
 .tab-button.active .tab-subtitle {
@@ -617,12 +650,16 @@ body {
   min-width: 1.5rem;
   text-align: center;
 }
+.card-header{
+  background-color: white !important;
+}
 
 /* Content Section */
 .content-section {
   padding: 0 3rem 3rem;
   max-width: 1400px;
   margin: 0 auto;
+  
 }
 
 .tab-pane {
@@ -716,7 +753,7 @@ body {
 
 /* Insight Cards */
 .insight-card {
-  background: var(--bg-secondary);
+  background:#1a2b5c#333333;
   border-radius: 24px;
   box-shadow: var(--shadow-large);
   margin-bottom: 2rem;
@@ -753,7 +790,7 @@ body {
 
 /* Card Header */
 .card-header {
-  background: linear-gradient(135deg, rgba(102, 51, 153, 0.05) 0%, rgba(102, 51, 153, 0.02) 100%);
+  background: #1a2b5c !important;
   border-bottom: 1px solid var(--border-light);
   padding: 2rem;
   display: flex;
@@ -882,12 +919,16 @@ body {
   padding: 2rem;
 }
 
+.third-metric{
+  background-color: #1a2b5c !important;
+}
 /* Metrics Grid */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  color: white !important;
 }
 
 .metric-card {
@@ -928,9 +969,12 @@ body {
 
 .primary-metric {
   border: 2px solid var(--accent-orange);
-  background: linear-gradient(135deg, rgba(255, 102, 0, 0.05) 0%, rgba(255, 102, 0, 0.02) 100%);
+  background: #333333;
 }
 
+.secondary-metric{
+  background-color: #1a2b5c;
+}
 .metric-icon {
   width: 3rem;
   height: 3rem;

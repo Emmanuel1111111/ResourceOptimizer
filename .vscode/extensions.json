@@ -5,6 +5,7 @@
     "github.copilot-chat",
     "ms-python.python",
     "rangav.vscode-thunder-client",
-    "mechatroner.rainbow-csv"
+    "mechatroner.rainbow-csv",
+    "codeium.codeium-enterprise-updater"
   ]
 }

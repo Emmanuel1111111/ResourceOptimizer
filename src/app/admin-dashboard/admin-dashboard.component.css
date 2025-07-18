@@ -3,7 +3,7 @@
 /* CSS Custom Properties */
 :root {
   --primary: #4361ee;
-  --primary-dark: #1a2b5c
+  --primary-dark: #1a2b5c;
   --secondary: #3f37c9;
   --success: #10b981;
   --warning: #f59e0b;
@@ -67,6 +67,10 @@ body {
   background-color: var(--gray-50);
 }
 
+
+i{
+  color:white !important
+}
 /* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
@@ -161,12 +165,14 @@ body {
   color: var(--gray-400);
 }
 
-
+span{
+  color: white;
+}
 .nav-link {
   display: flex;
   align-items: center;
   padding: 0.875rem 1.5rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--gray-300);
   text-decoration: none;
   transition: var(--transition-fast);
   font-size: 0.875rem;
@@ -342,6 +348,7 @@ body {
  
 }
 
+
 .cards{
   border-radius: 
   8px !important;
@@ -366,7 +373,7 @@ mat-card{
   transition: var(--transition-fast);
    border-radius: 9px;
    border: solid 1px rgb(198, 76, 0);
-   color: rgb(216, 69, 24);
+   color: #f5f5f5;
 }
 
 .stat-card:hover {

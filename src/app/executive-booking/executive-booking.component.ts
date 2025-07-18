@@ -70,6 +70,7 @@ export class ExecutiveBookingComponent implements OnInit {
   // Day options for dropdowns
   dayOptions: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
    tabs = ['Check Overlap', 'Suggest Rooms', 'Inject Schedule', 'Reallocate'];
+  reallocateForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -102,6 +103,19 @@ export class ExecutiveBookingComponent implements OnInit {
       department: ['', Validators.required],
       lecturer: [''],
       level: ['', Validators.required]
+    });
+    
+    this.reallocateForm = this.fb.group({
+      roomId: ['', Validators.required],
+      day: [''],
+      date: [''],
+      startTime: [''],
+      endTime: [''],
+      course: [''],
+      department: [''],
+      year: [''],
+      status: [''],
+      lecturer: ['']
     });
     
     this.timeOptions = this.getTimeOptions();
@@ -223,6 +237,38 @@ export class ExecutiveBookingComponent implements OnInit {
   performOperation(operation: string, roomId: string, date: string, startTime: string, endTime: string, 
                    day: string, scheduleId: string, course: string, department: string, 
                    lecturer: string, level: string, program: string) {
+    if (operation === 'reallocate') {
+      const formValue = this.reallocateForm.value;
+      // Build new_schedule dynamically
+      const new_schedule: any = {};
+      const roomId = formValue.roomId;
+      if (!roomId) {
+        this.snackBar.open('Room ID is required.', 'Close', { duration: 3000 });
+        this.loading = false;
+        return;
+      }
+      if (formValue.day) new_schedule.day = formValue.day;
+      if (formValue.date) new_schedule.date = formValue.date;
+      if (formValue.startTime) new_schedule.start_time = formValue.startTime;
+      if (formValue.endTime) new_schedule.end_time = formValue.endTime;
+      if (formValue.course) new_schedule.course = formValue.course;
+      if (formValue.department) new_schedule.department = formValue.department;
+      if (formValue.year) new_schedule.year = formValue.year;
+      if (formValue.status) new_schedule.status = formValue.status;
+      if (formValue.lecturer) new_schedule.lecturer = formValue.lecturer;
+      this.loading = true;
+      this.resourceService.reallocateSchedule(roomId, new_schedule).subscribe({
+        next: (response: any) => {
+          this.results = response;
+          this.snackBar.open('Reallocation request sent!', 'Close', { duration: 3000 });
+          this.loading = false;
+        },
+        error: (error) => {
+          this.handleApiError(error, 'Failed to reallocate schedule');
+        }
+      });
+      return;
+    }
     switch (operation) {
       case 'check_overlap':
         if (!roomId || !startTime || !endTime || !day) {
@@ -322,45 +368,6 @@ export class ExecutiveBookingComponent implements OnInit {
           },
           error: (error) => {
             this.handleApiError(error, 'Failed to add schedule');
-          }
-        });
-        break;
-
-      case 'reallocate':
-        if (!scheduleId || !roomId || !startTime || !endTime || !day) {
-          this.snackBar.open('Please fill in all required fields: Schedule ID, Room ID, Day, Start Time, End Time.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Create new schedule object with day as primary parameter
-        const newSchedule = {
-          room_id: roomId,
-          day: day,
-          start_time: startTime,
-          end_time: endTime,
-          course: course || 'CSM 477', // Default to CSM 477 if not provided
-          department: department || 'Computer Science', // Default to Computer Science if not provided
-          year: level || '4', // Correctly map level form control to year field
-          status: 'Booked' // Default status
-        };
-        
-        // Only add date if it's provided
-        if (date) {
-          Object.assign(newSchedule, { date });
-        }
-        
-        this.resourceService.reallocateSchedule(scheduleId, newSchedule).subscribe({
-          next: (response: ReallocateResponse) => {
-            this.results = response;
-            this.snackBar.open('Schedule reallocated successfully!', 'Close', { duration: 3000 });
-            this.loading = false;
-            
-            // Refresh data after successful reallocation
-            this.refreshData(roomId);
-          },
-          error: (error) => {
-            this.handleApiError(error, 'Failed to reallocate schedule');
           }
         });
         break;
@@ -490,6 +497,14 @@ export class ExecutiveBookingComponent implements OnInit {
     this.results = null; 
     
     this.form.reset();
+    // Show snackbar when Reallocate tab is activated
+    if (this.activeTab === 'Reallocate') {
+      this.snackBar.open(
+        'Only fields you fill in will be updated. Leave blank to keep existing values.',
+        'Dismiss',
+        { duration: 10000, verticalPosition: 'top' }
+      );
+    }
   }
   
 

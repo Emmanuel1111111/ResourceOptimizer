@@ -376,7 +376,7 @@ sideBar(){
     this.service.getRoomSchedules(roomId).subscribe({
       next: (response) => {
         console.log('All Schedules Response:', response);
-        // Sort schedules by day order and then by time slot
+      
         this.allSchedules = response.schedules.sort((a: any, b: any) => {
           // First sort by day
           const dayDiff = (this.dayOrder[a.Day] || 99) - (this.dayOrder[b.Day] || 99);

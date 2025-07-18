@@ -78,12 +78,12 @@
           <div class="header-icon">
             <i class="bi bi-stars"></i>
           </div>
-          <div class="header-text">
-            <h1 class="header-title">AI-Powered Resource Insights</h1>
-            <p class="header-subtitle">Smart analytics for optimal room utilization and predictive planning</p>
+          <div class="header-text" >
+            <h1 class="header-title" style="color: black;" >AI-Powered Resource Insights</h1>
+            <p class="header-subtitle" style="color: rgb(255, 252, 252);">Smart analytics for optimal room utilization and predictive planning</p>
           </div>
         </div>
-        
+         
         <div class="header-right">
           <div *ngIf="loading" class="loading-indicator">
             <div class="loading-spinner"></div>
@@ -276,7 +276,7 @@
               </div>
               
               <div 
-                class="metric-card"
+                class="metric-card secondary-metric"
                 [style.animation-delay]="getMetricAnimationDelay(1)">
                 <div class="metric-icon">
                   <i class="bi bi-graph-up"></i>
@@ -288,7 +288,7 @@
               </div>
               
               <div 
-                class="metric-card"
+                class="metric-card third-metric" 
                 [style.animation-delay]="getMetricAnimationDelay(2)">
                 <div class="metric-icon">
                   <i class="bi bi-clock"></i>
@@ -300,7 +300,7 @@
               </div>
               
               <div 
-                class="metric-card"
+                class="metric-card fourth-metric"
                 [style.animation-delay]="getMetricAnimationDelay(3)">
                 <div class="metric-icon">
                   <i class="bi bi-calendar-check"></i>
@@ -315,13 +315,13 @@
             <!-- Enhanced Utilization Progress -->
             <div class="utilization-section">
               <div class="section-header">
-                <h4 class="section-title">
+                <h4 class="section-title" style="color: white;">
                   <i class="bi bi-bar-chart"></i>
                   Utilization Overview
                 </h4>
-                <div class="utilization-range">
-                  <span class="range-label">Range:</span>
-                  <span class="range-value">
+                <div class="utilization-range" style="color: whitesmoke;">
+                  <span class="range-label" style="color: whitesmoke;">Range:</span>
+                  <span class="range-value" style="color: whitesmoke;">
                     {{ result.utilization_metrics.minimum_utilization | number: '1.0-1' }}% - 
                     {{ result.utilization_metrics.peak_utilization | number: '1.0-1' }}%
                   </span>
