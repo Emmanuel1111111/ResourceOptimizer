@@ -491,87 +491,260 @@
       </div>
     </div>
         
-        <!-- Reallocate Tab -->
+        <!-- Enhanced Reallocate Tab -->
     <div *ngIf="activeTab === 'Reallocate'" class="tab-content">
       <div class="tab-pane fade-in">
-        <div class="form-section">
-          <form [formGroup]="form" class="modern-form">
-            <div class="form-row">
-              <div class="form-group animate-on-hover">
-                <label class="form-label">Schedule ID</label>
-                <input class="form-input" formControlName="scheduleId" placeholder="Enter schedule ID" required>
+        
+        <!-- Step 1: Search and Select Existing Schedule -->
+        <div class="reallocate-step">
+          <h3 class="step-title">
+            <span class="step-number">1</span>
+            Find Schedule to Move
+          </h3>
+          
+          <div class="schedule-search-section">
+            <form [formGroup]="scheduleSearchForm" class="search-form">
+              <div class="search-controls">
+                <div class="search-row">
+                  <div class="search-group">
+                    <label class="search-label">Search Query</label>
+                    <input class="search-input" 
+                           formControlName="searchQuery" 
+                           placeholder="Search by Room ID, Course, or Lecturer"
+                           (input)="searchExistingSchedules()">
+                  </div>
+                  
+                  <div class="search-group">
+                    <label class="search-label">Room ID</label>
+                    <input class="search-input" 
+                           formControlName="roomId" 
+                           placeholder="Filter by Room ID"
+                           (input)="searchExistingSchedules()">
+                  </div>
+                </div>
+                
+                <div class="search-row">
+                  <div class="search-group">
+                    <label class="search-label">Day</label>
+                    <select class="search-select" 
+                            formControlName="day" 
+                            (change)="searchExistingSchedules()">
+                      <option value="">All Days</option>
+                      <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                    </select>
+                  </div>
+                  
+                  <div class="search-group">
+                    <label class="search-label">Course</label>
+                    <input class="search-input" 
+                           formControlName="course" 
+                           placeholder="Filter by Course"
+                           (input)="searchExistingSchedules()">
+                  </div>
+                </div>
               </div>
-              
-              <div class="form-group animate-on-hover">
-                <label class="form-label">New Room ID</label>
-                <input class="form-input" formControlName="roomId" placeholder="Enter new room ID" required>
+            </form>
+            
+            <!-- Loading State -->
+            <div *ngIf="scheduleSearchLoading" class="search-loading">
+              <div class="loading-spinner-small"></div>
+              <p>Searching schedules...</p>
+            </div>
+            
+            <!-- Search Results -->
+            <div *ngIf="foundSchedules.length > 0" class="schedule-results">
+              <h4>Found Schedules ({{foundSchedules.length}})</h4>
+              <div class="schedule-grid">
+                <div *ngFor="let schedule of foundSchedules" 
+                     class="schedule-card"
+                     [class.selected]="selectedSchedule?.id === schedule.id"
+                     (click)="selectScheduleForReallocation(schedule)">
+                  <div class="schedule-header">
+                    <h5 class="schedule-course">{{schedule.course}}</h5>
+                    <span class="schedule-room">{{schedule.room_id}}</span>
+                  </div>
+                  <div class="schedule-details">
+                    <p><span class="detail-label">Day:</span> {{schedule.day}}</p>
+                    <p><span class="detail-label">Time:</span> {{schedule.start}} - {{schedule.end}}</p>
+                    <p><span class="detail-label">Lecturer:</span> {{schedule.lecturer}}</p>
+                    <p><span class="detail-label">Department:</span> {{schedule.department}}</p>
+                  </div>
+                  <div class="schedule-actions">
+                    <button class="select-button" 
+                            [class.selected]="selectedSchedule?.id === schedule.id">
+                      {{selectedSchedule?.id === schedule.id ? 'Selected' : 'Select'}}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div class="form-row">
-              <div class="form-group highlighted-field animate-on-hover">
-                <label class="form-label">Day</label>
-                <select class="form-select" formControlName="day" required>
-                  <option value="" disabled selected>Select day</option>
-                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
-                </select>
+            <!-- No Results -->
+            <div *ngIf="foundSchedules.length === 0 && !scheduleSearchLoading && (scheduleSearchForm.get('searchQuery')?.value || scheduleSearchForm.get('roomId')?.value || scheduleSearchForm.get('day')?.value || scheduleSearchForm.get('course')?.value)" 
+                 class="no-schedules-found">
+              <div class="no-results-icon">🔍</div>
+              <h4>No schedules found</h4>
+              <p>Try adjusting your search criteria or check if the schedule exists.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2: Set New Schedule Details -->
+        <div class="reallocate-step" [class.disabled]="!selectedSchedule">
+          <h3 class="step-title">
+            <span class="step-number">2</span>
+            Set New Schedule Details
+            <span *ngIf="selectedSchedule" class="selected-indicator">
+              Moving: {{selectedSchedule.course}} from {{selectedSchedule.room_id}}
+            </span>
+          </h3>
+          
+          <div class="new-schedule-section" *ngIf="selectedSchedule">
+            
+            <!-- Partial Update Info -->
+            <div class="update-info-banner">
+              <div class="info-icon">💡</div>
+              <div class="info-content">
+                <h4>Partial Update Supported</h4>
+                <p>You can update individual fields while keeping others unchanged. Only fill in the fields you want to modify!</p>
+              </div>
+            </div>
+            
+            <form [formGroup]="form" class="modern-form">
+              <!-- Current vs New Comparison -->
+              <div class="comparison-section">
+                <div class="current-schedule">
+                  <h4>Current Schedule</h4>
+                  <div class="schedule-info">
+                    <p><strong>Room:</strong> {{selectedSchedule.room_id}}</p>
+                    <p><strong>Day:</strong> {{selectedSchedule.day}}</p>
+                    <p><strong>Time:</strong> {{selectedSchedule.start}} - {{selectedSchedule.end}}</p>
+                    <p><strong>Course:</strong> {{selectedSchedule.course}}</p>
+                  </div>
+                </div>
+                <div class="arrow-indicator">→</div>
+                <div class="new-schedule">
+                  <h4>New Schedule</h4>
+                  <div class="schedule-info">
+                    <p><strong>Room:</strong> {{form.get('roomId')?.value || 'Not set'}}</p>
+                    <p><strong>Day:</strong> {{form.get('day')?.value || 'Not set'}}</p>
+                    <p><strong>Time:</strong> {{form.get('startTime')?.value || 'Not set'}} - {{form.get('endTime')?.value || 'Not set'}}</p>
+                    <p><strong>Course:</strong> {{form.get('course')?.value || selectedSchedule.course}}</p>
+                  </div>
+                </div>
               </div>
               
+              <!-- New Schedule Form -->
+            <div class="form-row">
+                <div class="form-group animate-on-hover">
+                  <label class="form-label">New Room ID (Optional)</label>
+                  <input class="form-input" 
+                         formControlName="roomId" 
+                         placeholder="Leave blank to keep current room: {{selectedSchedule.room_id}}">
+                  <div class="form-hint">✨ Leave blank to keep current room, or enter new room ID to move</div>
+                </div>
+                
+              <div class="form-group highlighted-field animate-on-hover">
+                  <label class="form-label">Day (Optional)</label>
+                  <select class="form-select" formControlName="day">
+                    <option value="">Keep current day: {{selectedSchedule.day}}</option>
+                  <option *ngFor="let day of dayOptions" [value]="day">{{day}}</option>
+                </select>
+                  <div class="form-hint">✨ Leave as current day or select new day</div>
+                </div>
+              </div>
+              
+              <div class="form-row">
               <div class="form-group animate-on-hover">
                 <label class="form-label">Date (Optional)</label>
                 <input class="form-input" type="date" formControlName="date">
-              </div>
+                  <div class="form-hint">Used as fallback if day-based fails</div>
+                </div>
             </div>
       
             <div class="form-row time-row">
               <div class="form-group animate-on-hover">
-                <label class="form-label">Start Time</label>
-                <select class="form-select" formControlName="startTime" required>
-                  <option value="" disabled selected>Select time</option>
+                  <label class="form-label">Start Time (Optional)</label>
+                  <select class="form-select" formControlName="startTime">
+                    <option value="">Keep current time: {{selectedSchedule.start}}</option>
                   <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
                 </select>
+                  <div class="form-hint">✨ Leave blank to keep current start time</div>
               </div>
               
               <div class="form-group animate-on-hover">
-                <label class="form-label">End Time</label>
-                <select class="form-select" formControlName="endTime" required>
-                  <option value="" disabled selected>Select time</option>
+                  <label class="form-label">End Time (Optional)</label>
+                  <select class="form-select" formControlName="endTime">
+                    <option value="">Keep current time: {{selectedSchedule.end}}</option>
                   <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
                 </select>
-              </div>
+                  <div class="form-hint">✨ Leave blank to keep current end time</div>
+                </div>
             </div>
             
             <div class="form-row">
               <div class="form-group animate-on-hover">
-                <label class="form-label">Course</label>
-                <input class="form-input" formControlName="course" placeholder="Enter course name">
+                  <label class="form-label">Course (Optional)</label>
+                  <input class="form-input" 
+                         formControlName="course" 
+                         placeholder="Leave blank to keep current: {{selectedSchedule.course}}">
+                  <div class="form-hint">Only change if course name is different</div>
               </div>
               
               <div class="form-group animate-on-hover">
-                <label class="form-label">Department</label>
-                <input class="form-input" formControlName="department" placeholder="Enter department">
+                  <label class="form-label">Department (Optional)</label>
+                  <input class="form-input" 
+                         formControlName="department" 
+                         placeholder="Leave blank to keep current: {{selectedSchedule.department}}">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group animate-on-hover">
+                  <label class="form-label">Lecturer (Optional)</label>
+                  <input class="form-input" 
+                         formControlName="lecturer" 
+                         placeholder="Leave blank to keep current: {{selectedSchedule.lecturer}}">
               </div>
               
               <div class="form-group animate-on-hover">
-                <label class="form-label">Year</label>
-                <input class="form-input" formControlName="level" placeholder="Enter year">
-              </div>
+                  <label class="form-label">Year (Optional)</label>
+                  <input class="form-input" 
+                         formControlName="level" 
+                         placeholder="Enter year if needed">
+                </div>
             </div>
           
             <div class="form-actions">
-              <button class="action-button primary pulse-animation" (click)="executeOperation('reallocate')" [disabled]="loading">
-                <span class="button-icon">🔄</span> Reallocate Schedule
+                <button class="action-button secondary" 
+                        (click)="selectedSchedule = null; form.reset()">
+                  <span class="button-icon">↩️</span> Back to Search
+                </button>
+                <button class="action-button primary pulse-animation" 
+                        (click)="executeOperation('reallocate')" 
+                        [disabled]="loading">
+                  <span class="button-icon">🔄</span> Update Schedule
             </button>
             </div>
           </form>
       </div>
       
-        <!-- Results Section for Reallocate -->
+          <div class="no-schedule-selected" *ngIf="!selectedSchedule">
+            <div class="placeholder-content">
+              <div class="placeholder-icon">📋</div>
+              <h4>No Schedule Selected</h4>
+              <p>Please select a schedule from Step 1 to configure the new details.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Loading State -->
         <div *ngIf="loading" class="loading-container">
           <div class="loading-spinner"></div>
-          <p>Reallocating schedule...</p>
+          <p>Processing reallocation...</p>
         </div>
 
+        <!-- Results Section -->
         <div *ngIf="results && !loading" class="results-section fade-in">
           <div class="results-header">
             <h2>Reallocation Results</h2>
@@ -580,14 +753,27 @@
           <div class="results-summary">
             <div class="summary-card no-conflict">
               <div class="summary-icon">
-                <span>🔄</span>
+                <span>✅</span>
               </div>
               <div class="summary-details">
                 <h3>Schedule Reallocated Successfully</h3>
-                <p>Schedule ID: <strong>{{results.schedule_id}}</strong></p>
-                <p>New Room: <strong>{{results.new_room_id}}</strong></p>
-                <p>Day: <strong>{{results.day}}</strong></p>
-                <p>Time: <strong>{{results.time_range}}</strong></p>
+                <div class="reallocation-details">
+                  <div class="before-after">
+                    <div class="before">
+                      <h4>Before</h4>
+                      <p><strong>Room:</strong> {{results.original_schedule?.room_id}}</p>
+                      <p><strong>Time:</strong> {{results.original_schedule?.time}}</p>
+                      <p><strong>Day:</strong> {{results.original_schedule?.day}}</p>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="after">
+                      <h4>After</h4>
+                      <p><strong>Room:</strong> {{results.new_schedule?.room_id}}</p>
+                      <p><strong>Time:</strong> {{results.new_schedule?.start_time}} - {{results.new_schedule?.end_time}}</p>
+                      <p><strong>Day:</strong> {{results.new_schedule?.day}}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
           </div>
           </div>
@@ -669,6 +855,41 @@
         <span *ngIf="!injectLoading">Inject Schedule</span>
         <span *ngIf="injectLoading" class="spinner-small"></span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Multiple Schedules Selection Modal -->
+<div *ngIf="showMultipleSchedulesModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Multiple Schedules Found</h2>
+      <button class="close-button" (click)="showMultipleSchedulesModal = false">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-description">
+        Multiple schedules match your criteria. Please select the specific schedule you want to reallocate:
+      </p>
+      
+      <div class="multiple-schedules-list">
+        <div *ngFor="let schedule of multipleScheduleOptions" 
+             class="schedule-option"
+             (click)="selectSpecificSchedule(schedule)">
+          <div class="schedule-option-header">
+            <h4>{{schedule.course}}</h4>
+            <span class="schedule-option-room">{{schedule.room_id}}</span>
+          </div>
+          <div class="schedule-option-details">
+            <p><strong>Day:</strong> {{schedule.day}}</p>
+            <p><strong>Time:</strong> {{schedule.time}}</p>
+            <p><strong>Lecturer:</strong> {{schedule.lecturer}}</p>
+          </div>
+          <button class="select-option-button">Select This Schedule</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-button secondary" (click)="showMultipleSchedulesModal = false">Cancel</button>
     </div>
   </div>
 </div>

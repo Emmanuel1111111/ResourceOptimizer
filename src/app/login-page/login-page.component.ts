@@ -159,8 +159,14 @@ export class LoginPageComponent implements OnInit {
             console.log('logIn response:', response);
             const token = response.token || '';
             const Id = response.Id;
+            const username = response.username || loginData.username;
+            const email = (response as any).email || '';
+            
             localStorage.setItem('token', token);
             localStorage.setItem('userId', Id);
+            localStorage.setItem('username', username);
+            localStorage.setItem('userEmail', email);
+            
             this.successMessage = 'Login successful!';
 
             debounceTime(2500).pipe(
@@ -169,6 +175,7 @@ export class LoginPageComponent implements OnInit {
               })
             ).subscribe();
             console.log('userId:', Id);
+            console.log('userEmail:', email);
             console.log('Api response', response);
             
           },

@@ -77,13 +77,30 @@ def get_available_rooms():
         df['Start_dt'] = pd.to_datetime(df['Start'], format='%H:%M', errors='coerce').dt.time
         df['End_dt'] = pd.to_datetime(df['End'], format='%H:%M', errors='coerce').dt.time
 
-        def is_within_time_and_day(start, end, day, current_time,current_day):
+        def is_within_time_and_day(start, end, day, current_time, current_day):
             try:
-                start_buffer = (datetime.combine(datetime.today(), start)).time()
-                end_buffer = (datetime.combine(datetime.today(), end) ).time()
+                # Ensure all parameters are valid
+                if not start or not end or not day or not current_time or not current_day:
+                    return False
+                    
+                # Clean day strings and compare (case-insensitive)
+                schedule_day = str(day).strip().lower()
+                current_day_clean = str(current_day).strip().lower()
                 
-                return (day == current_day) and (start_buffer <=current_time<= end_buffer)
-            except Exception:
+                # Debug logging
+                print(f"Comparing: {schedule_day} vs {current_day_clean}, {start} <= {current_time} <= {end}")
+                
+                # Day must match and current time must be within schedule
+                day_match = schedule_day == current_day_clean
+                time_match = start <= current_time <= end
+                
+                result = day_match and time_match
+                if result:
+                    print(f"Match found: {day} {start}-{end}")
+                
+                return result
+            except Exception as e:
+                print(f"Error in time comparison: {e}")
                 return False
 
         df['Matches_Current_Time'] = df.apply(
@@ -92,16 +109,42 @@ def get_available_rooms():
             ),
             axis=1
         )
-        print(f"Current time matches found: {df['Matches_Current_Time'].sum()}")
+        print(f"\nCurrent time matches found: {df['Matches_Current_Time'].sum()}")
+        print(f"Debug - Current time: {now_time}, Current day: {now_day}")
+        print(f"Debug - Total rows in dataframe: {len(df)}")
+        if len(df) > 0:
+            print(f"Debug - Sample row: {df.iloc[0][['Day', 'Start', 'End', 'Course']].to_dict()}")
+            print(f"Debug - Unique days in data: {df['Day'].unique()}")
+            print(f"Debug - Sample start times: {df['Start'].unique()[:5]}")
+        
+        # Show which rows match current time for debugging
+        matching_rows = df[df['Matches_Current_Time'] == True]
+        if len(matching_rows) > 0:
+            print(f"Debug - Found matching schedules:")
+            for _, row in matching_rows.iterrows():
+                print(f"  - {row['Course']} in {row['Room ID']} on {row['Day']} from {row['Start']} to {row['End']}")
+        else:
+            print("Debug - No matching schedules found")
+            # Show some sample data to help debug
+            if len(df) > 0:
+                print("Debug - Sample schedules for comparison:")
+                for _, row in df.head(3).iterrows():
+                    print(f"  - {row['Course']} in {row['Room ID']} on {row['Day']} from {row['Start']} to {row['End']}")
 
+        # Filter and sort current time matches
         current_time_df = df[df['Matches_Current_Time'] == True][
             ['Room ID', 'Course', 'Start', 'End', 'Day', 'Status', 'Year', 'Department']
-        ]
+        ].sort_values(['Room ID', 'Start'])  # Sort by Room ID and Start time
+        
+        # Sort all data for consistency
+        daily_summary_sorted = daily_summary.sort_values(['Room ID', 'Day'])
+        weekly_summary_sorted = weekly_summary.sort_values(['Room ID'])
+        df_sorted = df.sort_values(['Room ID', 'Day', 'Start'])
 
         if room_id:
-            utilization_df = df[df['Room ID'] == room_id]
-            daily_summary_df = daily_summary[daily_summary['Room ID'] == room_id]
-            weekly_summary_df = weekly_summary[weekly_summary['Room ID'] == room_id]
+            utilization_df = df_sorted[df_sorted['Room ID'] == room_id]
+            daily_summary_df = daily_summary_sorted[daily_summary_sorted['Room ID'] == room_id]
+            weekly_summary_df = weekly_summary_sorted[weekly_summary_sorted['Room ID'] == room_id]
             current_time_df = current_time_df[current_time_df['Room ID'] == room_id]
 
             if utilization_df.empty:
@@ -121,17 +164,17 @@ def get_available_rooms():
                 "current_time_matches": current_time_df.to_dict(orient='records'),
             }), 200
         else:
-            room_status = df.groupby('Room ID').agg({
+            room_status = df_sorted.groupby('Room ID').agg({
                 'Utilization': 'mean',
                 'Room Type': 'first',
                 'Status': lambda x: ', '.join(x.dropna().unique())
-            }).reset_index()
+            }).reset_index().sort_values('Room ID')  # Sort room status by Room ID
 
             return jsonify({
                 "status": "success",
                 "room_status": room_status.to_dict(orient="records"),
-                "daily_utilization": daily_summary.to_dict(orient='records'),
-                "weekly_summary": weekly_summary.to_dict(orient='records'),
+                "daily_utilization": daily_summary_sorted.to_dict(orient='records'),
+                "weekly_summary": weekly_summary_sorted.to_dict(orient='records'),
                 "current_time_matches": current_time_df.to_dict(orient='records')
             }), 200
 
@@ -259,12 +302,12 @@ def predict_utilization():
 @routes_bp.route('/api/current_utilization', methods=['POST'])
 def current_utilization():
     try:
-        # Check if database connection is available
+       
         if db is None or timetables_collection is None:
             return jsonify({
                 'status': 'error',
                 'error': 'Database connection is not available. Please check your MongoDB connection.'
-            }), 503  # 503 Service Unavailable
+            }), 503  
             
         data = request.get_json()
         room_id = data.get('room_id')
@@ -545,7 +588,7 @@ def refresh_aggregated_data():
             return jsonify({"status": "error", "error": "No data found for the given filters"}), 404
 
         # Print raw data for debugging
-        print(f"Raw data from database for room {room_id}:")
+       
         for item in raw_data[:2]:  # Print just a couple of items to avoid log spam
             print(f"  {item}")
 

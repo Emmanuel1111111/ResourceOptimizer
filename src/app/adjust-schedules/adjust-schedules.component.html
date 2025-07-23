@@ -1,229 +1,1110 @@
-<div class="dashboard-wrapper container-fluid p-0">
- 
-  <nav class="sidebar shadow-sm d-flex flex-column align-items-center pt-3 " [ngClass]="{'open': isOpened }">
-    <mat-nav-list>
-      <a mat-nav-item class="nav-link" routerLinkActive="active" [routerLink]="'/admin-dashboard'"><i class="fas fa-home fa-lg"></i>Home</a>
-      <a mat-nav-item class="nav-link" routerLinkActive="active" routerLink="'/"><i class="fas fa-chart-line fa-lg"></i>Schedules</a>
-      <a mat-nav-item class="nav-link" routerLinkActive="active"  routerLink="''"><i class="fas fa-cog fa-lg"></i>Settings</a>
-      <a mat-nav-item class="nav-link" routerLinkActive="active"  routerLink="''"><i class="fas fa-chart-line fa-lg"></i>Executive</a>
-      <a mat-nav-item class="nav-link"  routerLinkActive="active" routerLink="''"><i class="fas fa-user-circle fa-lg"></i>User</a>
-      
-    </mat-nav-list>
-  </nav>
+<div class="ultra-modern-dashboard">
+  <!-- Bootstrap Container with Row -->
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Enhanced Sidebar -->
+      <nav class="modern-sidebar col-lg-2 col-md-3 col-sm-12 ultra-sidebar" [class.open]="isOpened">
+        <!-- Logo Section -->
+        <div class="sidebar-logo">
+          <div class="logo-container">
+            <div class="logo-text">
+              <h3>ResourceOpt</h3>
+              <span>Schedule Manager</span>
+            </div> 
+          </div>
+        </div>
 
-  
-   
-  <main class="dashboard-content px-4 py-3   ">
+        <!-- User Profile Section -->
+        <div class="user-profile" *ngIf="user">
+          <div class="user-avatar">
+            <div class="avatar-circle" *ngIf="!user.profileImage">
+              {{user.initials || 'SA'}}
+            </div>
+            <img *ngIf="user.profileImage" [src]="user.profileImage" alt="User Avatar" class="avatar-image">
+            <div class="admin-badge" *ngIf="user.isAdmin">
+              <i class="fas fa-crown"></i>
+            </div>
+          </div>
+          <div class="user-info">
+            <h4 class="user-name">{{user.displayName || 'System Administrator'}}</h4>
+            <p class="user-role">{{user.role || 'Administrator'}}</p>
+            <p class="user-department">{{user.department || 'IT Administration'}}</p>
+            <div class="user-details">
+              <div class="detail-item">
+                <i class="fas fa-envelope"></i>
+                <span>{{user.email}}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-id-badge"></i>
+                <span>ID: {{user.userId}}</span>
+              </div>
+              <div class="detail-item" *ngIf="user.adminLevel">
+                <i class="fas fa-shield-alt"></i>
+                <span>{{user.adminLevel}}</span>
+              </div>
+              <div class="detail-item" *ngIf="user.lastLogin">
+                <i class="fas fa-clock"></i>
+                <span>{{user.lastLogin | date:'short'}}</span>
+              </div>
+            </div>
+            <div class="status-indicator online">
+              <div class="status-dot"></div>
+              <span>{{user.sessionActive ? 'Online' : 'Offline'}}</span>
+            </div>
+          </div>
+        </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h3 class="fw-bold mb-0">Welcome Back , {{user.username}}</h3>
+        <!-- Navigation Menu -->
+        <div class="nav-menu">
+          <div class="nav-section">
+            <p class="nav-section-title">Navigation</p>
+            
+            <a class="nav-item" (click)="navigateToSection('home')" [class.active]="currentSection === 'home'">
+              <div class="nav-icon">
+                <i class="fas fa-home"></i>
+              </div>
+              <span class="nav-text">Home</span>
+              <div class="nav-indicator"></div>
+            </a>
+            
+            <a class="nav-item" (click)="navigateToSection('schedules')" [class.active]="currentSection === 'schedules'">
+              <div class="nav-icon">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <span class="nav-text">All Schedules</span>
+              <div class="nav-indicator"></div>
+            </a>
+            
+            <a class="nav-item" (click)="navigateToSection('analytics')" [class.active]="currentSection === 'analytics'">
+              <div class="nav-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <span class="nav-text">Analytics</span>
+              <div class="nav-indicator"></div>
+            </a>
+            
+            <a class="nav-item" (click)="navigateToSection('executive')" [class.active]="currentSection === 'executive'">
+              <div class="nav-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <span class="nav-text">Executive</span>
+              <div class="nav-indicator"></div>
+            </a> 
       </div>
-     <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
-      <div *ngIf="error_masssage && !isLoading" class="error-message align-items-baseline">{{ error_masssage }}</div>
-      
 
-      
-      <div class="search-container">
+          <div class="nav-section">
+            <p class="nav-section-title">Management</p>
+            
+            <a class="nav-item" (click)="navigateToSection('settings')" [class.active]="currentSection === 'settings'">
+              <div class="nav-icon">
+                <i class="fas fa-cog"></i>
+              </div>
+              <span class="nav-text">Settings</span>
+              <div class="nav-indicator"></div>
+            </a>
+            
+            <a class="nav-item" (click)="navigateToSection('user')" [class.active]="currentSection === 'user'">
+              <div class="nav-icon">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <span class="nav-text">User Profile</span>
+              <div class="nav-indicator"></div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+          <button class="logout-btn" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main class="main-content col-lg-10 col-md-9 col-sm-12">
         
-          <div class="search-container">
-          <input type="text" class="search-bar" placeholder="Search Room ID..." [(ngModel)]="searchQuery" (input)="searchRoom()" matInput />
+        <!-- Top Header -->
+        <header class="top-header">
+          <div class="container-fluid">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <div class="header-left">
+                  <button class="mobile-menu-btn d-md-none" (click)="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                  </button>
+                  <div class="page-title">
+                    <h1>{{getSectionTitle()}}</h1>
+                    <p>{{getSectionDescription()}}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-2 col-sm-3">
+                <div class="header-right">
+                  <div class="header-actions">
+                    <!-- Search - Enhanced with context awareness -->
+                    <div class="search-container" *ngIf="currentSection === 'schedules' || currentSection === 'home'">
+                      <input type="text" 
+                             [placeholder]="getSearchPlaceholder()" 
+                             [(ngModel)]="searchQuery" 
+                             (input)="searchRoom()" 
+                             (keyup.enter)="searchRoom()"
+                             class="global-search">
+                      <button class="search-btn" (click)="searchRoom()" [disabled]="!searchQuery" >
+                        <mat-icon class="search-icon" style="color:white;">search</mat-icon>
+                      </button>
+                     
+
+                      <!-- Search loading indicator -->
+                      <div class="search-loading" *ngIf="isLoadingRoomData || isLoadingSchedules">
+                        <i class="fas fa-spinner fa-spin"></i>
+                      </div>
+                      <!-- Search context indicator -->
+                      <div class="search-context" *ngIf="searchQuery">
+                        <small>
+                          <i class="fas fa-info-circle"></i>
+                          {{getSearchContext()}}
+                        </small>
+                      </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div class="loading-indicator" *ngIf="isLoading">
+                      <div class="loading-spinner"></div>
+                      <span class="loading-text">Processing...</span>
+                    </div>
+                    
+                    <!-- Error Alert -->
+                    <div class="error-alert" *ngIf="error_masssage && !isLoading">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <span>{{error_masssage}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <div class="container-fluid">
+            
+            <!-- Home Section -->
+            <section class="content-section" *ngIf="currentSection === 'home'" [@fadeInUp]>
+              
+              <!-- Quick Stats -->
+              <div class="row mb-4">
+                <div class="col-lg-4 col-md-6 mb-3">
+                  <div class="stat-card rooms" (click)="navigateToSection('schedules')">
+                    <div class="stat-icon">
+                      <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h3 class="stat-number">{{roomStats?.total || filteredRooms.length || 0}}</h3>
+                      <p class="stat-label">Total Rooms</p>
+                      <small class="stat-detail" *ngIf="roomStats?.departments">
+                        {{roomStats.departments}} departments
+                      </small>
+                    </div>
+                  </div>
           </div>
           
+                <div class="col-lg-4 col-md-6 mb-3">
+                  <div class="stat-card active-bookings">
+                    <div class="stat-icon">
+                      <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h3 class="stat-number">{{scheduleStats?.active || currentTimeMatches.length || 0}}</h3>
+                      <p class="stat-label">Active Sessions</p>
+                      <small class="stat-detail" *ngIf="scheduleStats?.today">
+                        {{scheduleStats.today}} scheduled today
+                      </small>
+                    </div>
        </div>
     </div>
 
-    
-    <div class="row g-4">
-      
-      <div class="col-lg-6">
-          <mat-card class="fancy-card shadow-lg h-100">
-            <mat-card-header style="background-color: brown;">
-              <mat-card-title><mat-icon>bar_chart</mat-icon> Daily Demand Insights</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
+                <div class="col-lg-4 col-md-12 mb-3">
+                  <div class="stat-card utilization">
+                    <div class="stat-icon">
+                      <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h3 class="stat-number">{{utilizationStats?.average || getUtilizationRate()}}%</h3>
+                      <p class="stat-label">Avg Utilization</p>
+                      <small class="stat-detail" *ngIf="utilizationStats?.trend">
+                        <i class="fas fa-arrow-up" *ngIf="utilizationStats.trend === 'increasing'"></i>
+                        <i class="fas fa-arrow-down" *ngIf="utilizationStats.trend === 'decreasing'"></i>
+                        <i class="fas fa-minus" *ngIf="utilizationStats.trend === 'stable'"></i>
+                        {{utilizationStats.trend}}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Analytics and Current Schedule -->
+              <div class="row">
+                
+                <!-- Daily Demand Chart -->
+                <div class="col-lg-8 col-md-12 mb-4">
+                  <div class="chart-card" [@slideInLeft]>
+                    <div class="card-header">
+                      <h3><i class="fas fa-chart-bar"></i> Daily Demand Insights</h3>
+                      <div class="card-actions">
+                        <button class="action-btn" (click)="refreshChart()">
+                          <i class="fas fa-sync-alt"></i>
+                        </button>
+                      </div>
+                    </div>
               <div class="chart-container">
                 <canvas #barCanvas></canvas>
               </div>
-            </mat-card-content>
-          </mat-card>
+                  </div>
+                </div>
+
+                <!-- Current Schedule -->
+                <div class="col-lg-4 col-md-12 mb-4" >
+                  <div class="schedule-card" [@slideInRight]>
+                    <div class="card-header">
+                      <h3><i class="fas fa-clock"></i> Live Schedule</h3>
+                      <div class="live-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>Live</span>
+                      </div>
+                    </div>
+                    <div class="schedule-content">
+                      <div class="schedule-item" *ngFor="let schedule of currentTimeMatches?.slice(0, 5)" [@fadeInUp]>
+                        <div class="schedule-room">
+                          <div class="room-badge">{{schedule?.['Room ID']}}</div>
+                        </div>
+                        <div class="schedule-details">
+                          <h4>{{schedule?.Course}}</h4>
+                          <p>{{schedule?.Start}} - {{schedule?.End}}</p>
+                          <span class="department-tag">{{schedule?.Department}}</span>
+                        </div>
+                        <div class="schedule-status">
+                          <div class="status-dot active"></div>
+                        </div>
         </div>
 
-      
-      <div class="col-lg-6">
-        <mat-card class="fancy-card shadow-lg h-100">
-          <mat-card-header class="bg-warning text-dark rounded-top">
-            <mat-card-title ><mat-icon>edit_calendar</mat-icon> Ongoing Schedule </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="overflow-auto">
-            <table class="table table-hover text-sm">
-              <thead class="table-light">
-                <tr>
-                  <th>Room</th>
-                  <th>Course</th>
-                  <th>Current Schedule</th>
-                  <th>Year</th>
-                  
-                  <th>Department</th>
-               
+                      <div class="empty-state" *ngIf="!currentTimeMatches || currentTimeMatches.length === 0">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>No active sessions at this time</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Room Search Results - Original Functionality Restored -->
+              <div class="row" *ngIf="selectedRoom && roomSearchResults" [@fadeInUp]>
+                
+                <!-- 1. Room Utilization Graph -->
+                <div class="col-12 mb-4">
+                  <div class="search-result-section">
+                    <div class="section-card">
+                      <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Daily Demand Insights</h3>
+                        <div class="chart-info">
+                          <span class="chart-period">Weekly Utilization Overview</span>
+                        </div>
+                      </div>
+                      <div class="chart-container-large">
+                        <canvas #utilizationCanvas width="800" height="400"></canvas>
+                        <div class="chart-loading" *ngIf="isLoadingRoomData">
+                          <div class="loading-spinner"></div>
+                          <p>Loading utilization data...</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Daily Utilization Table - With specified columns -->
+                <div class="col-12 mb-4" style="overflow-x: auto; overflow-y: auto; ">
+                  <div class="search-result-section">
+                    <div class="section-card">
+                      <div class="card-header">
+                        <h3><i class="fas fa-table"></i> Daily Utilization Analysis</h3>
+                        <div class="analysis-info">
+                          <span class="info-badge">
+                            <i class="fas fa-info-circle"></i>
+                            Detailed daily breakdown
+                          </span>
+                        </div>
+                      </div>
+                      <div class="table-container" *ngIf="!isLoadingUtilization" style="overflow-x: auto; overflow-y: auto;">
+                        <div class="table-responsive"  style="overflow-x: auto; overflow-y: auto;">
+                          <table class="table table-striped table-hover modern-table daily-utilization-table">
+                            <thead class="table-header">
+                              <tr>
+                                <th scope="col">Day</th>
+                                <th scope="col">Room</th>
+                                <th scope="col">Utilization (%)</th>
+                                <th scope="col">Time Slot</th>
+                                <th scope="col">Courses</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Year</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let schedule of currentTimeMatches">
-                  <td>{{ schedule?.['Room ID'] }}</td>
-                  <td>{{schedule?.Course}}</td>
-                  <td>
-                    {{ schedule?.Start }} - {{ schedule?.End }}
+                              <tr *ngFor="let util of filteredDailyUtilization" [@fadeInUp]>
+                                <td>
+                                  <span class="day-indicator" [ngClass]="util.Day?.toLowerCase()">
+                                    {{util.Day}}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="room-badge-small">{{util['Room ID']}}</span>
+                                </td>
+                                <td>
+                                  <div class="utilization-display">
+                                    <div class="utilization-bar-mini">
+                                      <div class="utilization-fill-mini" [style.width.%]="util.Daily_Utilization || util['Daily Utilization']"></div>
+                                    </div>
+                                    <span class="utilization-text">{{(util.Daily_Utilization || util['Daily Utilization']) | number:'1.1-1'}}%</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span class="time-slots" [title]="util.Time_Slot">
+                                    {{util.Time_Slot}}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="courses-count">{{util.Courses}}</span>
+                                </td>
+                                <td>
+                                  <span class="dept-badge">{{util.Department}}</span>
                   </td>
                   <td>
-                    {{schedule?.Year}}
+                                  <span class="status-indicator" [ngClass]="util.Status?.toLowerCase().replace(' ', '-')">
+                                    {{util.Status}}
+                                  </span>
                   </td>
                   <td>
-                    {{schedule?.Department}}
+                                  <span class="year-badge">{{util.Year}}</span>
                   </td>
-                 
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                        <div class="empty-state" *ngIf="filteredDailyUtilization.length === 0">
+                          <i class="fas fa-chart-bar"></i>
+                          <h3>No utilization data available</h3>
+                          <p>Daily utilization data is not available for this room</p>
+                        </div>
+                      </div>
+                      
+                      <div class="loading-state" *ngIf="isLoadingUtilization">
+                        <div class="loading-spinner"></div>
+                        <p>Loading daily utilization...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p></p>
+                <p></p>
+
+                <!-- 3. All Schedules Table -->
+                <div class="col-12 mb-4">
+                  <div class="search-result-section">
+                    <div class="section-card">
+                      <div class="card-header">
+                        <h3><i class="fas fa-calendar-check"></i> All Schedules</h3>
+                        <div class="schedules-count">
+                          <span class="count-badge">{{ongoingSchedules.length || 0}} schedules</span>
+                        </div>
+                      </div>
+                      <div class="table-container" *ngIf="!isLoadingSchedules">
+                        <div class="table-responsive"  style="overflow-x: auto; overflow-y: auto;">
+                          <table class="table table-striped table-hover modern-table ongoing-schedules-table">
+                            <thead class="table-header">
+                              <tr>
+                                <th scope="col">Day</th>
+                                <th scope="col">Course</th>
+                                <th scope="col">Start Time</th>
+                                <th scope="col">End Time</th>
+                                <th scope="col">Instructor</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Year</th>
+                                <th scope="col">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let schedule of ongoingSchedules" [@fadeInUp]>
+                                <td>
+                                  <span class="day-indicator" [ngClass]="schedule.Day?.toLowerCase()">
+                                    {{schedule.Day}}
+                                  </span>
+                                </td>
+                                <td><strong>{{schedule.Course}}</strong></td>
+                                <td><span class="time-badge">{{schedule.Start}}</span></td>
+                                <td><span class="time-badge">{{schedule.End}}</span></td>
+                                <td>{{schedule.Instructor || schedule.Lecturer || 'Unknown'}}</td>
+                                <td><span class="dept-badge">{{schedule.Department}}</span></td>
+                                <td><span class="year-badge">Year {{schedule.Year}}</span></td>
+                                <td>
+                                  <span class="status-indicator" [ngClass]="schedule.Status?.toLowerCase()">
+                                    {{schedule.Status || 'Active'}}
+                                  </span>
+                                </td>
       </tr>
               </tbody>
             </table>
-          </mat-card-content>
-        </mat-card>
+                        </div>
+                        
+                        <div class="empty-state" *ngIf="ongoingSchedules.length === 0">
+                          <i class="fas fa-calendar-times"></i>
+                          <h3>No schedules found</h3>
+                          <p>This room currently has no scheduled classes</p>
       </div>
     </div>
 
- <section class="conveyor mt-4" *ngIf="selectedRoom">
-    <mat-card class="fancy-card ">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>table_chart</mat-icon> Daily Utilization for {{ selectedRoom['Room ID'] }}
-          <span class="auto-update-badge" matTooltip="Data auto-updates when room changes">
-            <mat-icon>autorenew</mat-icon> Auto-updated
-          </span>
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <table mat-table [dataSource]="filteredDailyUtilization" class="utilization-table">
-          <ng-container matColumnDef="Day">
-            <th mat-header-cell *matHeaderCellDef>Day</th>
-            <td mat-cell *matCellDef="let data">{{ data.Day }}</td>
-          </ng-container>
-          <ng-container matColumnDef="Room ID">
-            <th mat-header-cell *matHeaderCellDef>Room</th>
-            <td mat-cell *matCellDef="let data">{{ data['Room ID'] }}</td>
-          </ng-container>
-          <ng-container matColumnDef="Daily Utilization">
-            <th mat-header-cell *matHeaderCellDef>Utilization (%)</th>
-            <td mat-cell *matCellDef="let data">
-              {{ data.Daily_Utilization | number:'1.1-1' }}
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="Time Slot">
-            <th mat-header-cell *matHeaderCellDef>Time Slot</th>
-            <td mat-cell *matCellDef="let data">{{ data.Time_Slot }}</td>
-          </ng-container>
-          <ng-container matColumnDef="Courses">
-            <th mat-header-cell *matHeaderCellDef>Courses</th>
-            <td mat-cell *matCellDef="let data">{{ data.Courses }}</td>
-          </ng-container>
-          <ng-container matColumnDef="Department">
-            <th mat-header-cell *matHeaderCellDef>Department</th>
-            <td mat-cell *matCellDef="let data">{{ data.Department }}</td>
-          </ng-container>
-         
-           
+                      <div class="loading-state" *ngIf="isLoadingSchedules">
+                        <div class="loading-spinner"></div>
+                        <p>Loading schedules...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-           <ng-container matColumnDef="Status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let data">{{ data.Status }}</td>
-          </ng-container> 
-          
-          <ng-container matColumnDef="Year">
-            <th mat-header-cell *matHeaderCellDef>Year</th>
-            <td mat-cell *matCellDef="let data">{{ data.Year }}</td>
-          </ng-container>
-           
-          <tr mat-header-row *matHeaderRowDef="utilizationColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: utilizationColumns;"></tr>
-        </table>
-      </mat-card-content>
-    </mat-card>
+                <!-- 4. Current Time Matches Table -->
+                 <div>
+                  <p></p>
+                 </div>
+                <div class="col-12 mb-4">
+                  <div class="search-result-section">
+                    <div class="section-card">
+                      <div class="card-header">
+                        <h3><i class="fas fa-clock"></i> Current Time Matches</h3>
+                        <div class="analysis-info">
+                          <span class="info-badge">
+                            <i class="fas fa-info-circle"></i>
+                            Live schedule matching current time
+                          </span>
+                        </div>
+                      </div>
+                      <div class="table-container" *ngIf="!isLoadingUtilization">
+                        <div class="table-responsive" style="overflow-x: auto; overflow-y: auto;">
+                          <table class="table table-striped table-hover modern-table current-time-table">
+                            <thead class="table-header">
+                              <tr>
+                                <th scope="col">Room ID</th>
+                                <th scope="col">Course</th>
+                                <th scope="col">Start</th>
+                                <th scope="col">End</th>
+                                <th scope="col">Day</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Year</th>
+                                <th scope="col">Department</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let match of currentTimeMatches" [@fadeInUp]>
+                                <td>
+                                  <span class="room-badge-small">{{match['Room ID']}}</span>
+                                </td>
+                                <td><strong>{{match.Course}}</strong></td>
+                                <td><span class="time-badge">{{match.Start}}</span></td>
+                                <td><span class="time-badge">{{match.End}}</span></td>
+                                <td>
+                                  <span class="day-indicator" [ngClass]="match.Day?.toLowerCase()">
+                                    {{match.Day}}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="status-indicator" [ngClass]="match.Status?.toLowerCase()">
+                                    {{match.Status || 'Active'}}
+          </span>
+            </td>
+                                <td><span class="year-badge">Year {{match.Year}}</span></td>
+                                <td><span class="dept-badge">{{match.Department}}</span></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                        <div class="empty-state" *ngIf="currentTimeMatches.length === 0">
+                          <i class="fas fa-clock"></i>
+                          <h3>No current matches</h3>
+                          <p>No schedules match the current time</p>
+                        </div>
+                      </div>
+                      
+                      <div class="loading-state" *ngIf="isLoadingUtilization">
+                        <div class="loading-spinner"></div>
+                        <p>Loading current time data...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Room Selection Panel - enhanced with search sync -->
+              <div class="row" *ngIf="searchQuery && filteredRooms.length !== availableRooms.length" [@slideInUp]>
+                <div class="col-lg-12">
+                  <div class="room-selection-panel">
+                    <div class="panel-header">
+                      <h3>Select Room for Analysis</h3>
+                      <p>Search syncs with room selection automatically</p>
+                    </div>
+                    <div class="room-grid">
+                      <div class="room-option" 
+                           *ngFor="let room of filteredRooms?.slice(0, 12)" 
+                           [class.selected]="selectedRoom === room"
+                           (click)="selectRoom(room)"
+                           [@scaleIn]>
+                        <div class="room-id">{{room['Room ID']}}</div>
+                        <div class="room-department">{{room['Department']}}</div>
+                        <div class="room-status">
+                          <div class="status-dot" [ngClass]="getRoomStatus(room)"></div>
+                          <span>{{getRoomStatusText(room)}}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Show message when search filters rooms -->
+                    <div class="search-results-info" *ngIf="searchQuery && filteredRooms.length !== availableRooms.length">
+                      <i class="fas fa-info-circle"></i>
+                      <span>Showing {{filteredRooms.length}} of {{availableRooms.length}} rooms matching "{{searchQuery}}"</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
   </section>
 
-   
-    <div class="text-center mt-4">
-      <button mat-raised-button color="primary" class="mx-2" (click)="saveChanges()">
-        <mat-icon>check_circle</mat-icon> Save All Changes
+            <!-- All Schedules Section - restored original table functionality -->
+            <section class="content-section" *ngIf="currentSection === 'schedules'" [@fadeInUp]>
+              <div class="row mb-4">
+                <div class="col-lg-12">
+                  <div class="schedules-header">
+                    <h2>All Schedules</h2>
+                    <div class="schedules-actions">
+                      <button class="btn btn-primary action-btn" (click)="refreshSchedules()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                      </button>
+                      <button class="btn btn-secondary action-btn" (click)="exportSchedules()">
+                        <i class="fas fa-download"></i>
+                        Export CSV
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Room Selection Required -->
+              <div class="row" *ngIf="!selectedRoom" [@slideInUp]>
+                <div class="col-lg-12">
+                  <div class="room-selection-prompt">
+                    <div class="prompt-content">
+                      <i class="fas fa-hand-pointer"></i>
+                      <h3>Select a Room</h3>
+                      <p>Choose a room from the options below to view all its schedules</p>
+                      
+                      <div class="row">
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-3" 
+                             *ngFor="let room of filteredRooms?.slice(0, 8)">
+                          <div class="room-quick-option" 
+                               (click)="selectRoom(room)"
+                               [@scaleIn]>
+                            <i class="fas fa-door-open"></i>
+                            <span>{{room['Room ID']}}</span>
+                            <small>{{room['Department']}}</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Schedules Table - restored original functionality -->
+              <div class="row" *ngIf="selectedRoom">
+                <div class="col-lg-12">
+                  <div class="schedules-container">
+                    <div class="schedules-card">
+                      <div class="card-header">
+                        <h3>
+                          <i class="fas fa-list-alt"></i> 
+                          All Schedules for {{selectedRoom['Room ID']}}
+                        </h3>
+                        <div class="schedule-filters">
+                          <select class="form-select filter-select" [(ngModel)]="selectedDay" (change)="filterSchedules()">
+                            <option value="">All Days</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <!-- Original Table Format - restored -->
+                      <div class="table-container" *ngIf="!isLoadingSchedules">
+                        <div class="table-responsive" style= " overflow-x:auto; overflow-y: auto;">
+                          <table class="table table-striped table-hover modern-table schedules-table" >
+                            <thead class="table-header">
+                              <tr>
+                                <th scope="col">Day</th>
+                                <th scope="col">Course</th>
+                                <th scope="col">Start Time</th>
+                                <th scope="col">End Time</th>
+                                <th scope="col">Instructor</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Year</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let schedule of getFilteredSchedules()" [@fadeInUp]>
+                                <td>
+                                  <span class="day-indicator" [ngClass]="schedule.Day?.toLowerCase()">
+                                    {{schedule.Day}}
+                                  </span>
+                                </td>
+                                <td>
+                                  <strong>{{schedule.Course}}</strong>
+                                </td>
+                                <td>{{schedule.Start}}</td>
+                                <td>{{schedule.End}}</td>
+                                <td>{{schedule.Instructor || 'Unknown'}}</td>
+                                <td>
+                                  <span class="dept-badge">{{schedule.Department}}</span>
+                                </td>
+                                <td>
+                                  <span class="year-badge">Year {{schedule.Year}}</span>
+                                </td>
+                                <td>
+                                  <span class="status-indicator" [ngClass]="schedule.Status?.toLowerCase()">
+                                    {{schedule.Status || 'Active'}}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary mini-btn" (click)="editSchedule(schedule)" matTooltip="Edit Schedule">
+                                      <i class="fas fa-edit"></i>
       </button>
-      <button mat-raised-button color="warn" class="mx-2" (click)="cancelChanges()">
-        <mat-icon>cancel</mat-icon> Cancel
+                                    <button class="btn btn-sm btn-outline-danger mini-btn" (click)="deleteSchedule(schedule)" matTooltip="Delete Schedule">
+                                      <i class="fas fa-trash"></i>
       </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
     </div>
 
-</main>
-
-<!-- New section to display all schedules -->
-<section class="conveyor mt-4" *ngIf="selectedRoom">
-  <mat-card class="fancy-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>list_alt</mat-icon> All Schedules for {{ selectedRoom['Room ID'] }}
-        <span class="auto-update-badge" matTooltip="Data auto-updates when room changes">
-          <mat-icon>autorenew</mat-icon> Auto-updated
-        </span>
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngIf="isLoadingSchedules" class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
+                        <!-- Empty state for table -->
+                        <div class="empty-state" *ngIf="getFilteredSchedules().length === 0">
+                          <i class="fas fa-calendar-times"></i>
+                          <h3>No schedules found</h3>
+                          <p *ngIf="selectedDay">No schedules found for {{selectedDay}}</p>
+                          <p *ngIf="!selectedDay">No schedules found for this room</p>
+                        </div>
+                      </div>
+                      
+                      <!-- Loading state -->
+                      <div class="loading-state" *ngIf="isLoadingSchedules">
+                        <div class="loading-spinner"></div>
         <p>Loading schedules...</p>
       </div>
-      <div *ngIf="scheduleError" class="error-message">
-        {{ scheduleError }}
+                      
+                      <!-- Error state -->
+                      <div class="error-state" *ngIf="scheduleError">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Schedules</h3>
+                        <p>{{scheduleError}}</p>
+                        <button class="btn btn-primary action-btn" (click)="refreshSchedules()">Try Again</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section class="content-section" *ngIf="currentSection === 'analytics'" [@fadeInUp]>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="analytics-grid">
+                    <div class="analytics-card">
+                      <h3>Analytics Dashboard</h3>
+                      <p>Advanced analytics and insights coming soon...</p>
+                      <button class="btn btn-primary action-btn" (click)="navigateToSection('home')">
+                        View Current Analytics
+                      </button>
+                    </div>
+                  </div>
+                </div>
       </div>
-      <table mat-table [dataSource]="allSchedules" class="utilization-table" *ngIf="!isLoadingSchedules">
-        <ng-container matColumnDef="Day">
-          <th mat-header-cell *matHeaderCellDef>Day</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Day }}</td>
-        </ng-container>
-        <ng-container matColumnDef="Course">
-          <th mat-header-cell *matHeaderCellDef>Course</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Course }}</td>
-        </ng-container>
-        <ng-container matColumnDef="Time">
-          <th mat-header-cell *matHeaderCellDef>Time</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Start }}–{{ schedule.End }}</td>
-        </ng-container>
-        <ng-container matColumnDef="Department">
-          <th mat-header-cell *matHeaderCellDef>Department</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Department }}</td>
-        </ng-container>
-        <ng-container matColumnDef="Year">
-          <th mat-header-cell *matHeaderCellDef>Year</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Year }}</td>
-        </ng-container>
-        <ng-container matColumnDef="Status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let schedule">{{ schedule.Status }}</td>
-        </ng-container>
-        
-        <tr mat-header-row *matHeaderRowDef="scheduleColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: scheduleColumns;"></tr>
-      </table>
-    </mat-card-content>
-  </mat-card>
+            </section>
+
+            <!-- Executive Section -->
+            <section class="content-section" *ngIf="currentSection === 'executive'" [@fadeInUp]>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="executive-grid">
+                    <div class="executive-card">
+                      <h3>Executive Management</h3>
+                      <p>Executive booking and resource management tools...</p>
+                      <button class="btn btn-primary action-btn" (click)="navigateToExecutive()">
+                        Go to Executive Booking
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 </section>
 
-<!-- Room selection and refresh buttons -->
-<div class="room-selection-container">
-  <div class="room-select">
-    <label for="roomSelect">Select Room:</label>
-    <select id="roomSelect" [(ngModel)]="selectedRoom" (change)="onRoomChange()">
-      <option *ngFor="let room of filteredRooms" [value]="room">{{ room['Room ID'] }}</option>
+            <!-- Settings Section -->
+            <section class="content-section" *ngIf="currentSection === 'settings'" [@fadeInUp]>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="settings-grid">
+                    <div class="settings-card">
+                      <h3>System Settings</h3>
+                      <p>Configure system preferences and options...</p>
+                      <div class="settings-options">
+                        <div class="row">
+                          <div class="col-md-6 mb-3">
+                            <div class="setting-item">
+                              <label class="form-label">Auto-refresh interval</label>
+                              <select class="form-select setting-select">
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                                <option value="300">5 minutes</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                            <div class="setting-item">
+                              <label class="form-label">Default view</label>
+                              <select class="form-select setting-select">
+                                <option value="home">Dashboard</option>
+                                <option value="schedules">All Schedules</option>
     </select>
   </div>
-  <div class="action-buttons">
-    <div class="auto-update-info">
-      <i class="fas fa-info-circle"></i> Data automatically updates when room changes
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- User Profile Section -->
+            <section class="content-section" *ngIf="currentSection === 'user'" [@fadeInUp]>
+              <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-12">
+                  <div class="profile-grid text-center">
+                    <div class="profile-card">
+                      <div class="card-header text-center">
+                        <h3 class="white-header"><i class="fas fa-user-circle"></i> Administrator Profile</h3>
+                        <div class="admin-badge-header mx-auto">
+                          <i class="fas fa-crown"></i>
+                          <span>{{user?.adminLevel || 'Super Admin'}}</span>
+                        </div>
+                      </div>
+                      <div class="profile-content">
+                        <div class="row justify-content-center">
+                          <div class="col-md-4 text-center">
+                            <div class="profile-avatar-large">
+                              <div class="avatar-circle-large">
+                                {{user?.initials || 'SA'}}
+                              </div>
+                              <div class="admin-badge-large">
+                                <i class="fas fa-crown"></i>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-8">
+                            <div class="profile-details text-center">
+                              <h4>{{user?.displayName || 'System Administrator'}}</h4>
+                              <p class="profile-role">{{user?.role || 'Administrator'}}</p>
+                              
+                              <div class="profile-info-grid">
+                                <div class="info-item">
+                                  <i class="fas fa-envelope"></i>
+                                  <div>
+                                    <label>Email Address</label>
+                                    <span>{{user?.email}}</span>
+                                  </div>
+                                </div>
+                                <div class="info-item">
+                                  <i class="fas fa-id-badge"></i>
+                                  <div>
+                                    <label>User ID</label>
+                                    <span>{{user?.userId}}</span>
+                                  </div>
+                                </div>
+                                <div class="info-item">
+                                  <i class="fas fa-building"></i>
+                                  <div>
+                                    <label>Department</label>
+                                    <span>{{user?.department}}</span>
+                                  </div>
+                                </div>
+                                <div class="info-item">
+                                  <i class="fas fa-clock"></i>
+                                  <div>
+                                    <label>Last Login</label>
+                                    <span>{{user?.lastLogin}}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Admin Permissions -->
+                        <div class="permissions-section text-center">
+                          <h5><i class="fas fa-key"></i> Permissions & Access</h5>
+                          <div class="permissions-grid justify-content-center">
+                            <div class="permission-item" *ngFor="let permission of user?.permissions">
+                              <i class="fas fa-check-circle"></i>
+                              <span>{{permission | titlecase}}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- System Status -->
+                        <div class="system-status-section text-center" *ngIf="user?.adminLogs?.systemInfo">
+                          <h5><i class="fas fa-server"></i> System Information</h5>
+                          <div class="row justify-content-center">
+                            <div class="col-md-3">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-code-branch"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>App Version</label>
+                                  <span>{{user.adminLogs.systemInfo.appVersion}}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>System Uptime</label>
+                                  <span>{{user.adminLogs.systemInfo.uptime}}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-database"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Total Logs</label>
+                                  <span>{{user.adminLogs.systemInfo.totalLogs}}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-activity"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Recent Activity</label>
+                                  <span>{{user.adminLogs.systemInfo.recentActivity || 0}}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Additional Real-time Statistics -->
+                          <div class="row justify-content-center mt-3" *ngIf="roomStats || scheduleStats">
+                            <div class="col-md-3" *ngIf="roomStats">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-door-open"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Available Rooms</label>
+                                  <span class="status-online">{{roomStats.available}}/{{roomStats.total}}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3" *ngIf="scheduleStats">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Total Schedules</label>
+                                  <span>{{scheduleStats.total}}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3" *ngIf="utilizationStats">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Peak Utilization</label>
+                                  <span>{{utilizationStats.peak}}%</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-3">
+                              <div class="status-card">
+                                <div class="status-icon">
+                                  <i class="fas fa-server"></i>
+                                </div>
+                                <div class="status-content">
+                                  <label>Server Status</label>
+                                  <span class="status-online">{{user.adminLogs.systemInfo.serverStatus}}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Admin Activity Logs -->
+                <div class="col-lg-4 col-md-12">
+                  <div class="logs-card">
+                    <div class="card-header text-center">
+                      <h3 class="white-header"><i class="fas fa-history"></i> Recent Activity</h3>
+                      <div class="logs-badge mx-auto">
+                        <span>{{user?.adminLogs?.activities?.length || 0}} entries</span>
+                      </div>
+                    </div>
+                    <div class="logs-content text-center" *ngIf="user?.adminLogs?.activities">
+                      <div class="log-item" *ngFor="let activity of user.adminLogs.activities">
+                        <div class="log-icon" [ngClass]="activity.status?.toLowerCase()">
+                          <i class="fas fa-check-circle" *ngIf="activity.status === 'Success'"></i>
+                          <i class="fas fa-exclamation-triangle" *ngIf="activity.status === 'Warning'"></i>
+                          <i class="fas fa-times-circle" *ngIf="activity.status === 'Error'"></i>
+                        </div>
+                        <div class="log-content text-center">
+                          <h6>{{activity.action}}</h6>
+                          <p>{{activity.resource}}</p>
+                          <small>{{activity.timestamp | date:'short'}}</small>
+                        </div>
+                        <div class="log-status" [ngClass]="activity.status?.toLowerCase()">
+                          {{activity.status}}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="logs-footer text-center">
+                      <button class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-download"></i>
+                        Export Logs
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-refresh"></i>
+                        Refresh
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="floating-actions" *ngIf="currentSection === 'home'" [@slideInUp]>
+            <button class="fab primary" (click)="saveChanges()" matTooltip="Save Changes">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="fab secondary" (click)="cancelChanges()" matTooltip="Cancel Changes">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Overlay for mobile -->
+        <div class="sidebar-overlay" 
+             *ngIf="isOpened" 
+             (click)="toggleSidebar()"></div>
+      </main>
     </div>
+  </div>
+
+        <!-- Search Feedback Section -->
+        <div class="search-feedback" *ngIf="searchQuery" [@fadeInUp]>
+          <div class="feedback-card">
+            <div class="feedback-header">
+              <h4><i class="fas fa-search"></i> Search Results for "{{searchQuery}}"</h4>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="feedback-loading" *ngIf="isLoadingRoomData">
+              <div class="loading-spinner"></div>
+              <p>Searching for room data...</p>
+            </div>
+            
+            <!-- Room Found -->
+            <div class="feedback-success" *ngIf="selectedRoom && roomSearchResults && !isLoadingRoomData">
+              <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="success-content">
+                <h5>Room Found: {{selectedRoom['Room ID']}}</h5>
+                <p>{{selectedRoom['Department']}} • {{selectedRoom['Room Type']}}</p>
+                <div class="data-status">
+                  <span class="status-item" [class.loaded]="roomUtilizationData.length > 0">
+                    <i class="fas fa-chart-line"></i> Utilization Data
+                  </span>
+                  <span class="status-item" [class.loaded]="ongoingSchedules.length > 0">
+                    <i class="fas fa-calendar"></i> Schedules ({{ongoingSchedules.length}})
+                  </span>
+                  <span class="status-item" [class.loaded]="dailyAnalysisData.length > 0">
+                    <i class="fas fa-analytics"></i> Daily Analysis
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Error State -->
+            <div class="feedback-error" *ngIf="roomSearchError && !isLoadingRoomData">
+              <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="error-content">
+                <h5>Search Error</h5>
+                <p>{{roomSearchError}}</p>
+                <button class="retry-btn" (click)="manualRoomSearch(searchQuery)">
+                  <i class="fas fa-redo"></i> Try Again
+                </button>
+              </div>
+            </div>
+            
+            <!-- Filtered Rooms -->
+            <div class="feedback-filtered" *ngIf="!selectedRoom && filteredRooms.length > 0 && !isLoadingRoomData && !roomSearchError">
+              <h5>Found {{filteredRooms.length}} matching room(s):</h5>
+              <div class="filtered-rooms">
+                <div class="room-quick-select" 
+                     *ngFor="let room of filteredRooms.slice(0, 5)" 
+                     (click)="selectRoom(room)">
+                  <span class="room-id">{{room['Room ID']}}</span>
+                  <span class="room-dept">{{room['Department']}}</span>
+                </div>
+              </div>
+              <p class="select-hint">Click on a room to view its data</p>
   </div>
 </div>
 </div>

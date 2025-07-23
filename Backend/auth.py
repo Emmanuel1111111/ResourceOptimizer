@@ -61,12 +61,14 @@ def login():
         log_entry['success'] = True
         log_entry['message'] = 'Login successful'
         log_entry['user_id'] = user['Id']
+        log_entry['email'] = user.get('email', '')  # Add user's email to log entry
         logs_collection.insert_one(log_entry)
         return jsonify({
             'message': 'Login successful',
             'Id': user['Id'],
             'token': access_token,
-            'username': username
+            'username': username,
+            'email': user.get('email', '')  # Include email in response
         }), 200
     else:
         log_entry['message'] = 'Invalid credentials'

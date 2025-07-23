@@ -11,24 +11,24 @@
 </head>
 <body [class.dark-mode]="isDarkMode">
 
-<div class="app-container">
+<div class="app-container row ">
   <!-- Enhanced Sidebar -->
-  <nav class="modern-sidebar">
+  <nav class="modern-sidebar col-lg-2 col-md-2">
     <div class="sidebar-header">
       <div class="logo-container">
         <div class="logo-icon">
-          <i class="bi bi-building"></i>
+          <i class="bi bi-building" style="color: white;"></i>
         </div>
-        <span class="logo-text">ResourceAI</span>
+        <span class="logo-text" style="color: white;">ResourceAI</span>
       </div>
     </div>
     
     <div class="nav-menu">
       <a class="nav-item active" href="#">
         <div class="nav-icon">
-          <i class="bi bi-house-door"></i>
+          <i class="bi bi-house-door" style="color: white;"></i>
         </div>
-        <span class="nav-text">Dashboard</span>
+        <span class="nav-text" style="color: white;">Dashboard</span>
         <div class="nav-indicator"></div>
       </a>
       
@@ -63,24 +63,25 @@
     
     <div class="sidebar-footer">
       <button class="theme-toggle-btn" (click)="toggleDarkMode()">
-        <i class="bi" [ngClass]="isDarkMode ? 'bi-sun' : 'bi-moon'"></i>
-        <span>{{ isDarkMode ? 'Light' : 'Dark' }} Mode</span>
+        <i class="bi" [ngClass]="isDarkMode ? 'bi-sun' : 'bi-moon'" style="color: white;"></i>
+        <span style="color: white;">{{ isDarkMode ? 'Light' : 'Dark' }} Mode</span>
       </button>
     </div>
   </nav>
 
   <!-- Main Content Area -->
-  <main class="main-content">
+  <main class="main-content ">
     <!-- Enhanced Header -->
+     <div class="col-md-10 col-lg-10">
     <div class="header-section">
-      <div class="header-content">
+      <div class="header-content" style="background-color:#ffffff; ">
         <div class="header-left">
           <div class="header-icon">
             <i class="bi bi-stars"></i>
           </div>
           <div class="header-text" >
-            <h1 class="header-title" style="color: black;" >AI-Powered Resource Insights</h1>
-            <p class="header-subtitle" style="color: rgb(255, 252, 252);">Smart analytics for optimal room utilization and predictive planning</p>
+            <h1 class="header-title" style="color: #1a2b5c;;" >AI-Powered Resource Insights</h1>
+            <p class="header-subtitle" style="color: #1a2b5c;;">Smart analytics for optimal room utilization and predictive planning</p>
           </div>
         </div>
          
@@ -98,7 +99,7 @@
     <!-- Enhanced Search Section -->
     <div class="search-section">
       <div class="search-container">
-        <div class="search-wrapper" [class.focused]="searchFocused">
+        <div class="search-wrapper" [class.focused]="searchFocused" style="background-color: #1a2b5c; color: white;">
           <div class="search-icon">
             <i class="bi bi-search"></i>
           </div>
@@ -914,6 +915,7 @@
       <button class="fab-button" (click)="clearInsights()" title="Clear All Data">
         <i class="bi bi-trash"></i>
       </button>
+    </div>
     </div>
   </main>
 </div>

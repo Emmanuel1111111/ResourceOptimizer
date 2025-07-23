@@ -246,7 +246,16 @@ export interface SuggestRoomsResponse extends ApiResponse {
   date: string;
   day: string;
   time: string;
+  business_hours?: {start: string, end: string};
   suggested_rooms: SuggestedRoom[];
+  conflicted_rooms?: SuggestedRoom[];
+  total_available?: number;
+  total_conflicted?: number;
+  analysis?: {
+    requested_duration: string;
+    total_rooms_analyzed: number;
+    rooms_with_schedules: number;
+  };
 }
 
 export interface SuggestedRoom {
@@ -271,7 +280,7 @@ export interface RequestedTimeSlot {
 
 // Request payload interfaces
 export interface ManageResourcesRequest {
-  operation: 'check_overlap' | 'reallocate' | 'inject_schedule' | 'suggest_rooms';
+  operation: 'check_overlap' | 'reallocate' | 'inject_schedule' | 'suggest_rooms' | 'get_room_schedules';
   room_id?: string;
   date?: string;
   start_time?: string;
@@ -281,9 +290,16 @@ export interface ManageResourcesRequest {
   new_schedule?: NewSchedule;
   department?: string;
   course?: string;
-  lecturer?: string;
-  level?: string;
-  program?: string;
+  instructor?: string; // Fixed: Use 'instructor' instead of 'lecturer'
+  year?: string; // Fixed: Use 'year' instead of 'level'
+  // Additional fields for reallocate operation - schedule identification
+  original_day?: string;
+  original_start_time?: string;
+  original_end_time?: string;
+  original_course?: string;
+  // Pagination support
+  page?: number;
+  per_page?: number;
 }
 
 export interface NewSchedule {

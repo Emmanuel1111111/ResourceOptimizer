@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatChip, MatChipsModule } from '@angular/material/chips';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -27,6 +27,19 @@ import {
   ConflictInfo,
   SuggestedRoom
 } from '../../Environ'
+
+// Interface for schedule search results
+interface ExistingSchedule {
+  id: string;
+  room_id: string;
+  course: string;
+  day: string;
+  start: string;
+  end: string;
+  lecturer: string;
+  department: string;
+  date?: string;
+}
 
 
 
@@ -62,29 +75,37 @@ export class ExecutiveBookingComponent implements OnInit {
   availableTimeSlots: any[] = [];
   endTimeOptions: string[] = [];
   
+  // Reallocate functionality
+  scheduleSearchForm: FormGroup;
+  foundSchedules: ExistingSchedule[] = [];
+  selectedSchedule: ExistingSchedule | null = null;
+  scheduleSearchLoading: boolean = false;
+  showMultipleSchedulesModal: boolean = false;
+  multipleScheduleOptions: any[] = [];
+  
   // Database connection status
   dbConnectionError: boolean = false;
   dbErrorMessage: string = '';
   showTroubleshootingGuide: boolean = false;
   
-  // Day options for dropdowns
+  // Day options for dropdowns (Day-based scheduling priority)
   dayOptions: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
    tabs = ['Check Overlap', 'Suggest Rooms', 'Inject Schedule', 'Reallocate'];
-  reallocateForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private resourceService: ResourceManagementService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
-     
+    // Main operation form (day-based priority)
     this.form = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''],
+      date: [''], // Optional - fallback for day-based scheduling
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
-      day: ['', Validators.required], 
+      day: ['', Validators.required], // Required - day-based scheduling priority
       scheduleId: [''],
       course: [''],
       department: [''],
@@ -93,41 +114,100 @@ export class ExecutiveBookingComponent implements OnInit {
       program: ['']
     });
     
+    // Enhanced inject schedule form
     this.injectScheduleForm = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''],
+      date: [''], // Optional
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
-      day: ['', Validators.required],
+      day: ['', Validators.required], // Required
       course: ['', Validators.required],
       department: ['', Validators.required],
       lecturer: [''],
       level: ['', Validators.required]
     });
     
-    this.reallocateForm = this.fb.group({
-      roomId: ['', Validators.required],
+    // Schedule search form for reallocate
+    this.scheduleSearchForm = this.fb.group({
+      searchQuery: [''],
+      roomId: [''],
       day: [''],
-      date: [''],
-      startTime: [''],
-      endTime: [''],
-      course: [''],
-      department: [''],
-      year: [''],
-      status: [''],
-      lecturer: ['']
+      course: ['']
     });
     
     this.timeOptions = this.getTimeOptions();
   }
 
   ngOnInit() {
-    
-    this.activeTab = 'Check Overlap'; // Default active tab
-    
-    
-    
+    this.activeTab = 'Check Overlap';
     this.checkDatabaseStatus();
+    
+    // Show day-based scheduling info
+    this.snackBar.open(
+      'Day-based scheduling is prioritized. Date is used as fallback only.',
+      'Got it',
+      { duration: 5000, verticalPosition: 'top' }
+    );
+  }
+
+  // Enhanced search for existing schedules (for reallocate operation)
+  searchExistingSchedules() {
+    const { searchQuery, roomId, day, course } = this.scheduleSearchForm.value;
+    
+    if (!searchQuery && !roomId && !day && !course) {
+      this.foundSchedules = [];
+      return;
+    }
+
+    this.scheduleSearchLoading = true;
+    
+    this.resourceService.searchSchedules(searchQuery, roomId, day, course).subscribe({
+      next: (response: any) => {
+        if (response.schedules) {
+          this.foundSchedules = response.schedules.map((schedule: any) => ({
+            id: schedule['Room ID'] + '_' + schedule.Start + '_' + schedule.Course,
+            room_id: schedule['Room ID'],
+            course: schedule.Course || 'Unknown',
+            day: schedule.Day || 'Unknown',
+            start: schedule.Start || '',
+            end: schedule.End || '',
+            // Fixed: Use 'Instructor' field from database, not 'Lecturer'
+            lecturer: schedule.Instructor || 'Unknown',
+            department: schedule.Department || 'Unknown',
+            date: schedule.Date
+          }));
+        } else {
+          this.foundSchedules = [];
+        }
+        this.scheduleSearchLoading = false;
+      },
+      error: (error) => {
+        this.handleApiError(error, 'Failed to search schedules');
+        this.scheduleSearchLoading = false;
+      }
+    });
+  }
+
+  // Select schedule for reallocation
+  selectScheduleForReallocation(schedule: ExistingSchedule) {
+    this.selectedSchedule = schedule;
+    
+    // Pre-populate form with current schedule details
+    this.form.patchValue({
+      roomId: '', // New room ID to be filled by user
+      day: schedule.day,
+      startTime: schedule.start,
+      endTime: schedule.end,
+      course: schedule.course,
+      lecturer: schedule.lecturer,
+      department: schedule.department
+    });
+    
+    this.snackBar.open(
+      `Selected schedule: ${schedule.course} in ${schedule.room_id}`,
+      'Continue',
+      { duration: 3000 }
+    );
   }
   
  
@@ -219,7 +299,7 @@ export class ExecutiveBookingComponent implements OnInit {
         }
         
         
-        this.performOperation(operation, roomId, date, startTime, endTime, day, scheduleId, course, department, lecturer, level, program);
+        this.performOperation(operation, roomId, date, startTime, endTime, day, scheduleId, course, department, lecturer, level);
       },
       error: (error: any) => {
         console.error('Failed to check database status:', error);
@@ -236,39 +316,7 @@ export class ExecutiveBookingComponent implements OnInit {
 
   performOperation(operation: string, roomId: string, date: string, startTime: string, endTime: string, 
                    day: string, scheduleId: string, course: string, department: string, 
-                   lecturer: string, level: string, program: string) {
-    if (operation === 'reallocate') {
-      const formValue = this.reallocateForm.value;
-      // Build new_schedule dynamically
-      const new_schedule: any = {};
-      const roomId = formValue.roomId;
-      if (!roomId) {
-        this.snackBar.open('Room ID is required.', 'Close', { duration: 3000 });
-        this.loading = false;
-        return;
-      }
-      if (formValue.day) new_schedule.day = formValue.day;
-      if (formValue.date) new_schedule.date = formValue.date;
-      if (formValue.startTime) new_schedule.start_time = formValue.startTime;
-      if (formValue.endTime) new_schedule.end_time = formValue.endTime;
-      if (formValue.course) new_schedule.course = formValue.course;
-      if (formValue.department) new_schedule.department = formValue.department;
-      if (formValue.year) new_schedule.year = formValue.year;
-      if (formValue.status) new_schedule.status = formValue.status;
-      if (formValue.lecturer) new_schedule.lecturer = formValue.lecturer;
-      this.loading = true;
-      this.resourceService.reallocateSchedule(roomId, new_schedule).subscribe({
-        next: (response: any) => {
-          this.results = response;
-          this.snackBar.open('Reallocation request sent!', 'Close', { duration: 3000 });
-          this.loading = false;
-        },
-        error: (error) => {
-          this.handleApiError(error, 'Failed to reallocate schedule');
-        }
-      });
-      return;
-    }
+                   lecturer: string, level: string) {
     switch (operation) {
       case 'check_overlap':
         if (!roomId || !startTime || !endTime || !day) {
@@ -293,10 +341,61 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       case 'suggest_rooms':
+        // Enhanced validation for suggest_rooms
         if (!startTime || !endTime || !day) {
           this.snackBar.open('Please fill in day, start time, and end time.', 'Close', { duration: 3000 });
           this.loading = false;
           return;
+        }
+        
+        // Validate time formats
+        const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timePattern.test(startTime)) {
+          this.snackBar.open('Invalid start time format. Use HH:MM (e.g., 09:00)', 'Close', { duration: 4000 });
+          this.loading = false;
+          return;
+        }
+        
+        if (!timePattern.test(endTime)) {
+          this.snackBar.open('Invalid end time format. Use HH:MM (e.g., 11:00)', 'Close', { duration: 4000 });
+          this.loading = false;
+          return;
+        }
+        
+        // Validate that end time is after start time
+        const startMinutes = this.timeToMinutes(startTime);
+        const endMinutes = this.timeToMinutes(endTime);
+        
+        if (endMinutes <= startMinutes) {
+          this.snackBar.open('End time must be after start time.', 'Close', { duration: 4000 });
+          this.loading = false;
+          return;
+        }
+        
+        // Validate reasonable duration (minimum 15 minutes, maximum 12 hours)
+        const durationMinutes = endMinutes - startMinutes;
+        if (durationMinutes < 15) {
+          this.snackBar.open('Minimum booking duration is 15 minutes.', 'Close', { duration: 4000 });
+          this.loading = false;
+          return;
+        }
+        
+        if (durationMinutes > 12 * 60) {
+          this.snackBar.open('Maximum booking duration is 12 hours.', 'Close', { duration: 4000 });
+          this.loading = false;
+          return;
+        }
+        
+        // Validate business hours (basic check - can be made configurable)
+        const businessStart = this.timeToMinutes('08:00');
+        const businessEnd = this.timeToMinutes('20:00');
+        
+        if (startMinutes < businessStart || endMinutes > businessEnd) {
+          this.snackBar.open(
+            `Requested time is outside typical business hours (08:00-20:00). Continuing with request...`, 
+            'Close', 
+            { duration: 5000 }
+          );
         }
         
         // Date is optional for suggest_rooms
@@ -304,9 +403,28 @@ export class ExecutiveBookingComponent implements OnInit {
           next: (response: SuggestRoomsResponse) => {
             this.results = response;
             
+            // Enhanced processing for improved backend response
+            if (response.suggested_rooms) {
+              // Sort rooms by availability and total free time
+              response.suggested_rooms.sort((a, b) => {
+                const aTotalFree = this.calculateTotalFreeTime(a.free_slots);
+                const bTotalFree = this.calculateTotalFreeTime(b.free_slots);
+                return bTotalFree - aTotalFree;
+              });
+            }
+            
             // Initialize pagination for room suggestions
             this.filteredRooms = [...(response.suggested_rooms || [])];
             this.initializePagination();
+            
+            // Show additional information if available
+            if (response.conflicted_rooms && response.conflicted_rooms.length > 0) {
+              this.snackBar.open(
+                `Found ${response.total_available} available rooms. ${response.total_conflicted} rooms have conflicts.`, 
+                'Close', 
+                { duration: 6000 }
+              );
+            }
             
             this.loading = false;
           },
@@ -323,7 +441,7 @@ export class ExecutiveBookingComponent implements OnInit {
           return;
         }
         
-        // Use injectSchedule but make date optional
+        // Fixed field mapping for inject schedule (day-based priority)
         this.resourceService.injectSchedule(
           roomId, 
           date || this.getCurrentDate(), 
@@ -333,8 +451,8 @@ export class ExecutiveBookingComponent implements OnInit {
           { 
             course: course || '', 
             department: department || '', 
-            lecturer: lecturer || '', 
-            year: level || '' // Correctly map level form control to year field
+            lecturer: lecturer || '', // This will be mapped to 'instructor' in service
+            year: level || '' // This will be mapped correctly in service
           }
         ).subscribe({
           next: (response: InjectScheduleResponse) => {
@@ -342,27 +460,22 @@ export class ExecutiveBookingComponent implements OnInit {
             this.snackBar.open(`Schedule added successfully! ID: ${response.schedule_id}`, 'Close', { duration: 3000 });
             this.loading = false;
             
-            // Check if the response includes refreshed data
             if (response.refreshed_data) {
               console.log('Received refreshed data from backend:', response.refreshed_data);
-              // Update the component data with the refreshed data
               if (response.refreshed_data.daily_utilization) {
                 this.dailyUtilization = response.refreshed_data.daily_utilization;
               }
               
-              // Update the results to include the refreshed data
               this.results = {
                 ...this.results,
                 refreshed_data: {
                   daily_utilization: this.dailyUtilization,
-                  all_schedules: []  // We'll fetch this separately
+                  all_schedules: []
                 }
               };
               
-              // Still fetch all schedules to ensure we have the latest data
               this.fetchAllSchedules(roomId);
             } else {
-              // If no refreshed data, fetch it manually
               this.refreshData(roomId);
             }
           },
@@ -371,14 +484,92 @@ export class ExecutiveBookingComponent implements OnInit {
           }
         });
         break;
+
+      case 'reallocate':
+        if (!this.selectedSchedule) {
+          this.snackBar.open('Please select a schedule to reallocate first.', 'Close', { duration: 3000 });
+          this.loading = false;
+          return;
+        }
+
+        // Build new schedule with only filled fields (partial update support)
+        const newSchedule: any = {};
+        
+        // Only add fields that are actually filled in the form
+        if (roomId) newSchedule.room_id = roomId;
+        if (date) newSchedule.date = date;
+        if (startTime) newSchedule.start_time = startTime;
+        if (endTime) newSchedule.end_time = endTime;
+        if (day) newSchedule.day = day;
+        if (course) newSchedule.course = course;
+        if (department) newSchedule.department = department;
+        if (lecturer) newSchedule.lecturer = lecturer;
+        if (level) newSchedule.year = level;
+        
+        // Validate that at least one field is being updated
+        if (Object.keys(newSchedule).length === 0) {
+          this.snackBar.open('Please fill in at least one field to update.', 'Close', { duration: 3000 });
+          this.loading = false;
+          return;
+        }
+
+        const originalDetails = {
+          original_day: this.selectedSchedule.day,
+          original_start_time: this.selectedSchedule.start,
+          original_end_time: this.selectedSchedule.end,
+          original_course: this.selectedSchedule.course
+        };
+
+        this.resourceService.reallocateSchedule(this.selectedSchedule.room_id, newSchedule, originalDetails).subscribe({
+          next: (response: any) => {
+            this.results = response;
+            this.snackBar.open('Schedule reallocated successfully!', 'Close', { duration: 3000 });
+            this.loading = false;
+            this.selectedSchedule = null;
+            this.foundSchedules = [];
+            this.scheduleSearchForm.reset();
+          },
+          error: (error) => {
+            // Handle multiple schedule matches
+            if (error.error?.matching_schedules) {
+              this.showMultipleScheduleOptions(error.error.matching_schedules);
+            } else {
+              this.handleApiError(error, 'Failed to reallocate schedule');
+            }
+          }
+        });
+        break;
     }
+  }
+
+  // Handle multiple schedule matches
+  showMultipleScheduleOptions(schedules: any[]) {
+    this.multipleScheduleOptions = schedules;
+    this.showMultipleSchedulesModal = true;
+    this.loading = false;
+  }
+
+  selectSpecificSchedule(schedule: any) {
+    this.selectedSchedule = {
+      id: schedule.room_id + '_' + schedule.time + '_' + schedule.course,
+      room_id: schedule.room_id,
+      course: schedule.course,
+      day: schedule.day,
+      start: schedule.time.split('-')[0],
+      end: schedule.time.split('-')[1],
+      // Fixed: Use correct field mapping for lecturer
+      lecturer: schedule.lecturer || 'Unknown',
+      department: schedule.department || 'Unknown'
+    };
+    
+    this.showMultipleSchedulesModal = false;
+    this.snackBar.open(`Selected specific schedule: ${schedule.course}`, 'Continue', { duration: 3000 });
   }
 
   // Helper method to handle API errors
   handleApiError(error: any, defaultMessage: string) {
     console.error('API Error:', error);
     
-    // Check if error is a database connection issue
     if (error.error && error.error.error && error.error.error.includes('Database connection is not available')) {
       this.dbConnectionError = true;
       this.dbErrorMessage = 'Database connection error. Please contact system administrator.';
@@ -390,6 +581,7 @@ export class ExecutiveBookingComponent implements OnInit {
     
     this.loading = false;
     this.injectLoading = false;
+    this.scheduleSearchLoading = false;
   }
 
 
@@ -491,18 +683,24 @@ export class ExecutiveBookingComponent implements OnInit {
   }
 
   onTabChange(index: number) {
-    
     this.activeTab = this.tabs[index];
     console.log('Tab changed to:', this.activeTab);
     this.results = null; 
-    
     this.form.reset();
-    // Show snackbar when Reallocate tab is activated
+    
+    // Clear reallocate-specific data when switching tabs
+    if (this.activeTab !== 'Reallocate') {
+      this.selectedSchedule = null;
+      this.foundSchedules = [];
+      this.scheduleSearchForm.reset();
+    }
+    
+    // Show specific guidance for reallocate tab
     if (this.activeTab === 'Reallocate') {
       this.snackBar.open(
-        'Only fields you fill in will be updated. Leave blank to keep existing values.',
-        'Dismiss',
-        { duration: 10000, verticalPosition: 'top' }
+        'Step 1: Search and select the schedule to move. Step 2: Set new location and time.',
+        'Got it',
+        { duration: 8000, verticalPosition: 'top' }
       );
     }
   }
@@ -641,6 +839,14 @@ export class ExecutiveBookingComponent implements OnInit {
   timeToMinutes(timeStr: string): number {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+
+  calculateTotalFreeTime(freeSlots: any[]): number {
+    return freeSlots.reduce((total: number, slot: any) => {
+      const start = this.timeToMinutes(slot.start);
+      const end = this.timeToMinutes(slot.end);
+      return total + (end - start);
+    }, 0);
   }
   
   // Room selection and inject schedule methods
