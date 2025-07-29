@@ -82,16 +82,9 @@ export class AuthService {
     catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch rooms')))
   );
 }
-  predictUtilization(roomId?: string, period: number = 7): Observable<Prediction[]> {
-    let params = new HttpParams().set('period', period.toString());
-    const body = roomId ? { room_id: roomId } : {};
-    return this.http.post<Prediction[]>(`${this.apiUrl}/api/predict`, body, { params }).pipe(
-      catchError(err => throwError(() => err.error?.error || 'Failed to predict utilization'))
-    );
-  }
-
  
 
+ 
   currentUtilization(roomId: string): Observable<AnalysisResult[]> {
    
     const body = roomId ? { room_id: roomId } : {};

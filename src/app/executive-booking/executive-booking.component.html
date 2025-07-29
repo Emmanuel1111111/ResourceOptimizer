@@ -74,6 +74,35 @@
         <!-- Check Overlap Tab -->
     <div *ngIf="activeTab === 'Check Overlap'" class="tab-content">
       <div class="tab-pane fade-in">
+        
+        <!-- Operation Mode Info -->
+        <div class="operation-modes-info">
+          <h4>📊 Check Overlap Operation Modes</h4>
+          <div class="mode-cards">
+            <div class="mode-card" [class.active]="!form.get('startTime')?.value || !form.get('endTime')?.value">
+              <div class="mode-icon">🔍</div>
+              <h5>Comprehensive Room Analysis</h5>
+              <p>Leave times empty to analyze ALL schedules for the room and day</p>
+              <ul>
+                <li>• Detect all schedule conflicts</li>
+                <li>• Show room utilization</li>
+                <li>• Find available time slots</li>
+                <li>• Get optimization recommendations</li>
+              </ul>
+            </div>
+            <div class="mode-card" [class.active]="form.get('startTime')?.value && form.get('endTime')?.value">
+              <div class="mode-icon">🎯</div>
+              <h5>Specific Time Slot Check</h5>
+              <p>Enter times to check if a specific slot conflicts</p>
+              <ul>
+                <li>• Check availability for specific time</li>
+                <li>• See conflicting schedules</li>
+                <li>• Plus full room analysis</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
         <div class="form-section">
           <form [formGroup]="form" class="modern-form">
             <div class="form-row">
@@ -108,25 +137,21 @@
 
             <div class="form-row time-row">
               <div class="form-group animate-on-hover">
-                <label class="form-label">Start Time</label>
-                <select class="form-select" formControlName="startTime" required>
-                  <option value="" disabled selected>Select time</option>
+                <label class="form-label">Start Time (Optional)</label>
+                <select class="form-select" formControlName="startTime">
+                  <option value="" disabled selected>Select time (for specific slot check)</option>
                   <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
                 </select>
-                <div *ngIf="form.get('startTime')?.hasError('required') && form.get('startTime')?.touched" class="error-message">
-                  Start time is required
-                </div>
+                <div class="form-hint">Leave empty for comprehensive room analysis</div>
               </div>
               
               <div class="form-group animate-on-hover">
-                <label class="form-label">End Time</label>
-                <select class="form-select" formControlName="endTime" required>
-                  <option value="" disabled selected>Select time</option>
+                <label class="form-label">End Time (Optional)</label>
+                <select class="form-select" formControlName="endTime">
+                  <option value="" disabled selected>Select time (for specific slot check)</option>
                   <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
                 </select>
-                <div *ngIf="form.get('endTime')?.hasError('required') && form.get('endTime')?.touched" class="error-message">
-                  End time is required
-                </div>
+                <div class="form-hint">Leave empty for comprehensive room analysis</div>
               </div>
             </div>
             
@@ -134,8 +159,9 @@
               <button 
                 class="action-button primary pulse-animation" 
                 (click)="executeOperation('check_overlap')" 
-                [disabled]="loading || !form.get('roomId')?.valid || !form.get('day')?.valid || !form.get('startTime')?.valid || !form.get('endTime')?.valid">
-                <span class="button-icon">🔍</span> Check Overlap
+                [disabled]="loading || !form.get('roomId')?.valid || !form.get('day')?.valid">
+                <span class="button-icon">🔍</span> 
+                {{ form.get('startTime')?.value && form.get('endTime')?.value ? 'Check Specific Time Slot' : 'Analyze Room Schedule' }}
               </button>
             </div>
           </form>
@@ -147,64 +173,6 @@
           <p>Processing request...</p>
         </div>
 
-        <div *ngIf="results && !loading" class="results-section fade-in">
-          <div class="results-header">
-            <h2>Overlap Check Results</h2>
-            <button class="refresh-button" (click)="refreshData(results.room_id)">
-              <span class="button-icon">↻</span> Refresh
-            </button>
-          </div>
-
-          <div class="results-summary">
-            <div class="summary-card" [ngClass]="{'conflict': results.has_conflict, 'no-conflict': !results.has_conflict}">
-              <div class="summary-icon">
-                <span *ngIf="results.has_conflict">⚠️</span>
-                <span *ngIf="!results.has_conflict">✓</span>
-              </div>
-              <div class="summary-details">
-                <h3>{{results.has_conflict ? 'Conflicts Detected' : 'No Conflicts'}}</h3>
-                <p><strong>Department:</strong> {{results.department}}</p>
-                <p>Room: <strong>{{results.room_id}}</strong></p>
-                <p>Day: <strong>{{results.day}}</strong></p>
-                <p>Time: <strong>{{results.proposed_time}}</strong></p>
-                <p>Schedules checked: <strong>{{results.schedules_checked}}</strong></p>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="results.has_conflict" class="conflicts-container">
-            <h3>Conflicting Schedules</h3>
-            <div class="conflicts-grid">
-              <div *ngFor="let conflict of results.conflicts; let i = index" class="conflict-card animate-in" [style.animation-delay]="i * 0.1 + 's'">
-                <div class="conflict-header">
-                  <span class="conflict-course">{{conflict.course}}</span>
-                </div>
-                <div class="conflict-details">
-                  <p><span class="detail-label">Time:</span> {{conflict.time}}</p>
-                  <p><span class="detail-label">Day:</span> {{conflict.day}}</p>
-                  <p><span class="detail-label">Date:</span> {{conflict.date || 'Not specified'}}</p>
-                  <p><span class="detail-label">Room:</span> {{conflict.schedule_id}}</p>
-                  <p><span class="detail-label">Department:</span> {{conflict.department || 'Not specified'}}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="!results.has_conflict" class="available-slot">
-            <div class="available-slot-card bounce-in">
-              <h3>This Time Slot is Available</h3>
-              <p>You can proceed with scheduling for:</p>
-              <p class="slot-details">
-                <span class="slot-room">{{results.room_id}}</span>
-                <span class="slot-day">{{results.day}}</span>
-                <span class="slot-time">{{results.proposed_time}}</span>
-              </p>
-              <button class="action-button secondary pulse-animation">
-                Book This Slot
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
         
@@ -512,17 +480,17 @@
                            formControlName="searchQuery" 
                            placeholder="Search by Room ID, Course, or Lecturer"
                            (input)="searchExistingSchedules()">
-                  </div>
-                  
+              </div>
+              
                   <div class="search-group">
                     <label class="search-label">Room ID</label>
                     <input class="search-input" 
                            formControlName="roomId" 
                            placeholder="Filter by Room ID"
                            (input)="searchExistingSchedules()">
-                  </div>
-                </div>
-                
+              </div>
+            </div>
+            
                 <div class="search-row">
                   <div class="search-group">
                     <label class="search-label">Day</label>
@@ -659,7 +627,7 @@
                 <label class="form-label">Date (Optional)</label>
                 <input class="form-input" type="date" formControlName="date">
                   <div class="form-hint">Used as fallback if day-based fails</div>
-                </div>
+              </div>
             </div>
       
             <div class="form-row time-row">
@@ -679,7 +647,7 @@
                   <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
                 </select>
                   <div class="form-hint">✨ Leave blank to keep current end time</div>
-                </div>
+              </div>
             </div>
             
             <div class="form-row">
@@ -700,7 +668,7 @@
               </div>
               
               <div class="form-row">
-                <div class="form-group animate-on-hover">
+              <div class="form-group animate-on-hover">
                   <label class="form-label">Lecturer (Optional)</label>
                   <input class="form-input" 
                          formControlName="lecturer" 
@@ -712,7 +680,7 @@
                   <input class="form-input" 
                          formControlName="level" 
                          placeholder="Enter year if needed">
-                </div>
+              </div>
             </div>
           
             <div class="form-actions">
@@ -890,6 +858,180 @@
     </div>
     <div class="modal-footer">
       <button class="action-button secondary" (click)="showMultipleSchedulesModal = false">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Overlap Analysis Results -->
+<div *ngIf="results && results.overlap_analysis" class="overlap-analysis-section">
+  <h3>📊 Comprehensive Overlap Analysis</h3>
+  
+  <!-- Analysis Summary Card -->
+  <div class="analysis-summary-card">
+    <h4>{{results.room_id}} - {{results.day}}</h4>
+    <div class="summary-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{results.schedule_summary?.total_schedules || 0}}</span>
+        <span class="stat-label">Total Schedules</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" [style.color]="results.overlap_analysis?.has_overlaps ? '#dc3545' : '#28a745'">
+          {{results.overlap_analysis?.total_conflicts || 0}}
+        </span>
+        <span class="stat-label">Conflicts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" [style.color]="results.utilization_analysis?.status_color">
+          {{results.utilization_analysis?.utilization_percentage || 0}}%
+        </span>
+        <span class="stat-label">Utilization</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Conflict Details (if any) -->
+  <div *ngIf="results.overlap_analysis?.has_overlaps" class="conflicts-section">
+    <h4>🚨 Schedule Conflicts ({{results.overlap_analysis.total_conflicts}})</h4>
+    <div class="conflict-list">
+      <div *ngFor="let conflict of results.overlap_analysis.overlapping_pairs" class="conflict-item">
+        <div class="conflict-header">
+          <span class="severity-badge" [style.background-color]="conflict.severity_color">
+            {{conflict.severity_icon}} {{conflict.conflict_severity}}
+          </span>
+          <span class="overlap-time">{{conflict.overlap_period}} ({{conflict.overlap_duration}})</span>
+        </div>
+        <div class="conflicting-schedules">
+          <div class="schedule-detail">
+            <strong>{{conflict.schedule1.course}}</strong>
+            <span class="time-range">{{conflict.schedule1.time}}</span>
+            <span class="department">{{conflict.schedule1.department}}</span>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="schedule-detail">
+            <strong>{{conflict.schedule2.course}}</strong>
+            <span class="time-range">{{conflict.schedule2.time}}</span>
+            <span class="department">{{conflict.schedule2.department}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- No Conflicts Message -->
+  <div *ngIf="!results.overlap_analysis?.has_overlaps" class="no-conflicts">
+    <div class="success-message">
+      <span class="success-icon">✅</span>
+      <h4>No Schedule Conflicts Found</h4>
+      <p>All schedules for {{results.room_id}} on {{results.day}} are properly separated.</p>
+    </div>
+  </div>
+  
+  <!-- Utilization Analysis -->
+  <div class="utilization-section">
+    <h4>📈 Room Utilization Analysis</h4>
+    <div class="utilization-details">
+      <div class="utilization-bar">
+        <div class="utilization-fill" 
+             [style.width.%]="results.utilization_analysis?.utilization_percentage || 0"
+             [style.background-color]="results.utilization_analysis?.status_color">
+        </div>
+      </div>
+      <div class="utilization-stats">
+        <div class="util-stat">
+          <label>Scheduled Time:</label>
+          <span>{{results.utilization_analysis?.total_scheduled_time}}</span>
+        </div>
+        <div class="util-stat">
+          <label>Business Hours:</label>
+          <span>{{results.utilization_analysis?.business_hours}}</span>
+        </div>
+        <div class="util-stat">
+          <label>Status:</label>
+          <span [style.color]="results.utilization_analysis?.status_color">
+            {{results.utilization_analysis?.status_icon}} {{results.utilization_analysis?.utilization_status}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Free Time Slots -->
+  <div *ngIf="results.free_time_analysis?.total_free_slots > 0" class="free-time-section">
+    <h4>⏰ Available Time Slots ({{results.free_time_analysis.total_free_slots}})</h4>
+    <div class="free-slots-grid">
+      <div *ngFor="let slot of results.free_time_analysis.free_slots" class="free-slot-item">
+        <span class="slot-time">{{formatTimeRange(slot.start, slot.end)}}</span>
+        <span class="slot-duration">{{slot.duration}}</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- All Schedules List -->
+  <div *ngIf="results.all_schedules?.length > 0" class="all-schedules-section">
+    <h4>📋 All Schedules ({{results.all_schedules.length}})</h4>
+    <div class="schedules-table">
+      <div class="schedule-header">
+        <span>Time</span>
+        <span>Course</span>
+        <span>Department</span>
+        <span>Duration</span>
+        <span>Conflicts</span>
+      </div>
+      <div *ngFor="let schedule of results.all_schedules" class="schedule-row">
+        <span class="schedule-time">{{formatTimeRange(schedule.start, schedule.end)}}</span>
+        <span class="schedule-course">{{schedule.course}}</span>
+        <span class="schedule-department">{{schedule.department}}</span>
+        <span class="schedule-duration">{{schedule.duration_formatted}}</span>
+        <span class="schedule-conflicts" 
+              [style.color]="getConflictCount(schedule.course) > 0 ? '#dc3545' : '#28a745'">
+          {{getConflictCount(schedule.course) > 0 ? getConflictCount(schedule.course) + ' conflicts' : 'No conflicts'}}
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Specific Time Check Results (if applicable) -->
+  <div *ngIf="results.specific_time_check" class="specific-time-section">
+    <h4>🎯 Specific Time Slot Analysis</h4>
+    <div class="time-check-result">
+      <div class="requested-time">
+        <strong>Requested Time:</strong> {{results.specific_time_check.requested_time}}
+      </div>
+      <div class="availability-status" 
+           [style.color]="results.specific_time_check.is_available ? '#28a745' : '#dc3545'">
+        <span class="status-icon">{{results.specific_time_check.is_available ? '✅' : '❌'}}</span>
+        {{results.specific_time_check.recommendation}}
+      </div>
+      <div *ngIf="results.specific_time_check.conflicts?.length > 0" class="time-conflicts">
+        <h5>Conflicting Schedules:</h5>
+        <div *ngFor="let conflict of results.specific_time_check.conflicts" class="time-conflict-item">
+          <span class="conflict-course">{{conflict.course}}</span>
+          <span class="conflict-time">{{conflict.time}}</span>
+          <span class="conflict-dept">{{conflict.department}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recommendations -->
+  <div *ngIf="results.recommendations?.length > 0" class="recommendations-section">
+    <h4>💡 Optimization Recommendations</h4>
+    <div class="recommendations-list">
+      <div *ngFor="let recommendation of results.recommendations" class="recommendation-item">
+        {{recommendation}}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Data Quality Issues -->
+  <div *ngIf="results.data_quality?.total_invalid > 0" class="data-quality-section">
+    <h4>⚠️ Data Quality Issues ({{results.data_quality.total_invalid}})</h4>
+    <div class="invalid-schedules">
+      <div *ngFor="let invalid of results.data_quality.invalid_schedules" class="invalid-item">
+        <span class="issue-type">{{invalid.issue}}</span>
+        <span class="invalid-course">{{invalid.course}}</span>
+        <span class="invalid-time">{{invalid.start}} - {{invalid.end}}</span>
+      </div>
     </div>
   </div>
 </div>

@@ -75,7 +75,7 @@ export class ExecutiveBookingComponent implements OnInit {
   availableTimeSlots: any[] = [];
   endTimeOptions: string[] = [];
   
-  // Reallocate functionality
+
   scheduleSearchForm: FormGroup;
   foundSchedules: ExistingSchedule[] = [];
   selectedSchedule: ExistingSchedule | null = null;
@@ -83,12 +83,12 @@ export class ExecutiveBookingComponent implements OnInit {
   showMultipleSchedulesModal: boolean = false;
   multipleScheduleOptions: any[] = [];
   
-  // Database connection status
+ 
   dbConnectionError: boolean = false;
   dbErrorMessage: string = '';
   showTroubleshootingGuide: boolean = false;
   
-  // Day options for dropdowns (Day-based scheduling priority)
+  
   dayOptions: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
    tabs = ['Check Overlap', 'Suggest Rooms', 'Inject Schedule', 'Reallocate'];
 
@@ -99,13 +99,13 @@ export class ExecutiveBookingComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
-    // Main operation form (day-based priority)
+   
     this.form = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''], // Optional - fallback for day-based scheduling
-      startTime: ['', Validators.required],
-      endTime: ['', Validators.required],
-      day: ['', Validators.required], // Required - day-based scheduling priority
+      date: [''], 
+      startTime: [''], 
+      endTime: [''], 
+      day: ['', Validators.required], 
       scheduleId: [''],
       course: [''],
       department: [''],
@@ -114,20 +114,20 @@ export class ExecutiveBookingComponent implements OnInit {
       program: ['']
     });
     
-    // Enhanced inject schedule form
+    
     this.injectScheduleForm = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''], // Optional
+      date: [''], 
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
-      day: ['', Validators.required], // Required
+      day: ['', Validators.required], 
       course: ['', Validators.required],
       department: ['', Validators.required],
       lecturer: [''],
       level: ['', Validators.required]
     });
     
-    // Schedule search form for reallocate
+    
     this.scheduleSearchForm = this.fb.group({
       searchQuery: [''],
       roomId: [''],
@@ -141,8 +141,9 @@ export class ExecutiveBookingComponent implements OnInit {
   ngOnInit() {
     this.activeTab = 'Check Overlap';
     this.checkDatabaseStatus();
+    this.updateFormValidators(); 
     
-    // Show day-based scheduling info
+
     this.snackBar.open(
       'Day-based scheduling is prioritized. Date is used as fallback only.',
       'Got it',
@@ -150,7 +151,7 @@ export class ExecutiveBookingComponent implements OnInit {
     );
   }
 
-  // Enhanced search for existing schedules (for reallocate operation)
+  
   searchExistingSchedules() {
     const { searchQuery, roomId, day, course } = this.scheduleSearchForm.value;
     
@@ -171,7 +172,6 @@ export class ExecutiveBookingComponent implements OnInit {
             day: schedule.Day || 'Unknown',
             start: schedule.Start || '',
             end: schedule.End || '',
-            // Fixed: Use 'Instructor' field from database, not 'Lecturer'
             lecturer: schedule.Instructor || 'Unknown',
             department: schedule.Department || 'Unknown',
             date: schedule.Date
@@ -188,13 +188,13 @@ export class ExecutiveBookingComponent implements OnInit {
     });
   }
 
-  // Select schedule for reallocation
+
   selectScheduleForReallocation(schedule: ExistingSchedule) {
     this.selectedSchedule = schedule;
     
-    // Pre-populate form with current schedule details
+    
     this.form.patchValue({
-      roomId: '', // New room ID to be filled by user
+      roomId: '', 
       day: schedule.day,
       startTime: schedule.start,
       endTime: schedule.end,
@@ -215,7 +215,7 @@ export class ExecutiveBookingComponent implements OnInit {
     this.authService.checkDatabaseStatus().subscribe({
       next: (response: {status: string, message: string, connection_type: string, error_details?: string}) => {
         if (response.status === 'warning') {
-          this.dbConnectionError = true;
+         
           this.dbErrorMessage = response.message;
           if (response.error_details) {
             this.dbErrorMessage += ' - ' + response.error_details;
@@ -227,7 +227,7 @@ export class ExecutiveBookingComponent implements OnInit {
             { duration: 10000 }
           );
         } else if (response.status === 'error') {
-          this.dbConnectionError = true;
+         
           this.dbErrorMessage = response.message;
           if (response.error_details) {
             this.dbErrorMessage += ' - ' + response.error_details;
@@ -256,7 +256,7 @@ export class ExecutiveBookingComponent implements OnInit {
     });
   }
   
-  // Retry database connection
+
   retryDatabaseConnection() {
     this.loading = true;
     this.checkDatabaseStatus();
@@ -269,7 +269,7 @@ export class ExecutiveBookingComponent implements OnInit {
 
   executeOperation(operation: string) {
     this.loading = true;
-    const { roomId, date, startTime, endTime, day, scheduleId, course, department, lecturer, level, program } = this.form.value;
+    const { roomId, date, startTime, endTime, day, scheduleId, course, department, lecturer, level} = this.form.value;
 
    
     if ((startTime && !this.resourceService.validateTimeFormat(startTime)) || (endTime && !this.resourceService.validateTimeFormat(endTime))) {
@@ -278,7 +278,7 @@ export class ExecutiveBookingComponent implements OnInit {
       return;
     }
     
-    // Validate day is provided for all operations
+   
     if (!day) {
       this.snackBar.open('Day is required for all operations.', 'Close', { duration: 3000 });
       this.loading = false;
@@ -317,167 +317,65 @@ export class ExecutiveBookingComponent implements OnInit {
   performOperation(operation: string, roomId: string, date: string, startTime: string, endTime: string, 
                    day: string, scheduleId: string, course: string, department: string, 
                    lecturer: string, level: string) {
+    this.loading = true;
+    this.results = null;
+
+    const roomData = { room_id: roomId, date, start: startTime, end: endTime, day };
+    
+    console.log(`Performing ${operation} operation with data:`, roomData);
+
     switch (operation) {
       case 'check_overlap':
-        if (!roomId || !startTime || !endTime || !day) {
-          this.snackBar.open('Please fill in all required fields: Room ID, Day, Start Time, End Time.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return 
-        }
-        
-        
-        this.resourceService.checkOverlap(roomId, date || this.getCurrentDate(), startTime, endTime, day).subscribe({
-          next: (response: CheckOverlapResponse) => {
+        this.resourceService.checkOverlap(roomId, date, startTime, endTime, day).subscribe({
+          next: (response) => {
             this.results = response;
-            this.loading = false;
-            
-            
-            console.log('Check overlap response:', this.results);
+            this.processOverlapAnalysis(response);
+            this.handleBookingOperation(operation, roomData, response);
+            this.snackBar.open('Overlap check completed successfully!', 'Close', { duration: 3000 });
           },
           error: (error) => {
-            this.handleApiError(error, 'Failed to check conflicts');
+            this.handleApiError(error, 'Failed to check overlap');
+          },
+          complete: () => {
+            this.loading = false;
           }
         });
         break;
 
       case 'suggest_rooms':
-        // Enhanced validation for suggest_rooms
-        if (!startTime || !endTime || !day) {
-          this.snackBar.open('Please fill in day, start time, and end time.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Validate time formats
-        const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timePattern.test(startTime)) {
-          this.snackBar.open('Invalid start time format. Use HH:MM (e.g., 09:00)', 'Close', { duration: 4000 });
-          this.loading = false;
-          return;
-        }
-        
-        if (!timePattern.test(endTime)) {
-          this.snackBar.open('Invalid end time format. Use HH:MM (e.g., 11:00)', 'Close', { duration: 4000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Validate that end time is after start time
-        const startMinutes = this.timeToMinutes(startTime);
-        const endMinutes = this.timeToMinutes(endTime);
-        
-        if (endMinutes <= startMinutes) {
-          this.snackBar.open('End time must be after start time.', 'Close', { duration: 4000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Validate reasonable duration (minimum 15 minutes, maximum 12 hours)
-        const durationMinutes = endMinutes - startMinutes;
-        if (durationMinutes < 15) {
-          this.snackBar.open('Minimum booking duration is 15 minutes.', 'Close', { duration: 4000 });
-          this.loading = false;
-          return;
-        }
-        
-        if (durationMinutes > 12 * 60) {
-          this.snackBar.open('Maximum booking duration is 12 hours.', 'Close', { duration: 4000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Validate business hours (basic check - can be made configurable)
-        const businessStart = this.timeToMinutes('08:00');
-        const businessEnd = this.timeToMinutes('20:00');
-        
-        if (startMinutes < businessStart || endMinutes > businessEnd) {
-          this.snackBar.open(
-            `Requested time is outside typical business hours (08:00-20:00). Continuing with request...`, 
-            'Close', 
-            { duration: 5000 }
-          );
-        }
-        
-        // Date is optional for suggest_rooms
-        this.resourceService.suggestRooms(date || null, startTime, endTime, day, roomId).subscribe({
-          next: (response: SuggestRoomsResponse) => {
+        this.resourceService.suggestRooms(date, startTime, endTime, day).subscribe({
+          next: (response) => {
             this.results = response;
-            
-            // Enhanced processing for improved backend response
-            if (response.suggested_rooms) {
-              // Sort rooms by availability and total free time
-              response.suggested_rooms.sort((a, b) => {
-                const aTotalFree = this.calculateTotalFreeTime(a.free_slots);
-                const bTotalFree = this.calculateTotalFreeTime(b.free_slots);
-                return bTotalFree - aTotalFree;
-              });
-            }
-            
-            // Initialize pagination for room suggestions
-            this.filteredRooms = [...(response.suggested_rooms || [])];
-            this.initializePagination();
-            
-            // Show additional information if available
-            if (response.conflicted_rooms && response.conflicted_rooms.length > 0) {
-              this.snackBar.open(
-                `Found ${response.total_available} available rooms. ${response.total_conflicted} rooms have conflicts.`, 
-                'Close', 
-                { duration: 6000 }
-              );
-            }
-            
-            this.loading = false;
+            this.handleBookingOperation(operation, roomData, response);
+            this.snackBar.open('Room suggestions generated successfully!', 'Close', { duration: 3000 });
           },
           error: (error) => {
-            this.handleApiError(error, 'Failed to fetch room suggestions');
+            this.handleApiError(error, 'Failed to suggest rooms');
+          },
+          complete: () => {
+            this.loading = false;
           }
         });
         break;
 
       case 'inject_schedule':
-        if (!roomId || !startTime || !endTime || !day) {
-          this.snackBar.open('Please fill in all required fields: Room ID, Day, Start Time, End Time.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return;
-        }
-        
-        // Fixed field mapping for inject schedule (day-based priority)
-        this.resourceService.injectSchedule(
-          roomId, 
-          date || this.getCurrentDate(), 
-          startTime, 
-          endTime, 
-          day, 
-          { 
-            course: course || '', 
-            department: department || '', 
-            lecturer: lecturer || '', // This will be mapped to 'instructor' in service
-            year: level || '' // This will be mapped correctly in service
-          }
-        ).subscribe({
+        this.resourceService.injectSchedule(roomId, date, startTime, endTime, day, {
+          course: course,
+          department: department,
+          lecturer: lecturer,
+          level: level
+        }).subscribe({
           next: (response: InjectScheduleResponse) => {
             this.results = response;
             this.snackBar.open(`Schedule added successfully! ID: ${response.schedule_id}`, 'Close', { duration: 3000 });
-            this.loading = false;
+            this.injectLoading = false;
+            this.closeRoomSelectionModal();
             
-            if (response.refreshed_data) {
-              console.log('Received refreshed data from backend:', response.refreshed_data);
-              if (response.refreshed_data.daily_utilization) {
-                this.dailyUtilization = response.refreshed_data.daily_utilization;
-              }
-              
-              this.results = {
-                ...this.results,
-                refreshed_data: {
-                  daily_utilization: this.dailyUtilization,
-                  all_schedules: []
-                }
-              };
-              
-              this.fetchAllSchedules(roomId);
-            } else {
-              this.refreshData(roomId);
-            }
+            // Refresh data
+            this.refreshData(roomId);
+            
+            // Switch to inject-schedule tab to show the result
+            this.onTabChange(2); // 2 is the index for inject-schedule tab
           },
           error: (error) => {
             this.handleApiError(error, 'Failed to add schedule');
@@ -486,59 +384,30 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       case 'reallocate':
-        if (!this.selectedSchedule) {
-          this.snackBar.open('Please select a schedule to reallocate first.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return;
-        }
-
-        // Build new schedule with only filled fields (partial update support)
-        const newSchedule: any = {};
-        
-        // Only add fields that are actually filled in the form
-        if (roomId) newSchedule.room_id = roomId;
-        if (date) newSchedule.date = date;
-        if (startTime) newSchedule.start_time = startTime;
-        if (endTime) newSchedule.end_time = endTime;
-        if (day) newSchedule.day = day;
-        if (course) newSchedule.course = course;
-        if (department) newSchedule.department = department;
-        if (lecturer) newSchedule.lecturer = lecturer;
-        if (level) newSchedule.year = level;
-        
-        // Validate that at least one field is being updated
-        if (Object.keys(newSchedule).length === 0) {
-          this.snackBar.open('Please fill in at least one field to update.', 'Close', { duration: 3000 });
-          this.loading = false;
-          return;
-        }
-
-        const originalDetails = {
-          original_day: this.selectedSchedule.day,
-          original_start_time: this.selectedSchedule.start,
-          original_end_time: this.selectedSchedule.end,
-          original_course: this.selectedSchedule.course
-        };
-
-        this.resourceService.reallocateSchedule(this.selectedSchedule.room_id, newSchedule, originalDetails).subscribe({
-          next: (response: any) => {
+        this.resourceService.reallocateSchedule(scheduleId, {
+          room_id: roomId,
+          date: date,
+          start_time: startTime,
+          end_time: endTime,
+          day: day
+        }).subscribe({
+          next: (response) => {
             this.results = response;
+            this.handleBookingOperation(operation, roomData, response);
             this.snackBar.open('Schedule reallocated successfully!', 'Close', { duration: 3000 });
-            this.loading = false;
-            this.selectedSchedule = null;
-            this.foundSchedules = [];
-            this.scheduleSearchForm.reset();
           },
           error: (error) => {
-            // Handle multiple schedule matches
-            if (error.error?.matching_schedules) {
-              this.showMultipleScheduleOptions(error.error.matching_schedules);
-            } else {
-              this.handleApiError(error, 'Failed to reallocate schedule');
-            }
+            this.handleApiError(error, 'Failed to reallocate schedule');
+          },
+          complete: () => {
+            this.loading = false;
           }
         });
         break;
+
+      default:
+        this.loading = false;
+        this.snackBar.open('Unknown operation', 'Close', { duration: 3000 });
     }
   }
 
@@ -953,5 +822,205 @@ export class ExecutiveBookingComponent implements OnInit {
         this.handleApiError(error, 'Failed to add schedule');
       }
     });
+  }
+
+  // Enhanced processing for overlap analysis results
+  processOverlapAnalysis(response: any): void {
+    // Add visual indicators for overlap severity
+    if (response.overlap_analysis?.overlapping_pairs) {
+      response.overlap_analysis.overlapping_pairs.forEach((pair: any) => {
+        pair.severity_color = this.getSeverityColor(pair.conflict_severity);
+        pair.severity_icon = this.getSeverityIcon(pair.conflict_severity);
+      });
+    }
+    
+    // Process utilization status
+    if (response.utilization_analysis) {
+      const utilization = response.utilization_analysis;
+      utilization.status_color = this.getUtilizationColor(utilization.utilization_percentage);
+      utilization.status_icon = this.getUtilizationIcon(utilization.utilization_percentage);
+    }
+    
+    // Sort free slots by duration for better display
+    if (response.free_time_analysis?.free_slots) {
+      response.free_time_analysis.free_slots.sort((a: any, b: any) => {
+        const aDuration = this.timeToMinutes(a.end) - this.timeToMinutes(a.start);
+        const bDuration = this.timeToMinutes(b.end) - this.timeToMinutes(b.start);
+        return bDuration - aDuration; // Sort by duration descending
+      });
+    }
+  }
+  
+  createAnalysisSummary(response: any): string {
+    const schedule = response.schedule_summary;
+    const overlap = response.overlap_analysis;
+    const utilization = response.utilization_analysis;
+    
+    let summary = `📊 Analysis: ${schedule?.total_schedules || 0} schedules`;
+    
+    if (overlap?.has_overlaps) {
+      summary += ` | 🚨 ${overlap.total_conflicts} conflicts`;
+    } else {
+      summary += ` | ✅ No conflicts`;
+    }
+    
+    if (utilization?.utilization_percentage !== undefined) {
+      summary += ` | 📈 ${utilization.utilization_percentage}% utilized`;
+    }
+    
+    return summary;
+  }
+  
+  getSeverityColor(severity: string): string {
+    switch (severity?.toLowerCase()) {
+      case 'high': return '#dc3545'; // Red
+      case 'medium': return '#fd7e14'; // Orange  
+      case 'low': return '#ffc107'; // Yellow
+      default: return '#6c757d'; // Gray
+    }
+  }
+  
+  getSeverityIcon(severity: string): string {
+    switch (severity?.toLowerCase()) {
+      case 'high': return '🚨';
+      case 'medium': return '⚠️';
+      case 'low': return '⚡';
+      default: return 'ℹ️';
+    }
+  }
+  
+  getUtilizationColor(percentage: number): string {
+    if (percentage >= 85) return '#dc3545'; // Red - over-utilized
+    if (percentage >= 65) return '#28a745'; // Green - optimal
+    if (percentage >= 40) return '#ffc107'; // Yellow - moderate
+    return '#17a2b8'; // Blue - under-utilized
+  }
+  
+  getUtilizationIcon(percentage: number): string {
+    if (percentage >= 85) return '🔴';
+    if (percentage >= 65) return '🟢';
+    if (percentage >= 40) return '🟡';
+    return '🔵';
+  }
+  
+  // Helper method to format time ranges nicely
+  formatTimeRange(start: string, end: string): string {
+    return `${start}–${end}`;
+  }
+  
+  // Helper method to get conflict count for a specific course
+  getConflictCount(courseName: string): number {
+    if (!this.results?.overlap_analysis?.overlapping_pairs) return 0;
+    
+    return this.results.overlap_analysis.overlapping_pairs.filter((pair: any) => 
+      pair.schedule1.course === courseName || pair.schedule2.course === courseName
+    ).length;
+  }
+
+  // Update form validators based on active tab
+  updateFormValidators() {
+    const startTimeControl = this.form.get('startTime');
+    const endTimeControl = this.form.get('endTime');
+    
+    if (this.activeTab === 'Check Overlap') {
+      // For check overlap, times are optional (comprehensive analysis)
+      startTimeControl?.clearValidators();
+      endTimeControl?.clearValidators();
+    } else {
+      // For other operations, times are required
+      startTimeControl?.setValidators([Validators.required]);
+      endTimeControl?.setValidators([Validators.required]);
+    }
+    
+    // Update validity
+    startTimeControl?.updateValueAndValidity();
+    endTimeControl?.updateValueAndValidity();
+  }
+
+  // Override setActiveTab to update validators
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+    this.updateFormValidators();
+    
+ 
+    this.results = null;
+    this.filteredRooms = [];
+    this.foundSchedules = [];
+    this.selectedSchedule = null;
+    this.showRoomSelectionModal = false;
+    this.showMultipleSchedulesModal = false;
+    
+    // Reset form for clean state
+    this.form.reset();
+    this.form.patchValue({
+      roomId: '',
+      date: '',
+      startTime: '',
+      endTime: '',
+      day: '',
+      scheduleId: '',
+      course: '',
+      department: '',
+      lecturer: '',
+      level: '',
+      program: ''
+    });
+  }
+
+  private createNotification(type: string, title: string, message: string, data: any = {}): void {
+    // Create notification for admin users
+    const notificationData = {
+      type: type,
+      title: title,
+      message: message,
+      data: data
+    };
+
+    // Send notification to backend
+    this.resourceService.createNotification(notificationData).subscribe({
+      next: (response) => {
+        console.log('Notification created:', response);
+      },
+      error: (error) => {
+        console.error('Error creating notification:', error);
+      }
+    });
+  }
+
+  private handleBookingOperation(operation: string, roomData: any, result: any): void {
+    let notificationType = '';
+    let notificationTitle = '';
+    let notificationMessage = '';
+
+    switch (operation) {
+      case 'check_overlap':
+        notificationType = 'booking_created';
+        notificationTitle = 'Overlap Check Completed';
+        notificationMessage = `Overlap analysis completed for ${roomData.room_id}`;
+        break;
+      case 'suggest_rooms':
+        notificationType = 'booking_updated';
+        notificationTitle = 'Room Suggestions Generated';
+        notificationMessage = `Room suggestions generated for ${result.suggested_rooms?.length || 0} rooms`;
+        break;
+      case 'inject_schedule':
+        notificationType = 'booking_created';
+        notificationTitle = 'Schedule Injected';
+        notificationMessage = `Schedule successfully injected for ${roomData.room_id}`;
+        break;
+      case 'reallocate':
+        notificationType = 'booking_updated';
+        notificationTitle = 'Schedule Reallocated';
+        notificationMessage = `Schedule reallocated for ${roomData.room_id}`;
+        break;
+    }
+
+    if (notificationType) {
+      this.createNotification(notificationType, notificationTitle, notificationMessage, {
+        room_id: roomData.room_id,
+        operation: operation,
+        result: result
+      });
+    }
   }
 }

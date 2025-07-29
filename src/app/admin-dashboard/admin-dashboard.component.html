@@ -200,12 +200,12 @@
                      [class.unread]="!notification.read"
                      (click)="markNotificationAsRead(notification)">
                   <div class="notification-icon" [ngClass]="notification.type">
-                    <i [class]="notification.icon"></i>
+                    <i class="fas fa-bell"></i>
                   </div>
                   <div class="notification-content">
                     <h5>{{notification.title}}</h5>
                     <p>{{notification.message}}</p>
-                    <small>{{notification.time}}</small>
+                    <small>{{notification.time_ago}}</small>
                   </div>
                   <div class="notification-status" *ngIf="!notification.read">
                     <div class="unread-dot"></div>

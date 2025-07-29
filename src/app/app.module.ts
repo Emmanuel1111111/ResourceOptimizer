@@ -1,104 +1,141 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import {MatCardModule} from '@angular/material/card';
-import {MatButtonModule} from '@angular/material/button';
-import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+
+// Angular Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatBadgeModule } from '@angular/material/badge';
+
+// Components
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { ExecutiveBookingComponent } from './executive-booking/executive-booking.component';
-import { AiInsightsComponent } from './ai-insights/ai-insights.component';
-import { MatChipsModule } from '@angular/material/chips'
-import { ResourceListComponent } from './resource-list/resource-list.component';
-import { NotificationComponent } from './notification/notification.component';
-import {MatChip} from '@angular/material/chips';
-import { MatChipListbox } from '@angular/material/chips';
-import { AdjustSchedulesComponent } from './adjust-schedules/adjust-schedules.component';
-import { FormsModule } from '@angular/forms';
-import { MatFormField } from '@angular/material/form-field';
-import { MatLabel } from '@angular/material/form-field';
-import { MatTooltip } from '@angular/material/tooltip';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { MatTableModule } from '@angular/material/table';
-import {MatInputModule} from '@angular/material/input';
-import { MatInput } from '@angular/material/input';
-import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoginPageComponent } from './login-page/login-page.component';
-import {MatTab} from '@angular/material/tabs';
-import { MatTabsModule } from '@angular/material/tabs';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MAT_DATE_FORMATS, MatOption, MatNativeDateModule } from '@angular/material/core';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatListModule, MatNavList } from '@angular/material/list';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AdminLoginComponent } from './admin-login/admin-login.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { ResourceListComponent } from './resource-list/resource-list.component';
+import { ExecutiveBookingComponent } from './executive-booking/executive-booking.component';
+import { AdjustSchedulesComponent } from './adjust-schedules/adjust-schedules.component';
+import { AiInsightsComponent } from './ai-insights/ai-insights.component';
+import { NotificationComponent } from './notification/notification.component';
+import { UnauthorizedComponent, InsufficientPrivilegesComponent } from './app-routing.module';
+
+// Services
+import { AuthService } from './service.service';
+import { AdminAuthService } from './services/admin-auth.service';
+import { SecurityService } from './services/security.service';
+import { ResourceManagementService } from './resource-management.service';
+import { NotificationService } from './services/notification.service';
+
+// Guards
+import { canActivate } from './guard/auth.guard';
+import { AdminGuard, SuperAdminGuard, PermissionGuard } from './guards/admin.guard';
+
+// Interceptors
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { ErrorInterceptor } from './interceptors/error.interceptor';
 
 @NgModule({
   declarations: [
     AppComponent,
-    AdminDashboardComponent,
-    ExecutiveBookingComponent,
-    AiInsightsComponent,
-    ResourceListComponent,
-    NotificationComponent,
     LoginPageComponent,
-    AdjustSchedulesComponent
+    AdminLoginComponent,
+    AdminDashboardComponent,
+    ResourceListComponent,
+    ExecutiveBookingComponent,
+    AdjustSchedulesComponent,
+    AiInsightsComponent,
+    NotificationComponent,
+    UnauthorizedComponent,
+    InsufficientPrivilegesComponent
   ],
   imports: [
-    MatLabel,
-    MatFormField,
-    MatChip,
-    FormsModule,
     BrowserModule,
     AppRoutingModule,
-    MatCardModule,
-    MatButtonModule,
-    CommonModule,
-    MatIconModule,
-    MatToolbarModule,
-    MatOption,
-    MatChip,
-    MatChipListbox,
-    MatChipsModule,
-    HttpClientModule,
-    MatTooltip,
-    MatTableModule,
-    MatInput,
-    MatInputModule,
-    MatProgressSpinner,
-    MatProgressSpinnerModule,
-    MatTab,
-    MatTabsModule,
+    BrowserAnimationsModule,
+    FormsModule,
     ReactiveFormsModule,
-    MatNavList,
-    MatProgressBarModule,
-    MatProgressBar,
-    MatChipListbox,
-    MatChip,
-    MatOption,
+    HttpClientModule,
+    
+    // Angular Material Modules
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSidenavModule,
+    MatListModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatListModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatSnackBarModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
     MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatSlideToggleModule,
+    MatMenuModule,
     MatTooltipModule,
-    MatBadgeModule,
-    BrowserAnimationsModule
+    MatChipsModule,
+    MatAutocompleteModule,
+    MatStepperModule,
+    MatExpansionModule,
+    MatBadgeModule
   ],
   providers: [
-    provideAnimationsAsync()
+    AuthService,
+    AdminAuthService,
+    SecurityService,
+    ResourceManagementService,
+    NotificationService,
+    AdminGuard,
+    SuperAdminGuard,
+    PermissionGuard,
+    // Temporarily disabled to test circular dependency
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: AuthInterceptor,
+    //   multi: true
+    // },
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: ErrorInterceptor,
+    //   multi: true
+    // }
   ],
   bootstrap: [AppComponent]
 })

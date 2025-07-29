@@ -24,12 +24,12 @@
     </div>
     
     <div class="nav-menu">
-      <a class="nav-item active" href="#">
+      <a class="nav-item " href="#">
         <div class="nav-icon">
           <i class="bi bi-house-door" style="color: white;"></i>
         </div>
         <span class="nav-text" style="color: white;">Dashboard</span>
-        <div class="nav-indicator"></div>
+       
       </a>
       
       <a class="nav-item" href="#">
@@ -37,13 +37,15 @@
           <i class="bi bi-calendar-week"></i>
         </div>
         <span class="nav-text">Schedules</span>
+
       </a>
       
-      <a class="nav-item" href="#">
+      <a class="nav-item active" href="#">
         <div class="nav-icon">
           <i class="bi bi-graph-up-arrow"></i>
         </div>
         <span class="nav-text">Analytics</span>
+         <div class="nav-indicator"></div>
       </a>
       
       <a class="nav-item" href="#">
@@ -178,21 +180,7 @@
           </div>
         </button>
         
-        <button 
-          class="tab-button" 
-          [class.active]="selectedTab === 1" 
-          (click)="switchTab(1)">
-          <div class="tab-icon">
-            <i class="bi bi-graph-up-arrow"></i>
-          </div>
-          <div class="tab-content">
-            <span class="tab-title">AI Predictions</span>
-            <span class="tab-subtitle">Future demand forecasting</span>
-          </div>
-          <div class="tab-badge" *ngIf="hasPredictionData()">
-            {{ predictions.length }}
-          </div>
-        </button>
+        
       </div>
     </div>
 
@@ -234,12 +222,7 @@
                   <i class="bi bi-building"></i>
                   {{ result.room_id }}
                 </h3>
-                <div class="room-meta">
-                  <span class="meta-item">
-                    <i class="bi bi-calendar-range"></i>
-                    {{ result.analysis_period_days }} days analyzed
-                  </span>
-                </div>
+                
               </div>
             </div>
             
@@ -306,10 +289,7 @@
                 <div class="metric-icon">
                   <i class="bi bi-calendar-check"></i>
                 </div>
-                <div class="metric-content">
-                  <div class="metric-value">{{ result.summary_insights.average_courses_per_day | number: '1.0-1' }}</div>
-                  <div class="metric-label">Avg Courses/Day</div>
-                </div>
+                
               </div>
             </div>
 
@@ -473,15 +453,7 @@
                   </div>
                 </div>
                 
-                <div class="insight-item">
-                  <div class="insight-icon">
-                    <i class="bi bi-book"></i>
-                  </div>
-                  <div class="insight-content">
-                    <div class="insight-label">Avg Courses/Day</div>
-                    <div class="insight-value">{{ result.summary_insights.average_courses_per_day | number: '1.1-1' }}</div>
-                  </div>
-                </div>
+                
               </div>
             </div>
 
@@ -565,360 +537,15 @@
         </div>
       </div>
 
-      <!-- Predicted Demand Tab -->
-      <div class="tab-pane" [class.active]="selectedTab === 1" [class.show-metrics]="showMetrics">
-        <!-- Empty State -->
-        <div *ngIf="!hasPredictionData() && !loading" class="empty-state">
-          <div class="empty-icon">
-            <i class="bi bi-graph-up-arrow"></i>
-          </div>
-          <h3 class="empty-title">No Prediction Data Available</h3>
-          <p class="empty-subtitle">Enter a room ID and generate insights to view AI-powered demand forecasting</p>
-          <div class="empty-suggestions">
-            <span class="suggestion-label">Try these room IDs:</span>
-            <div class="suggestion-chips">
-              <button 
-                class="suggestion-chip" 
-                *ngFor="let suggestion of searchSuggestions.slice(0, 3)"
-                (click)="selectSuggestion(suggestion)">
-                {{ suggestion }}
-              </button>
-            </div>
-          </div>
-        </div>
 
-        <!-- Prediction Cards -->
-        <div 
-          *ngFor="let prediction of predictions; let i = index" 
-          class="insight-card prediction-card"
-          [style.animation-delay]="getCardAnimationDelay(i)">
-          
-          <!-- Enhanced Card Header -->
-          <div class="card-header">
-            <div class="header-left">
-              <div class="room-info">
-                <h3 class="room-title">
-                  <i class="bi bi-cpu"></i>
-                  {{ prediction.room_id }}
-                </h3>
-                <div class="room-meta">
-                  <span class="meta-item">
-                    <i class="bi bi-calendar-range"></i>
-                    {{ prediction.dates?.length || 0 }} days forecast
-                  </span>
-                  <span class="meta-item">
-                    <i class="bi bi-robot"></i>
-                    AI Prediction
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="header-right">
-              <div class="status-indicators">
-                <div class="status-badge" [ngClass]="getStatusClass(prediction.utilization_status)">
-                  <i class="bi bi-circle-fill"></i>
-                  {{ prediction.utilization_status }}
-                </div>
-                
-                <div class="trend-indicator" [ngClass]="prediction.trend.toLowerCase()">
-                  <i class="bi" [ngClass]="getTrendIcon(prediction.trend)"></i>
-                  <span>{{ prediction.trend | titlecase }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <!-- Enhanced Metrics Grid -->
-            <div class="metrics-grid">
-              <div 
-                class="metric-card primary-metric pulse-animation"
-                [style.animation-delay]="getMetricAnimationDelay(0)">
-                <div class="metric-icon">
-                  <i class="bi bi-speedometer2"></i>
-                </div>
-                <div class="metric-content">
-                  <div class="metric-value">{{ prediction.average_utilization | number: '1.0-1' }}%</div>
-                  <div class="metric-label">Predicted Average</div>
-                </div>
-                <div class="metric-trend" [ngClass]="prediction.trend.toLowerCase()">
-                  <i class="bi" [ngClass]="getTrendIcon(prediction.trend)"></i>
-                </div>
-              </div>
-              
-              <div 
-                class="metric-card"
-                [style.animation-delay]="getMetricAnimationDelay(1)">
-                <div class="metric-icon">
-                  <i class="bi bi-graph-up"></i>
-                </div>
-                <div class="metric-content">
-                  <div class="metric-value">{{ getMaxUtilization(prediction.utilization) | number: '1.0-1' }}%</div>
-                  <div class="metric-label">Peak Forecast</div>
-                </div>
-              </div>
-              
-              <div 
-                class="metric-card"
-                [style.animation-delay]="getMetricAnimationDelay(2)">
-                <div class="metric-icon">
-                  <i class="bi bi-graph-down"></i>
-                </div>
-                <div class="metric-content">
-                  <div class="metric-value">{{ getMinUtilization(prediction.utilization) | number: '1.0-1' }}%</div>
-                  <div class="metric-label">Minimum Forecast</div>
-                </div>
-              </div>
-              
-              <div 
-                class="metric-card"
-                [style.animation-delay]="getMetricAnimationDelay(3)">
-                <div class="metric-icon">
-                  <i class="bi bi-calendar-range"></i>
-                </div>
-                <div class="metric-content">
-                  <div class="metric-value">{{ prediction.dates?.length || 0 }}</div>
-                  <div class="metric-label">Forecast Days</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enhanced Utilization Progress -->
-            <div class="utilization-section">
-              <div class="section-header">
-                <h4 class="section-title">
-                  <i class="bi bi-bar-chart"></i>
-                  Predicted Utilization Range
-                </h4>
-                <div class="utilization-range">
-                  <span class="range-label">Forecast Range:</span>
-                  <span class="range-value">
-                    {{ getMinUtilization(prediction.utilization) | number: '1.0-1' }}% - 
-                    {{ getMaxUtilization(prediction.utilization) | number: '1.0-1' }}%
-                  </span>
-                </div>
-              </div>
-              
-              <div class="progress-container">
-                <div class="progress-track">
-                  <div 
-                    class="progress-fill prediction-fill" 
-                    [style.width.%]="prediction.average_utilization"
-                    [style.background]="'linear-gradient(90deg, ' + getUtilizationColor(prediction.average_utilization) + ' 0%, rgb(102, 51, 153) 100%)'">
-                    <div class="progress-glow"></div>
-                    <div class="progress-pulse"></div>
-                  </div>
-                </div>
-                <div class="progress-markers">
-                  <span class="marker" style="left: 30%">30%</span>
-                  <span class="marker" style="left: 70%">70%</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Demand Distribution Cards -->
-            <div class="distribution-grid">
-              <div class="distribution-card low-demand">
-                <div class="card-icon">
-                  <i class="bi bi-arrow-down-circle"></i>
-                </div>
-                <div class="card-content">
-                  <div class="card-value">{{ getDemandCount(prediction.demand_levels, 'Low') }}</div>
-                  <div class="card-label">Low Demand Days</div>
-                  <div class="card-sublabel">Opportunity for scheduling</div>
-                </div>
-              </div>
-              
-              <div class="distribution-card moderate-demand">
-                <div class="card-icon">
-                  <i class="bi bi-dash-circle"></i>
-                </div>
-                <div class="card-content">
-                  <div class="card-value">{{ getDemandCount(prediction.demand_levels, 'Moderate') }}</div>
-                  <div class="card-label">Moderate Demand</div>
-                  <div class="card-sublabel">Balanced utilization</div>
-                </div>
-              </div>
-              
-              <div class="distribution-card high-demand">
-                <div class="card-icon">
-                  <i class="bi bi-arrow-up-circle"></i>
-                </div>
-                <div class="card-content">
-                  <div class="card-value">{{ getHighDemandCount(prediction.demand_levels) }}</div>
-                  <div class="card-label">High Demand Days</div>
-                  <div class="card-sublabel">Capacity planning needed</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enhanced Recommendations -->
-            <div class="recommendations-section">
-              <h4 class="section-title">
-                <i class="bi bi-robot"></i>
-                AI Recommendations
-              </h4>
-              
-              <div class="recommendations-grid">
-                <div class="recommendation-card priority-medium">
-                  <div class="recommendation-header">
-                    <div class="recommendation-icon">
-                      <i class="bi bi-lightbulb"></i>
-                    </div>
-                    <div class="recommendation-title">Optimization Strategy</div>
-                    <div class="priority-badge medium">AI Insight</div>
-                  </div>
-                  <div class="recommendation-content">
-                    {{ prediction.utilization_tip }}
-                  </div>
-                </div>
-                
-                <div class="recommendation-card">
-                  <div class="recommendation-header">
-                    <div class="recommendation-icon">
-                      <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <div class="recommendation-title">Trend Analysis</div>
-                  </div>
-                  <div class="recommendation-content">
-                    <div class="trend-analysis">
-                      <div class="trend-item">
-                        <strong class="trend-label">Utilization Trend:</strong>
-                        <span class="trend-value" [ngClass]="prediction.trend.toLowerCase()">
-                          <i class="bi" [ngClass]="getTrendIcon(prediction.trend)"></i>
-                          {{ prediction.trend | titlecase }}
-                        </span>
-                      </div>
-                      
-                      <div class="trend-item">
-                        <strong class="trend-label">Current Status:</strong>
-                        <span class="status-value">{{ prediction.utilization_status }}</span>
-                      </div>
-                      
-                      <div class="trend-item">
-                        <strong class="trend-label">Forecast Confidence:</strong>
-                        <span class="confidence-value">High ({{ prediction.dates?.length || 0 }} days)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enhanced Chart Section -->
-            <div class="chart-section">
-              <h4 class="section-title">
-                <i class="bi bi-graph-up"></i>
-                Utilization Forecast Visualization
-              </h4>
-              
-              <div class="chart-container">
-                <canvas 
-                  class="chart-canvas" 
-                  [id]="'chart-' + prediction.room_id"
-                  width="400" 
-                  height="300">
-                </canvas>
-                
-                <div class="chart-overlay">
-                  <div class="chart-legend">
-                    <div class="legend-item">
-                      <div class="legend-color prediction"></div>
-                      <span class="legend-label">Predicted Utilization</span>
-                    </div>
-                    <div class="legend-item">
-                      <div class="legend-color optimal-range"></div>
-                      <span class="legend-label">Optimal Range (30-70%)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enhanced Daily Predictions Table -->
-            <div class="table-section">
-              <h4 class="section-title">
-                <i class="bi bi-calendar-week"></i>
-                Daily Demand Forecast
-              </h4>
-              
-              <div class="table-container">
-                <table class="modern-table prediction-table">
-                  <thead>
-                    <tr>
-                      <th>
-                        <i class="bi bi-calendar-day"></i>
-                        Date
-                      </th>
-                      <th>
-                        <i class="bi bi-percent"></i>
-                        Predicted Utilization
-                      </th>
-                      <th>
-                        <i class="bi bi-activity"></i>
-                        Demand Level
-                      </th>
-                      <th>
-                        <i class="bi bi-lightbulb"></i>
-                        AI Optimization Tip
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let date of prediction.dates; let i = index" 
-                        [style.animation-delay]="(i * 0.1) + 's'">
-                      <td class="date-cell">
-                        <div class="date-info">
-                          <span class="date-day">{{ formatDate(date) }}</span>
-                          <span class="date-full">{{ date }}</span>
-                        </div>
-                      </td>
-                      <td class="utilization-cell">
-                        <div class="utilization-badge prediction-badge" 
-                             [ngClass]="{'optimal': prediction.utilization[i] >= 30 && prediction.utilization[i] <= 70,
-                                        'under': prediction.utilization[i] < 30,
-                                        'over': prediction.utilization[i] > 70}">
-                          <span class="percentage">{{ prediction.utilization[i] | number: '1.1-1' }}%</span>
-                          <div class="mini-progress">
-                            <div class="mini-fill" [style.width.%]="prediction.utilization[i]"></div>
-                          </div>
-                          <div class="prediction-indicator">
-                            <i class="bi bi-cpu"></i>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="demand-cell">
-                        <div class="demand-badge" [ngClass]="getDemandClass(prediction.demand_levels[i])">
-                          <i class="bi bi-circle-fill"></i>
-                          <span>{{ prediction.demand_levels[i] }}</span>
-                        </div>
-                      </td>
-                      <td class="tip-cell">
-                        <div class="optimization-tip">
-                          <i class="bi bi-lightbulb"></i>
-                          <span>{{ prediction.optimization_tips?.[i] || 'No specific optimization needed' }}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Floating Action Button -->
-    <div class="floating-actions" *ngIf="hasCurrentData() || hasPredictionData()">
-      <button class="fab-button" (click)="clearInsights()" title="Clear All Data">
-        <i class="bi bi-trash"></i>
-      </button>
+      
     </div>
     </div>
+
+    
   </main>
 </div>
 
 </body>
 </html>
+  

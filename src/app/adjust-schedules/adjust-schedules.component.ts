@@ -1747,8 +1747,8 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
           console.log(`Backend returned ${response.current_time_matches.length} current time matches:`);
           response.current_time_matches.forEach((match: any, index: number) => {
             console.log(`  ${index + 1}. ${match.Course} in ${match['Room ID']} on ${match.Day} from ${match.Start} to ${match.End}`);
-          });
-        } else {
+        });
+    } else {
           console.log('No current_time_matches in response');
         }
         

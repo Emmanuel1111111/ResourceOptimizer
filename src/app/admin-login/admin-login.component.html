@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Resource Optimizer</title>
+</head>
+<body>
+  <div class="admin-login-container">
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="logo-section">
+        <mat-icon class="admin-logo">admin_panel_settings</mat-icon>
+        <h1 class="admin-title">Administrator Access</h1>
+      </div>
+      <p class="security-notice">
+        <mat-icon class="security-icon">security</mat-icon>
+        Secure administrative access to Resource Optimizer
+      </p>
+    </div>
+
+    <!-- Security Status Card -->
+    <mat-card class="security-status-card" *ngIf="securityIndicators.length > 0">
+      <mat-card-header>
+        <mat-icon class="status-icon">shield</mat-icon>
+        <mat-card-title>Security Status</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="security-indicators">
+          <div class="indicator" 
+               *ngFor="let indicator of securityIndicators"
+               [ngClass]="'indicator-' + indicator.type">
+            <mat-icon class="indicator-icon">{{ indicator.icon }}</mat-icon>
+            <span class="indicator-message">{{ indicator.message }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Main Login Card -->
+    <mat-card class="login-card">
+      <mat-card-header>
+        <mat-card-title>
+          <span *ngIf="!showMFAStep">Administrator Login</span>
+          <span *ngIf="showMFAStep">Multi-Factor Authentication</span>
+        </mat-card-title>
+        <mat-card-subtitle *ngIf="lastLoginInfo">{{ lastLoginInfo }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Loading Spinner -->
+        <div class="loading-overlay" *ngIf="isLoading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p class="loading-text">Authenticating...</p>
+        </div>
+
+        <!-- Blocked Account Notice -->
+        <div class="blocked-notice" *ngIf="isBlocked">
+          <mat-icon class="block-icon">block</mat-icon>
+          <h3>Account Temporarily Locked</h3>
+          <p>Too many failed login attempts. Please wait {{ formatBlockTime() }} before trying again.</p>
+        </div>
+
+        <!-- Messages -->
+        <div class="message-container" *ngIf="errorMessage || successMessage">
+          <mat-card class="error-card" *ngIf="errorMessage">
+            <mat-icon class="message-icon">error</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </mat-card>
+          <mat-card class="success-card" *ngIf="successMessage">
+            <mat-icon class="message-icon">check_circle</mat-icon>
+            <span>{{ successMessage }}</span>
+          </mat-card>
+        </div>
+
+        <!-- Login Form -->
+        <form [formGroup]="adminLoginForm" 
+              (ngSubmit)="onLogin()" 
+              *ngIf="!showMFAStep && !isBlocked"
+              class="login-form">
+          
+          <!-- Admin Username Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Admin Username</mat-label>
+            <mat-icon matPrefix>admin_panel_settings</mat-icon>
+            <input matInput 
+                   formControlName="username"
+                   placeholder="admin.username"
+                   autocomplete="username"
+                   [attr.aria-invalid]="adminLoginForm.get('username')?.invalid && adminLoginForm.get('username')?.touched">
+            <mat-hint>Format: admin.your_username</mat-hint>
+            <mat-error>
+              {{ getErrorMessage('username') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Password Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix>lock</mat-icon>
+            <input matInput 
+                   [type]="hidePassword ? 'password' : 'text'"
+                   formControlName="password"
+                   placeholder="Enter your secure password"
+                   autocomplete="current-password"
+                   [attr.aria-invalid]="adminLoginForm.get('password')?.invalid && adminLoginForm.get('password')?.touched">
+            <button mat-icon-button 
+                    matSuffix 
+                    type="button"
+                    (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'">
+              <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-hint>Minimum 12 characters with uppercase, lowercase, numbers, and symbols</mat-hint>
+            <mat-error>
+              {{ getErrorMessage('password') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Remember Device -->
+          <div class="form-options">
+            <mat-checkbox formControlName="rememberDevice" class="remember-device">
+              Remember this device for 30 days
+            </mat-checkbox>
+          </div>
+
+          <!-- Security Warning -->
+          <div class="security-warning" *ngIf="suspiciousActivity">
+            <mat-icon class="warning-icon">warning</mat-icon>
+            <p>
+              <strong>Security Alert:</strong> Suspicious activity detected on this account.
+              If this wasn't you, please contact IT security immediately.
+            </p>
+          </div>
+
+          <!-- Login Button -->
+          <button mat-raised-button 
+                  color="primary"
+                  type="submit"
+                  class="login-button"
+                  [disabled]="adminLoginForm.invalid || isLoading">
+            <mat-icon *ngIf="!isLoading">login</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <span *ngIf="!isLoading">Sign In Securely</span>
+            <span *ngIf="isLoading">Authenticating...</span>
+          </button>
+
+          <!-- Forgot Password -->
+          <div class="forgot-password-section">
+            <button mat-button 
+                    type="button"
+                    color="accent"
+                    (click)="onForgotPassword()"
+                    [disabled]="isLoading">
+              <mat-icon>help</mat-icon>
+              Forgot Password?
+            </button>
+          </div>
+        </form>
+
+        <!-- MFA Form -->
+        <form [formGroup]="mfaForm" 
+              (ngSubmit)="onMFAVerify()" 
+              *ngIf="showMFAStep"
+              class="mfa-form">
+          
+          <div class="mfa-header">
+            <mat-icon class="mfa-icon">verified_user</mat-icon>
+            <h3>Two-Factor Authentication Required</h3>
+            <p>Enter the 6-digit code from your authenticator app</p>
+          </div>
+
+          <!-- QR Code for Setup (if first time) -->
+          <div class="qr-setup" *ngIf="qrCodeUrl">
+            <h4>First Time Setup</h4>
+            <p>Scan this QR code with your authenticator app:</p>
+            <img [src]="qrCodeUrl" alt="MFA QR Code" class="qr-code">
+          </div>
+
+          <!-- MFA Code Input -->
+          <mat-form-field appearance="outline" class="full-width mfa-input">
+            <mat-label>Authentication Code</mat-label>
+            <mat-icon matPrefix>security</mat-icon>
+            <input matInput 
+                   formControlName="mfaCode"
+                   placeholder="000000"
+                   maxlength="6"
+                   autocomplete="one-time-code"
+                   [attr.aria-invalid]="mfaForm.get('mfaCode')?.invalid && mfaForm.get('mfaCode')?.touched">
+            <mat-hint>6-digit code from your authenticator app</mat-hint>
+            <mat-error>
+              {{ getErrorMessage('mfaCode', mfaForm) }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- MFA Verify Button -->
+          <button mat-raised-button 
+                  color="primary"
+                  type="submit"
+                  class="verify-button"
+                  [disabled]="mfaForm.invalid || isLoading">
+            <mat-icon *ngIf="!isLoading">verified</mat-icon>
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <span *ngIf="!isLoading">Verify & Continue</span>
+            <span *ngIf="isLoading">Verifying...</span>
+          </button>
+
+          <!-- Back to Login -->
+          <button mat-button 
+                  type="button"
+                  color="accent"
+                  (click)="showMFAStep = false"
+                  [disabled]="isLoading">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Login
+          </button>
+        </form>
+
+        <!-- Backup Codes Display -->
+        <div class="backup-codes" *ngIf="backupCodes.length > 0">
+          <h4>Backup Codes</h4>
+          <p>Save these codes in a secure location. Each code can only be used once:</p>
+          <div class="codes-grid">
+            <span class="backup-code" *ngFor="let code of backupCodes">{{ code }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Security Footer -->
+    <div class="security-footer">
+      <div class="security-features">
+        <div class="feature">
+          <mat-icon>enhanced_encryption</mat-icon>
+          <span>End-to-End Encryption</span>
+        </div>
+        <div class="feature">
+          <mat-icon>verified_user</mat-icon>
+          <span>Multi-Factor Authentication</span>
+        </div>
+        <div class="feature">
+          <mat-icon>audit</mat-icon>
+          <span>Audit Logging</span>
+        </div>
+        <div class="feature">
+          <mat-icon>shield</mat-icon>
+          <span>Advanced Security</span>
+        </div>
+      </div>
+      
+      <div class="legal-links">
+        <a href="/admin/privacy" target="_blank">Privacy Policy</a>
+        <a href="/admin/terms" target="_blank">Terms of Service</a>
+        <a href="/admin/security" target="_blank">Security Guidelines</a>
+      </div>
+      
+      <p class="copyright">
+        © 2024 Resource Optimizer. Administrator access is logged and monitored.
+      </p>
+    </div>
+  </div>
+</body>
+</html> 

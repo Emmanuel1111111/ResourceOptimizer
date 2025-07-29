@@ -46,8 +46,8 @@
 
 @media (max-width: 1023px) {
   .ultra-sidebar {
-    position: fixed;
-    left: 0;
+  position: fixed;
+  left: 0;
     top: 0;
     transform: translateX(-100%);
   }
@@ -1309,8 +1309,8 @@
 }
 
 .status-item {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
   justify-content: space-between;
   padding: 0.75rem;
   border-radius: 12px;
@@ -1370,26 +1370,26 @@
   .dashboard-content {
     padding: 1rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .actions-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .overview-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .top-header {
     padding: 1rem;
   }
-  
+
   .global-search {
     width: 200px;
   }
@@ -1402,7 +1402,7 @@
   .section-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .stat-number {
     font-size: 2rem;
   }

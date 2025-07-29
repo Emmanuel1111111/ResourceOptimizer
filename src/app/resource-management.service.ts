@@ -40,14 +40,20 @@ export class ResourceManagementService {
     const payload: ManageResourcesRequest = {
       operation: 'check_overlap',
       room_id: roomId,
-      start_time: startTime,
-      end_time: endTime,
       day: day // Day is required and prioritized
     };
     
-    // Add date as optional fallback
+    // Add optional parameters only if provided
     if (date) {
       payload.date = date;
+    }
+    
+    if (startTime) {
+      payload.start_time = startTime;
+    }
+    
+    if (endTime) {
+      payload.end_time = endTime;
     }
 
     console.log('Check overlap payload (day-based priority):', payload);
@@ -146,7 +152,7 @@ export class ResourceManagementService {
   ): Observable<InjectScheduleResponse> {
     const payload: ManageResourcesRequest = {
       operation: 'inject_schedule',
-      room_id: roomId,  
+      room_id: roomId,
       start_time: startTime,
       end_time: endTime,
       day: day, // Day is required and prioritized
@@ -242,7 +248,7 @@ export class ResourceManagementService {
         // Special handling for multiple schedule matches
         errorMessage = 'Multiple schedules found. Please select specific schedule.';
       } else {
-        errorMessage = error.error?.error || `Server Error: ${error.status} ${error.message}`;
+      errorMessage = error.error?.error || `Server Error: ${error.status} ${error.message}`;
       }
     }
     
@@ -265,5 +271,11 @@ export class ResourceManagementService {
   validateDateFormat(date: string): boolean {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     return dateRegex.test(date) && !isNaN(Date.parse(date));
+  }
+
+  createNotification(notificationData: any): Observable<any> {
+    return this.http.post(`${this.API_BASE_URL}/api/admin/notifications/create`, notificationData).pipe(
+      catchError(this.handleError)
+    );
   }
 }

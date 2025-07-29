@@ -4,7 +4,10 @@ import { Router, NavigationEnd } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuthService } from '../service.service';
+import { AdminAuthService } from '../services/admin-auth.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 // Interfaces
 interface UserStats {
@@ -26,12 +29,15 @@ interface DashboardCard {
 
 interface Notification {
   id: string;
+  type: string;
   title: string;
   message: string;
-  time: string;
-  type: 'info' | 'warning' | 'error' | 'success';
-  icon: string;
+  data: any;
   read: boolean;
+  created_at: string;
+  time_ago: string;
+  icon?: string;
+  time?: string;
 }
 
 interface RecentActivity {
@@ -171,7 +177,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       textColor: 'white'
     },
     {
-      title: 'Adjust Schedules',
+      title: 'Monitor/Visualize Data',           
       icon: '🗓️',
       description: 'Modify classroom schedules, resolve conflicts, and manage time slot allocations effectively.',
       route: '/adjust-schedules',
@@ -183,13 +189,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private adminAuthService: AdminAuthService,
+    private http: HttpClient
   ) {
     this.checkScreenSize();
-    this.initializeNotifications();
-    this.initializeRecentActivities();
-    this.initializeSystemStatus();
-    this.setupSearchDebouncing();
+    this.setupEventListeners();
   }
 
   ngOnInit(): void {
@@ -199,6 +204,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     this.loadRealTimeData();
     this.setupRouteTracking();
     this.setupNotificationPolling();
+    this.initializeNotifications(); // Add this line
   }
 
   ngAfterViewInit(): void {
@@ -459,9 +465,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
           id: Date.now().toString(),
           title: 'Room Stats Updated',
           message: `${this.userStats.totalRooms} rooms available in system`,
-          time: 'Just now',
+          data: {},
+          created_at: new Date().toISOString(),
+          time_ago: 'Just now',
           type: 'info',
-          icon: 'fas fa-door-open',
           read: false
         });
       },
@@ -513,9 +520,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
         id: Date.now().toString(),
         title: 'System Health Check',
         message: 'All systems operating normally',
-        time: 'Just now',
-        type: 'success' as const,
-        icon: 'fas fa-check-circle',
+        data: {},
+        created_at: new Date().toISOString(),
+        time_ago: 'Just now',
+        type: 'success',
         read: false
       }
     ];
@@ -605,11 +613,38 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   markAllAsRead(): void {
-    this.notifications.forEach(notification => notification.read = true);
+    const apiUrl = environment.apiUrl || 'http://localhost:5000';
+    
+    this.http.post(`${apiUrl}/api/admin/notifications/read-all`, {}).subscribe({
+      next: () => {
+        // Mark all notifications as read locally
+        this.notifications = this.notifications.map(notification => ({
+          ...notification,
+          read: true
+        }));
+        // this.unreadNotificationCount = 0; // This line is removed
+      },
+      error: (error) => {
+        console.error('Error marking notifications as read:', error);
+      }
+    });
   }
 
   markNotificationAsRead(notification: Notification): void {
-    notification.read = true;
+    const apiUrl = environment.apiUrl || 'http://localhost:5000';
+    
+    this.http.post(`${apiUrl}/api/admin/notifications/${notification.id}/read`, {}).subscribe({
+      next: () => {
+        // Mark notification as read locally
+        this.notifications = this.notifications.map(n => 
+          n.id === notification.id ? { ...n, read: true } : n
+        );
+        // this.unreadNotificationCount = Math.max(0, this.unreadNotificationCount - 1); // This line is removed
+      },
+      error: (error) => {
+        console.error('Error marking notification as read:', error);
+      }
+    });
   }
 
   viewAllActivity(): void {
@@ -637,10 +672,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  // Getter methods for template
-  get unreadNotifications(): Notification[] {
-    return this.notifications.filter(n => !n.read);
-  }
+
 
   get unreadNotificationCount(): number {
     return this.notifications.filter(n => !n.read).length;
@@ -652,41 +684,32 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   // Data initialization methods (existing methods remain the same but enhanced)
   private initializeNotifications(): void {
-    // Load saved avatar
-    const savedAvatar = localStorage.getItem('userAvatar');
-    if (savedAvatar) {
-      this.userProfile.avatar = savedAvatar;
-    }
+    // Load real-time notifications from the server
+    this.loadRealTimeNotifications();
+    
+    // Set up polling for new notifications every 30 seconds
+    this.notificationPolling$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.loadRealTimeNotifications();
+    });
+  }
 
-    this.notifications = [
-      {
-        id: '1',
-        title: 'Room SCB-GF1 Conflict',
-        message: 'Scheduling conflict detected for Tuesday 10:00 AM',
-        time: '5 minutes ago',
-        type: 'warning',
-        icon: 'fas fa-exclamation-triangle',
-        read: false
+  private loadRealTimeNotifications(): void {
+    const apiUrl = environment.apiUrl || 'http://localhost:5000';
+    
+    this.http.get<{notifications: Notification[], unread_count: number}>(`${apiUrl}/api/admin/notifications`).subscribe({
+      next: (response) => {
+        this.notifications = response.notifications;
+        // this.unreadNotificationCount = response.unread_count; // This line is removed
       },
-      {
-        id: '2',
-        title: 'New Booking Request',
-        message: 'MATH 161 requires room for Friday 2:00 PM',
-        time: '15 minutes ago',
-        type: 'info',
-        icon: 'fas fa-calendar-plus',
-        read: false
-      },
-      {
-        id: '3',
-        title: 'System Update Complete',
-        message: 'Resource optimization algorithms updated successfully',
-        time: '1 hour ago',
-        type: 'success',
-        icon: 'fas fa-check-circle',
-        read: true
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+        // Fallback to empty notifications
+        this.notifications = [];
+        // this.unreadNotificationCount = 0; // This line is removed
       }
-    ];
+    });
   }
 
   private initializeRecentActivities(): void {
@@ -765,5 +788,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     } else {
       this.systemStatus.overall = 'healthy';
     }
+  }
+
+  private setupEventListeners(): void {
+    // Setup search debouncing
+    this.setupSearchDebouncing();
+    
+    // Setup other event listeners as needed
+    this.initializeRecentActivities();
+    this.initializeSystemStatus();
   }
 }

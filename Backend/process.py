@@ -21,8 +21,18 @@ def preprocess_data(df):
     # Convert Date to datetime
     df['Date'] = pd.to_datetime(df['Date'])
     
-    df = df.drop_duplicates(subset=['Room ID', 'Date', 'Start', 'End', 'Course'])
-
+    # CRITICAL FIX: Comment out drop_duplicates to allow detection of duplicate schedules
+    # The drop_duplicates was removing legitimate duplicate bookings that should be detected as conflicts!
+    # df = df.drop_duplicates(subset=['Room ID', 'Date', 'Start', 'End', 'Course'])
+    
+    # Instead, let's identify duplicates for analysis but keep them in the dataset
+    duplicate_mask = df.duplicated(subset=['Room ID', 'Date', 'Start', 'End', 'Course'], keep=False)
+    if duplicate_mask.any():
+        print(f"WARNING: Found {duplicate_mask.sum()} duplicate schedule entries that may indicate conflicts!")
+        duplicate_schedules = df[duplicate_mask][['Room ID', 'Date', 'Start', 'End', 'Course', 'Day']]
+        print("Duplicate schedules detected:")
+        print(duplicate_schedules.to_string(index=False))
+    
     # Handle potential format issues with Start and End times
     df['Start'] = df['Start'].astype(str)
     df['End'] = df['End'].astype(str)

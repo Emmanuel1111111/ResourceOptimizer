@@ -184,119 +184,6 @@ def get_available_rooms():
         return jsonify({'status': 'error', 'error': f'Unexpected error: {e}'}), 500
 
 
-@routes_bp.route('/api/predict', methods=['POST'])
-def predict_utilization():
-    try:
-        # Check if database connection is available
-        if db is None or timetables_collection is None:
-            return jsonify({
-                'status': 'error',
-                'error': 'Database connection is not available. Please check your MongoDB connection.'
-            }), 503  # 503 Service Unavailable
-            
-        data = request.get_json()
-        room_id = data.get('room_id')
-        period = int(request.args.get('period', 7))
-        
-        if period < 1 or period > 30:
-            return jsonify({"status": "error", "error": "Period must be between 1 and 30 days"}), 400
-
-        # Fetch data from MongoDB
-        query = {'Room ID': room_id} if room_id else {}
-        raw_data = list(timetables_collection.find(query, {'_id': 0}))
-        
-        if not raw_data:
-            return jsonify({"status": "error", "error": "No data found for the given filters"}), 404
-
-        # Convert to DataFrame and preprocess
-        df = pd.DataFrame(raw_data)
-        if df.empty:
-            return jsonify({"status": "error", "error": "No data found after processing"}), 404
-
-        # Apply preprocessing (fixed syntax)
-        df, _, _ = preprocess_data(df)
-
-        # Group by Room ID
-        predictions = []
-        room_ids = [room_id] if room_id else df['Room ID'].unique()
-
-        for rid in room_ids:
-            room_df = df[df['Room ID'] == rid][['Room ID', 'Date', 'Utilization']].copy()
-            
-            # Rename columns for Prophet (fixed column mapping)
-            room_df = room_df.rename(columns={'Date': 'ds', 'Utilization': 'y'})
-            room_df['ds'] = pd.to_datetime(room_df['ds'])
-
-            if room_df.empty:
-                continue
-
-            # Train Prophet model
-            model = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=False)
-            model.fit(room_df)
-
-            # Make future predictions
-            future = model.make_future_dataframe(periods=period, freq='D')
-            forecast = model.predict(future)
-
-            # Extract predictions for future dates only
-            forecast = forecast.tail(period)
-            dates = forecast['ds'].dt.strftime('%Y-%m-%d').tolist()
-            utilization = forecast['yhat'].clip(lower=0, upper=100).tolist()
-            
-            # Calculate trend
-            trend = forecast['trend'].mean()
-            trend_indicator = "Increasing" if trend > 0 else "Decreasing" if trend < 0 else "Stable"
-
-            # Calculate average utilization
-            avg_utilization = sum(utilization) / len(utilization)
-
-            # Determine utilization status
-            if avg_utilization > 80:
-                utilization_status = "Over-Utilized"
-                utilization_tip = "Consider splitting sessions or adding capacity to avoid scheduling conflicts."
-            elif avg_utilization < 20:
-                utilization_status = "Under-Utilized"
-                utilization_tip = "Reallocate to smaller rooms or free up for alternative uses."
-            else:
-                utilization_status = "Optimal"
-                utilization_tip = "Utilization is balanced; maintain existing schedule."
-
-            # Generate demand levels and tips (fixed loop syntax)
-            demand_levels = []
-            optimization_tips = []
-            for util in utilization:
-                if util < 30:
-                    demand_levels.append("Low")
-                    optimization_tips.append("Consider reallocating to smaller rooms or freeing for maintenance.")
-                elif util < 70:
-                    demand_levels.append("Medium")
-                    optimization_tips.append("Monitor usage; suitable for standard scheduling.")
-                else:
-                    demand_levels.append("High")
-                    optimization_tips.append("Prioritize booking; consider adding capacity.")
-
-            predictions.append({
-                'room_id': rid,
-                "dates": dates,
-                "utilization": utilization,
-                "demand_levels": demand_levels,
-                "optimization_tips": optimization_tips,
-                "trend": trend_indicator,
-                "utilization_status": utilization_status,
-                "utilization_tip": utilization_tip,
-                "average_utilization": round(avg_utilization, 2)
-            })
-
-        return jsonify({
-            "status": "success",
-            "message": "Classroom demand predictions generated successfully",
-            "predictions": predictions
-        }), 200
-
-    except KeyError as e:
-        return jsonify({"status": "error", "error": f"Key error: {str(e)}"}), 500
-    except Exception as e:
-        return jsonify({"status": "error", "error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
 @routes_bp.route('/api/current_utilization', methods=['POST'])
@@ -318,7 +205,7 @@ def current_utilization():
         
         if not raw_data:
             return jsonify({"status": "error", "error": "No data found for the specified room"}), 404
-
+ 
         # Process data
         df = pd.DataFrame(raw_data)
         df, daily_summary, _ = preprocess_data(df)

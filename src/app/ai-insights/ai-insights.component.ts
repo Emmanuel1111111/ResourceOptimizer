@@ -21,7 +21,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>()
 
-  // Form inputs
+  
   roomId = ""
   period = 7
 
@@ -119,35 +119,13 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     this.error = ""
     this.loading = true
     this.current_results = []
-    this.predictions = []
+ 
     this.cardAnimationDelay = 0
 
     // Add loading animation
     this.showMetrics = false
 
-    this.service.predictUtilization(this.roomId, this.period).subscribe({
-      next: (response: any) => {
-        console.log("Predictions Response:", response)
-
-        if (response.predictions && Array.isArray(response.predictions)) {
-          this.predictions = response.predictions
-        } else {
-          this.predictions = [response.predictions || response]
-        }
-
-        if (this.selectedTab === 1) {
-          setTimeout(() => this.renderCharts(), 100)
-        }
-
-        this.loading = false
-        this.initializeAnimations()
-      },
-      error: (err) => {
-        this.error = err.error?.message || "Failed to fetch predictions."
-        this.loading = false
-        console.error("Predictions Error:", err)
-      },
-    })
+   
 
     this.service.currentUtilization(this.roomId).subscribe({
       next: (response: any) => {
@@ -177,12 +155,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
     // Add tab switch animation
     this.showMetrics = false
-    setTimeout(() => {
-      this.showMetrics = true
-      if (tabIndex === 1 && this.predictions.length > 0) {
-        setTimeout(() => this.renderCharts(), 100)
-      }
-    }, 200)
+   
   }
 
   toggleDarkMode(): void {
@@ -190,174 +163,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     document.body.classList.toggle("dark-mode", this.isDarkMode)
   }
 
-  renderCharts(): void {
-    this.predictions.forEach((pred, index) => {
-      const chartId = `chart-${pred.room_id}`
-      const canvas = document.getElementById(chartId) as HTMLCanvasElement
-
-      if (!canvas) {
-        console.warn(`Chart canvas not found: ${chartId}`)
-        return
-      }
-
-      if (this.charts[chartId]) {
-        this.charts[chartId].destroy()
-      }
-
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      // Enhanced gradient with theme colors
-      const gradient = ctx.createLinearGradient(0, 0, 0, 300)
-      gradient.addColorStop(0, "rgba(102, 51, 153, 0.8)")
-      gradient.addColorStop(0.5, "rgba(102, 51, 153, 0.4)")
-      gradient.addColorStop(1, "rgba(102, 51, 153, 0.1)")
-
-      // Secondary gradient for line
-      const lineGradient = ctx.createLinearGradient(0, 0, canvas.width, 0)
-      lineGradient.addColorStop(0, "rgb(102, 51, 153)")
-      lineGradient.addColorStop(0.5, "rgb(255, 102, 0)")
-      lineGradient.addColorStop(1, "rgb(102, 51, 153)")
-
-      const chartConfig: ChartConfiguration = {
-        type: "line" as ChartType,
-        data: {
-          labels:
-            pred.dates?.map((date: string) => {
-              return new Date(date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })
-            }) || [],
-          datasets: [
-            {
-              label: "Predicted Utilization %",
-              data: pred.utilization || [],
-              borderColor: lineGradient,
-              backgroundColor: gradient,
-              borderWidth: 4,
-              fill: true,
-              tension: 0.4,
-              pointBackgroundColor: "rgb(255, 102, 0)",
-              pointBorderColor: "#ffffff",
-              pointBorderWidth: 3,
-              pointRadius: 8,
-              pointHoverRadius: 12,
-              pointHoverBackgroundColor: "rgb(255, 102, 0)",
-              pointHoverBorderColor: "#ffffff",
-              pointHoverBorderWidth: 4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            intersect: false,
-            mode: "index",
-          },
-          plugins: {
-            legend: {
-              display: true,
-              position: "top",
-              labels: {
-                font: {
-                  family: "Inter, system-ui, sans-serif",
-                  size: 14,
-                  weight: 600,
-                },
-                color: this.isDarkMode ? "#ffffff" : "rgb(0, 0, 0)",
-                usePointStyle: true,
-                pointStyle: "circle",
-                padding: 20,
-              },
-            },
-            tooltip: {
-              backgroundColor: "rgba(255, 255, 255, 0.98)",
-              titleColor: "rgb(0, 0, 0)",
-              bodyColor: "rgb(0, 51, 102)",
-              borderColor: "rgb(102, 51, 153)",
-              borderWidth: 2,
-              cornerRadius: 12,
-              displayColors: true,
-              padding: 16,
-              titleFont: {
-                size: 14,
-                weight: 600,
-              },
-              bodyFont: {
-                size: 13,
-                weight: 500,
-              },
-              callbacks: {
-                title: (context) => {
-                  const index = context[0].dataIndex
-                  return `${pred.dates[index]} - ${pred.demand_levels[index]} Demand`
-                },
-                label: (context) => {
-                  return `Utilization: ${context.parsed.y.toFixed(1)}%`
-                },
-                afterLabel: (context) => {
-                  const index = context.dataIndex
-                  return `Tip: ${pred.optimization_tips[index]}`
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              grid: {
-                display: true,
-                color: this.isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                lineWidth: 1,
-              },
-              ticks: {
-                font: {
-                  family: "Inter, system-ui, sans-serif",
-                  size: 12,
-                  weight: 500,
-                },
-                color: this.isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgb(0, 51, 102)",
-                padding: 8,
-              },
-            },
-            y: {
-              beginAtZero: true,
-              max: 100,
-              grid: {
-                color: this.isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
-                lineWidth: 1,
-              },
-              ticks: {
-                callback: (value) => `${value}%`,
-                font: {
-                  family: "Inter, system-ui, sans-serif",
-                  size: 12,
-                  weight: 500,
-                },
-                color: this.isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgb(0, 51, 102)",
-                padding: 8,
-              },
-            },
-          },
-          elements: {
-            point: {
-              hoverBackgroundColor: "rgb(255, 102, 0)",
-              hoverBorderColor: "#ffffff",
-            },
-          },
-          animation: {
-            duration: 2000,
-            easing: "easeInOutCubic",
-            delay: (context) => context.dataIndex * 100,
-          },
-        },
-      }
-
-      this.charts[chartId] = new Chart(ctx, chartConfig)
-    })
-  }
-
+  
   // Enhanced utility methods
   getStatusClass(status: string): string {
     const statusLower = status?.toLowerCase() || ""
@@ -377,7 +183,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
 
   clearInsights(): void {
     this.current_results = []
-    this.predictions = []
+
     this.error = ""
     this.showMetrics = false
 
@@ -403,9 +209,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
     return this.current_results && this.current_results.length > 0
   }
 
-  hasPredictionData(): boolean {
-    return this.predictions && this.predictions.length > 0
-  }
+ 
 
   getUtilizationColor(utilization: number): string {
     if (utilization >= 70) return "rgb(244, 67, 54)" // Red
