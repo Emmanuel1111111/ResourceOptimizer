@@ -168,14 +168,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       textColor: 'white',
     },
     {
-      title: 'AI Predictions',
+      title: 'Room Analytics',
       icon: '📊',
-      description: 'View AI-powered insights on classroom demand, usage patterns, and optimization recommendations.',
+      description: 'View analytical insights on classroom demand, usage patterns, and optimization recommendations.',
       route: '/ai-insights',
       buttonText: 'View AI Insights',
       gradient: 'linear-gradient(135deg, #ff4500 0%, #ff6b35 100%)',
       textColor: 'white'
     },
+    
     {
       title: 'Monitor/Visualize Data',           
       icon: '🗓️',
@@ -199,12 +200,30 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.loadUserStats();
-    this.loadUserProfile();
-    this.loadRealTimeData();
-    this.setupRouteTracking();
-    this.setupNotificationPolling();
-    this.initializeNotifications(); // Add this line
+    
+    // Subscribe to authentication state changes
+    this.adminAuthService.isAuthenticated$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(isAuthenticated => {
+      if (isAuthenticated) {
+        console.log('User authenticated, initializing dashboard features');
+        this.loadUserStats();
+        this.loadUserProfile();
+        this.loadRealTimeData();
+        this.setupRouteTracking();
+        this.setupNotificationPolling();
+        // Only initialize notifications if we have a valid token
+        const token = sessionStorage.getItem('admin_token');
+        if (token) {
+          console.log('Token available, initializing notifications');
+          this.initializeNotifications();
+        } else {
+          console.log('No token available, skipping notification initialization');
+        }
+      } else {
+        console.log('User not authenticated, skipping dashboard features');
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -240,7 +259,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       this.showUserMenu = false;
     }
     
-    // Close mobile sidebar when clicking outside
+
     if (this.isMobile && this.sidebarOpen) {
       const sidebar = document.querySelector('.ultra-sidebar');
     const toggleButton = document.querySelector('.sidebar-toggle');
@@ -253,11 +272,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   // Initialization methods
   private initializeComponent(): void {
-    this.userId = localStorage.getItem('userId');
-    if (!this.userId) {
-      this.router.navigate(['/login-page']);
+    // Check if user is authenticated using AdminAuthService
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, redirecting to admin login');
+      this.router.navigate(['/admin/login']);
       return;
     }
+    
+    // Get user ID from AdminAuthService
+    this.userId = this.adminAuthService.getCurrentUserId();
   }
 
   private setupSearchDebouncing(): void {
@@ -282,6 +305,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   private setupNotificationPolling(): void {
+    // Only start polling if user is authenticated
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, skipping notification polling setup');
+      return;
+    }
+    
     // Poll for new notifications every 30 seconds
     setInterval(() => {
       this.checkForNewNotifications();
@@ -613,6 +642,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   markAllAsRead(): void {
+    // Check if user is authenticated before making the request
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, skipping mark all as read');
+      return;
+    }
+    
     const apiUrl = environment.apiUrl || 'http://localhost:5000';
     
     this.http.post(`${apiUrl}/api/admin/notifications/read-all`, {}).subscribe({
@@ -626,11 +661,21 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       },
       error: (error) => {
         console.error('Error marking notifications as read:', error);
+        // If it's an authentication error, don't retry
+        if (error.status === 401) {
+          console.log('Authentication error in mark all as read');
+        }
       }
     });
   }
 
   markNotificationAsRead(notification: Notification): void {
+    // Check if user is authenticated before making the request
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, skipping mark as read');
+      return;
+    }
+    
     const apiUrl = environment.apiUrl || 'http://localhost:5000';
     
     this.http.post(`${apiUrl}/api/admin/notifications/${notification.id}/read`, {}).subscribe({
@@ -643,6 +688,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       },
       error: (error) => {
         console.error('Error marking notification as read:', error);
+        // If it's an authentication error, don't retry
+        if (error.status === 401) {
+          console.log('Authentication error in mark as read');
+        }
       }
     });
   }
@@ -684,8 +733,23 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   // Data initialization methods (existing methods remain the same but enhanced)
   private initializeNotifications(): void {
-    // Load real-time notifications from the server
-    this.loadRealTimeNotifications();
+    // Only load notifications if user is authenticated
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, skipping notification initialization');
+      return;
+    }
+    
+    // Check if token is available
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      console.log('No admin token found, skipping notification initialization');
+      return;
+    }
+    
+    // Add a small delay to ensure token is properly set
+    setTimeout(() => {
+      this.loadRealTimeNotifications();
+    }, 1000);
     
     // Set up polling for new notifications every 30 seconds
     this.notificationPolling$.pipe(
@@ -696,6 +760,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   private loadRealTimeNotifications(): void {
+    // Check if user is authenticated before making the request
+    if (!this.adminAuthService.isAuthenticated()) {
+      console.log('User not authenticated, skipping notification load');
+      return;
+    }
+    
     const apiUrl = environment.apiUrl || 'http://localhost:5000';
     
     this.http.get<{notifications: Notification[], unread_count: number}>(`${apiUrl}/api/admin/notifications`).subscribe({
@@ -705,7 +775,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
       },
       error: (error) => {
         console.error('Error loading notifications:', error);
-        // Fallback to empty notifications
+        // If it's an authentication error, don't retry
+        if (error.status === 401) {
+          console.log('Authentication error, stopping notification polling');
+          this.notificationPolling$.complete();
+          return;
+        }
+        // Fallback to empty notifications for other errors
         this.notifications = [];
         // this.unreadNotificationCount = 0; // This line is removed
       }

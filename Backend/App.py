@@ -262,7 +262,7 @@ except Exception as e:
                         def modified_count(self):
                             return 0
                     return MockResult()
-                
+                    
                 def command(self, cmd):
                     print(f"Mock command called: {cmd}")
                     return {"ok": 1}
@@ -276,7 +276,7 @@ except Exception as e:
                     if name not in self._collections:
                         self._collections[name] = MockCollection(name)
                     return self._collections[name]
-                
+                    
                 def command(self, cmd):
                     print(f"Mock database command: {cmd}")
                     return {"ok": 1}

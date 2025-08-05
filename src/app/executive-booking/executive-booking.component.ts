@@ -99,10 +99,10 @@ export class ExecutiveBookingComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
-   
+     
     this.form = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''], 
+      date: [''],
       startTime: [''], 
       endTime: [''], 
       day: ['', Validators.required], 
@@ -117,10 +117,10 @@ export class ExecutiveBookingComponent implements OnInit {
     
     this.injectScheduleForm = this.fb.group({
       roomId: ['', Validators.required],
-      date: [''], 
+      date: [''],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
-      day: ['', Validators.required], 
+      day: ['', Validators.required],
       course: ['', Validators.required],
       department: ['', Validators.required],
       lecturer: [''],
@@ -317,7 +317,7 @@ export class ExecutiveBookingComponent implements OnInit {
   performOperation(operation: string, roomId: string, date: string, startTime: string, endTime: string, 
                    day: string, scheduleId: string, course: string, department: string, 
                    lecturer: string, level: string) {
-    this.loading = true;
+      this.loading = true;
     this.results = null;
 
     const roomData = { room_id: roomId, date, start: startTime, end: endTime, day };
@@ -328,12 +328,12 @@ export class ExecutiveBookingComponent implements OnInit {
       case 'check_overlap':
         this.resourceService.checkOverlap(roomId, date, startTime, endTime, day).subscribe({
           next: (response) => {
-            this.results = response;
+          this.results = response;
             this.processOverlapAnalysis(response);
             this.handleBookingOperation(operation, roomData, response);
             this.snackBar.open('Overlap check completed successfully!', 'Close', { duration: 3000 });
-          },
-          error: (error) => {
+        },
+        error: (error) => {
             this.handleApiError(error, 'Failed to check overlap');
           },
           complete: () => {
@@ -353,7 +353,7 @@ export class ExecutiveBookingComponent implements OnInit {
             this.handleApiError(error, 'Failed to suggest rooms');
           },
           complete: () => {
-            this.loading = false;
+          this.loading = false;
           }
         });
         break;
@@ -406,7 +406,7 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       default:
-        this.loading = false;
+          this.loading = false;
         this.snackBar.open('Unknown operation', 'Close', { duration: 3000 });
     }
   }

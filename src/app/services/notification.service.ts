@@ -35,13 +35,23 @@ export class NotificationService {
   private pollingSubscription: any;
 
   constructor(private http: HttpClient) {
-    this.startPolling();
+    // Don't start polling automatically - wait for user authentication
   }
 
   /**
    * Get notifications from the server
    */
   getNotifications(unreadOnly: boolean = false, limit: number = 50): Observable<NotificationResponse> {
+    // Check if user is authenticated before making request
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      console.log('No admin token found, skipping notification request');
+      return new Observable(subscriber => {
+        subscriber.next({ notifications: [], unread_count: 0 });
+        subscriber.complete();
+      });
+    }
+
     const params = {
       unread_only: unreadOnly.toString(),
       limit: limit.toString()
@@ -54,6 +64,11 @@ export class NotificationService {
       }),
       catchError(error => {
         console.error('Error fetching notifications:', error);
+        if (error.status === 401) {
+          console.log('Authentication error, clearing notifications');
+          this.notificationsSubject.next([]);
+          this.unreadCountSubject.next(0);
+        }
         return [];
       })
     );
@@ -63,6 +78,16 @@ export class NotificationService {
    * Mark a notification as read
    */
   markAsRead(notificationId: string): Observable<any> {
+    // Check if user is authenticated before making request
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      console.log('No admin token found, skipping mark as read request');
+      return new Observable(subscriber => {
+        subscriber.next({});
+        subscriber.complete();
+      });
+    }
+
     return this.http.post(`${this.apiUrl}/api/admin/notifications/${notificationId}/read`, {}).pipe(
       tap(() => {
         // Update local state
@@ -77,6 +102,9 @@ export class NotificationService {
       }),
       catchError(error => {
         console.error('Error marking notification as read:', error);
+        if (error.status === 401) {
+          console.log('Authentication error in mark as read');
+        }
         return [];
       })
     );
@@ -86,6 +114,16 @@ export class NotificationService {
    * Mark all notifications as read
    */
   markAllAsRead(): Observable<any> {
+    // Check if user is authenticated before making request
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      console.log('No admin token found, skipping mark all as read request');
+      return new Observable(subscriber => {
+        subscriber.next({});
+        subscriber.complete();
+      });
+    }
+
     return this.http.post(`${this.apiUrl}/api/admin/notifications/read-all`, {}).pipe(
       tap(response => {
         // Update local state
@@ -98,30 +136,51 @@ export class NotificationService {
       }),
       catchError(error => {
         console.error('Error marking all notifications as read:', error);
+        if (error.status === 401) {
+          console.log('Authentication error in mark all as read');
+        }
         return [];
       })
     );
   }
 
   /**
-   * Get unread count
+   * Get unread notification count
    */
   getUnreadCount(): Observable<{unread_count: number}> {
+    // Check if user is authenticated before making request
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) {
+      console.log('No admin token found, skipping unread count request');
+      return new Observable(subscriber => {
+        subscriber.next({ unread_count: 0 });
+        subscriber.complete();
+      });
+    }
+
     return this.http.get<{unread_count: number}>(`${this.apiUrl}/api/admin/notifications/unread-count`).pipe(
       tap(response => {
         this.unreadCountSubject.next(response.unread_count);
       }),
       catchError(error => {
-        console.error('Error getting unread count:', error);
+        console.error('Error fetching unread count:', error);
+        if (error.status === 401) {
+          console.log('Authentication error in unread count');
+          this.unreadCountSubject.next(0);
+        }
         return [];
       })
     );
   }
 
   /**
-   * Start polling for new notifications
+   * Start polling for notifications (call this after user login)
    */
   startPolling(): void {
+    if (this.pollingSubscription) {
+      this.stopPolling();
+    }
+    
     this.pollingSubscription = interval(this.pollingInterval).pipe(
       switchMap(() => this.getNotifications())
     ).subscribe();

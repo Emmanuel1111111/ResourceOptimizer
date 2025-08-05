@@ -72,7 +72,7 @@ def get_available_rooms():
         # Time-based filtering
         now_time = datetime.now().time()
         now_day = datetime.now().strftime('%A')  
-        buffer = timedelta(minutes=5)
+   
 
         df['Start_dt'] = pd.to_datetime(df['Start'], format='%H:%M', errors='coerce').dt.time
         df['End_dt'] = pd.to_datetime(df['End'], format='%H:%M', errors='coerce').dt.time
@@ -82,21 +82,43 @@ def get_available_rooms():
                 # Ensure all parameters are valid
                 if not start or not end or not day or not current_time or not current_day:
                     return False
+                
+                # Check for NaT (Not a Time) values in datetime objects
+                if pd.isna(start) or pd.isna(end) or pd.isna(current_time):
+                    return False
+                
+                # Convert datetime objects to time objects for comparison
+                if hasattr(start, 'time'):
+                    start_time = start.time()
+                else:
+                    start_time = start
+                    
+                if hasattr(end, 'time'):
+                    end_time = end.time()
+                else:
+                    end_time = end
+                    
+                if hasattr(current_time, 'time'):
+                    current_time_obj = current_time.time()
+                else:
+                    current_time_obj = current_time
+                
+                # Validate that all time objects are valid
+                if not all([start_time, end_time, current_time_obj]):
+                    return False
                     
                 # Clean day strings and compare (case-insensitive)
                 schedule_day = str(day).strip().lower()
                 current_day_clean = str(current_day).strip().lower()
                 
-                # Debug logging
-                print(f"Comparing: {schedule_day} vs {current_day_clean}, {start} <= {current_time} <= {end}")
-                
+              
                 # Day must match and current time must be within schedule
                 day_match = schedule_day == current_day_clean
-                time_match = start <= current_time <= end
+                time_match = start_time <= current_time_obj <= end_time  
                 
                 result = day_match and time_match
                 if result:
-                    print(f"Match found: {day} {start}-{end}")
+                    print(f"Match found: {day} {start_time}-{end_time}")
                 
                 return result
             except Exception as e:
@@ -109,13 +131,7 @@ def get_available_rooms():
             ),
             axis=1
         )
-        print(f"\nCurrent time matches found: {df['Matches_Current_Time'].sum()}")
-        print(f"Debug - Current time: {now_time}, Current day: {now_day}")
-        print(f"Debug - Total rows in dataframe: {len(df)}")
-        if len(df) > 0:
-            print(f"Debug - Sample row: {df.iloc[0][['Day', 'Start', 'End', 'Course']].to_dict()}")
-            print(f"Debug - Unique days in data: {df['Day'].unique()}")
-            print(f"Debug - Sample start times: {df['Start'].unique()[:5]}")
+       
         
         # Show which rows match current time for debugging
         matching_rows = df[df['Matches_Current_Time'] == True]
@@ -205,7 +221,7 @@ def current_utilization():
         
         if not raw_data:
             return jsonify({"status": "error", "error": "No data found for the specified room"}), 404
- 
+
         # Process data
         df = pd.DataFrame(raw_data)
         df, daily_summary, _ = preprocess_data(df)
@@ -476,8 +492,7 @@ def refresh_aggregated_data():
 
         # Print raw data for debugging
        
-        for item in raw_data[:2]:  # Print just a couple of items to avoid log spam
-            print(f"  {item}")
+       
 
         # Convert to DataFrame and reprocess
         df = pd.DataFrame(raw_data)
@@ -485,7 +500,7 @@ def refresh_aggregated_data():
             return jsonify({"status": "error", "error": "No data found after processing"}), 404
 
         # Apply preprocessing to regenerate aggregated data
-        df, daily_summary, weekly_summary = preprocess_data(df)
+        df, daily_summary, weekly_summary = preprocess_data(df) 
         
         if prioritize_day:
             # Check if we have day-based entries for this room

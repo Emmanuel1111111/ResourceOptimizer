@@ -93,9 +93,7 @@ export class ResourceManagementService {
     );
   }
 
-  /**
-   * Reallocate an existing schedule to a new room/time (Enhanced)
-   */
+ 
   reallocateSchedule(
     scheduleId: string,
     newSchedule: {

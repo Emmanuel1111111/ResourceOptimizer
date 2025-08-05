@@ -47,7 +47,7 @@ def validate_time_format(time_str):
     
     hours_str, minutes_str = parts
     
-    # Check if both parts are digits
+    
     if not (hours_str.isdigit() and minutes_str.isdigit()):
         return False
     
@@ -61,10 +61,7 @@ def validate_time_format(time_str):
         return False
 
 def normalize_time_format(time_str):
-    """
-    Normalize various time formats to HH:MM format.
-    ENHANCED: Now handles more edge cases and formats.
-    """
+   
     if not time_str or not isinstance(time_str, str):
         return None
     
@@ -76,31 +73,30 @@ def normalize_time_format(time_str):
         return None
     
     try:
-        # Handle combined time format (e.g., "08:00–09:55" or "08:00-09:55")
+        # Handle combined time format (e.g., "08:00–10:00")
         if '–' in time_str or '-' in time_str:
-            # Split on either en dash or regular dash
+            # Extract just the start time
             parts = time_str.replace('–', '-').split('-')
             if len(parts) >= 2:
-                # Return only the first part (start time)
+                # Take the first part as the start time
                 time_str = parts[0].strip()
         
-        # Remove common suffixes/prefixes
+        # Remove common time suffixes
         time_str = time_str.replace('hrs', '').replace('hr', '').replace('h', '').strip()
         
-        # Handle different separators
+        # Handle formats without colons
         if ':' not in time_str:
-            # Handle formats like "8", "08", "800", "0800"
             if time_str.isdigit():
                 if len(time_str) == 1:  # "8" -> "08:00"
                     time_str = f"0{time_str}:00"
-                elif len(time_str) == 2:  # "08" -> "08:00"
+                elif len(time_str) == 2:  # "14" -> "14:00"
                     time_str = f"{time_str}:00"
-                elif len(time_str) == 3:  # "800" -> "08:00"
+                elif len(time_str) == 3:  # "830" -> "08:30"
                     time_str = f"0{time_str[0]}:{time_str[1:]}"
-                elif len(time_str) == 4:  # "0800" -> "08:00"
+                elif len(time_str) == 4:  # "1430" -> "14:30"
                     time_str = f"{time_str[:2]}:{time_str[2:]}"
         
-        # Handle formats with dots (e.g., "8.30" -> "08:30")
+        # Handle formats with dots
         if '.' in time_str:
             time_str = time_str.replace('.', ':')
         
@@ -178,11 +174,7 @@ def serialize_mongo_doc(doc):
     return serialized
 
 def check_overlap(start1, end1, start2, end2):
-    """
-    Check if two time periods overlap.
-    FIXED: Now properly detects identical time slots and exact duplicates.
-    Returns True if there is an overlap, False otherwise.
-    """
+   
     try:
         # Validate all time strings first
         time_strings = [start1, end1, start2, end2]
@@ -210,7 +202,7 @@ def check_overlap(start1, end1, start2, end2):
             print(f"  *** EXACT DUPLICATE DETECTED: {start1}-{end1} is identical to {start2}-{end2} ***")
             return True
         
-        # ENHANCED OVERLAP CHECK: Use strict inequality for boundary conditions
+       
         # Two periods overlap if: (start1 < end2) AND (end1 > start2)
         condition1 = s1 < e2
         condition2 = e1 > s2
@@ -225,214 +217,22 @@ def check_overlap(start1, end1, start2, end2):
         print(f"Error in check_overlap: {e}")
         return True
 
-def _check_schedule_conflict(schedule, requested_start, requested_end, day, room_id):
-    """
-    Check if a specific schedule conflicts with a requested time slot.
-    Returns conflict info if there's an overlap, None otherwise.
-    """
-    try:
-        # Get schedule details
-        schedule_start = schedule.get('Start')
-        schedule_end = schedule.get('End')
-        schedule_day = schedule.get('Day', 'Unknown')
-        schedule_date = schedule.get('Date', 'Unknown')
-        schedule_course = schedule.get('Course', 'Unknown')
-        schedule_department = schedule.get('Department', 'Unknown')
-        schedule_year = schedule.get('Year', 'Unknown')
-        schedule_lecturer = schedule.get('Lecturer', 'Unknown')
-        
-        # Handle combined time format (e.g., "08:00–10:00")
-        if isinstance(schedule_start, str) and '–' in schedule_start:
-            time_parts = schedule_start.split('–')
-            if len(time_parts) == 2:
-                schedule_start = time_parts[0].strip()
-                if not schedule_end or not isinstance(schedule_end, str):
-                    schedule_end = time_parts[1].strip()
-        
-        # Normalize time formats
-        schedule_start = normalize_time_format(schedule_start)
-        schedule_end = normalize_time_format(schedule_end)
-        
-        print(f"Checking schedule: Room={room_id}, Day={schedule_day}, Date={schedule_date}, " +
-              f"Time={schedule_start}-{schedule_end}, Course={schedule_course}")
-        
-        # Validate time formats
-        if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
-            print(f"  → Skipping due to invalid time format")
-            return None
-        
-        # Check day match
-        if schedule_day != day and schedule_day != "Unknown":
-            print(f"  → Skipping due to day mismatch: schedule day '{schedule_day}' != requested day '{day}'")
-            return None
-        
-        # Check for time overlap
-        overlap = check_overlap(requested_start, requested_end, schedule_start, schedule_end)
-        print(f"  → Overlap result: {overlap}")
-        
-        if overlap:
-            conflict_info = {
-                'schedule_id': str(schedule.get('_id', 'Unknown')),
-                'room_id': schedule.get('Room ID', room_id),
-                'course': schedule_course,
-                'time': f"{schedule_start}-{schedule_end}",
-                'day': schedule_day,
-                'date': schedule_date,
-                'department': schedule_department,
-                'year': schedule_year,
-                'lecturer': schedule_lecturer,
-                'conflict_type': 'time_overlap'
-            }
-            print(f"  → CONFLICT DETECTED: {conflict_info}")
-            return conflict_info
-        else:
-            print(f"  → No conflict")
-            return None
-            
-    except Exception as e:
-        print(f"Error checking schedule conflict: {e}")
-        return None
 
-def _analyze_all_schedule_overlaps(schedules, day, room_id):
-    """
-    Analyze all schedules for a room/day to find overlaps between existing schedules.
-    Returns a list of all conflicts found.
-    """
-    conflicts = []
-    valid_schedules = []
-    
-    # First, prepare and validate all schedules
-    for i, schedule in enumerate(schedules):
-        try:
-            # Get schedule details
-            schedule_start = schedule.get('Start')
-            schedule_end = schedule.get('End')
-            schedule_day = schedule.get('Day', 'Unknown')
-            schedule_course = schedule.get('Course', 'Unknown')
-            schedule_department = schedule.get('Department', 'Unknown')
-            schedule_year = schedule.get('Year', 'Unknown')
-            schedule_lecturer = schedule.get('Lecturer', 'Unknown')
-            
-            # Handle combined time format
-            if isinstance(schedule_start, str) and '–' in schedule_start:
-                time_parts = schedule_start.split('–')
-                if len(time_parts) == 2:
-                    schedule_start = time_parts[0].strip()
-                    if not schedule_end or not isinstance(schedule_end, str):
-                        schedule_end = time_parts[1].strip()
-            
-            # Normalize time formats
-            schedule_start = normalize_time_format(schedule_start)
-            schedule_end = normalize_time_format(schedule_end)
-            
-            # Validate time formats and day
-            if (validate_time_format(schedule_start) and 
-                validate_time_format(schedule_end) and 
-                (schedule_day == day or schedule_day == "Unknown")):
-                
-                valid_schedules.append({
-                    'index': i,
-                    'schedule': schedule,
-                    'start': schedule_start,
-                    'end': schedule_end,
-                    'course': schedule_course,
-                    'department': schedule_department,
-                    'year': schedule_year,
-                    'lecturer': schedule_lecturer,
-                    'day': schedule_day
-                })
-            else:
-                print(f"Skipping invalid schedule {i}: Start={schedule_start}, End={schedule_end}, Day={schedule_day}")
-                
-        except Exception as e:
-            print(f"Error processing schedule {i}: {e}")
-            continue
-    
-    print(f"Processing {len(valid_schedules)} valid schedules for overlap analysis")
-    
-    # Check each schedule against all others
-    for i in range(len(valid_schedules)):
-        for j in range(i + 1, len(valid_schedules)):
-            schedule_a = valid_schedules[i]
-            schedule_b = valid_schedules[j]
-            
-            # Check for overlap between the two schedules
-            if check_overlap(schedule_a['start'], schedule_a['end'], 
-                           schedule_b['start'], schedule_b['end']):
-                
-                conflict_info = {
-                    'conflict_type': 'schedule_overlap',
-                    'room_id': room_id,
-                    'day': day,
-                    'schedule_1': {
-                        'id': str(schedule_a['schedule'].get('_id', f'schedule_{schedule_a["index"]}')),
-                        'course': schedule_a['course'],
-                        'time': f"{schedule_a['start']}-{schedule_a['end']}",
-                        'department': schedule_a['department'],
-                        'year': schedule_a['year'],
-                        'lecturer': schedule_a['lecturer']
-                    },
-                    'schedule_2': {
-                        'id': str(schedule_b['schedule'].get('_id', f'schedule_{schedule_b["index"]}')),
-                        'course': schedule_b['course'],
-                        'time': f"{schedule_b['start']}-{schedule_b['end']}",
-                        'department': schedule_b['department'],
-                        'year': schedule_b['year'],
-                        'lecturer': schedule_b['lecturer']
-                    },
-                    'overlap_period': _calculate_overlap_period(
-                        schedule_a['start'], schedule_a['end'],
-                        schedule_b['start'], schedule_b['end']
-                    )
-                }
-                
-                conflicts.append(conflict_info)
-                print(f"OVERLAP DETECTED: {schedule_a['course']} ({schedule_a['start']}-{schedule_a['end']}) " +
-                      f"overlaps with {schedule_b['course']} ({schedule_b['start']}-{schedule_b['end']})")
-    
-    print(f"Found {len(conflicts)} overlapping schedule pairs")
-    return conflicts
 
-def _calculate_overlap_period(start1, end1, start2, end2):
-  
-    try:
-        from datetime import datetime
-        
-        s1 = datetime.strptime(start1, '%H:%M').time()
-        e1 = datetime.strptime(end1, '%H:%M').time()
-        s2 = datetime.strptime(start2, '%H:%M').time()
-        e2 = datetime.strptime(end2, '%H:%M').time()
-        
-        # Calculate overlap start and end
-        overlap_start = max(s1, s2)
-        overlap_end = min(e1, e2)
-        
-        return {
-            'start': overlap_start.strftime('%H:%M'),
-            'end': overlap_end.strftime('%H:%M'),
-            'duration_minutes': int((datetime.combine(datetime.today(), overlap_end) - 
-                                   datetime.combine(datetime.today(), overlap_start)).total_seconds() / 60)
-        }
-    except Exception as e:
-        print(f"Error calculating overlap period: {e}")
-        return {
-            'start': 'Unknown',
-            'end': 'Unknown',
-            'duration_minutes': 0
-        }
+
 
 def _calculate_free_slots_improved(occupied_slots, business_start, business_end):
 
     free_slots = []
     
     if not occupied_slots:
-        # Entire day is free
+        
         duration_mins = time_diff_minutes(business_start, business_end)
         if duration_mins > 0:
             free_slots.append({
                 'start': business_start,
                 'end': business_end,
-                'duration': format_duration(duration_mins)
+                'duration': format_duration(duration_mins) 
             })
         return free_slots
     
@@ -617,22 +417,21 @@ def manage_resources():
             
             conflicts = []
             if room_changed or time_changed:
-               
                 new_room_query = {'Room ID': new_room_id, 'Day': new_day}
                 existing_schedules = list(timetables.find(new_room_query, {'_id': 0}))
 
                 for schedule in existing_schedules:
-                   
+                    # Skip the original schedule being reallocated
                     if (schedule.get('Room ID') == original_schedule.get('Room ID') and
                         schedule.get('Start') == original_schedule.get('Start') and
                         schedule.get('End') == original_schedule.get('End') and
                         schedule.get('Course') == original_schedule.get('Course')):
                         continue
-                        
+                    
                     schedule_start = schedule.get('Start')
                     schedule_end = schedule.get('End')
                     
-                   
+                    # Skip schedules with invalid time format
                     if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
                         print(f"Skipping schedule with invalid time format: Start={schedule_start}, End={schedule_end}")
                         continue
@@ -981,12 +780,12 @@ def manage_resources():
                             duration = time_diff_minutes(schedule_start, schedule_end)
                             if duration > 0:  # Valid duration
                                 normalized_schedules.append({
-                                    'start': schedule_start,
-                                    'end': schedule_end,
+                                'start': schedule_start,
+                                'end': schedule_end,
                                     'course': schedule.get('Course', 'Unknown'),
                                     'department': schedule.get('Department', 'Unknown')
-                                })
-                            else:
+                        })
+                    else:
                                 print(f"Warning: Invalid schedule duration for {room}: {schedule_start}-{schedule_end}")
                     
                     # Calculate free time slots using improved logic
@@ -1003,14 +802,14 @@ def manage_resources():
                             break
                     
                     # Prepare room information
-                    room_info = {
-                        'room_id': room,
+                        room_info = {
+                            'room_id': room,
                         'status': 'Available' if is_available else 'Conflicted',
                         'free_slots': free_slots,  # Use the improved free_slots
-                        'requested_slot': {
-                            'start': start_time,
-                            'end': end_time,
-                            'duration': format_duration(time_diff_minutes(start_time, end_time))
+                            'requested_slot': {
+                                'start': start_time,
+                                'end': end_time,
+                                'duration': format_duration(time_diff_minutes(start_time, end_time))
                         },
                         'total_schedules': len(normalized_schedules),
                         'business_hours': {'start': business_start, 'end': business_end}
@@ -1029,7 +828,7 @@ def manage_resources():
                     else:
                         # Still include conflicted rooms for user information
                         available_rooms.append(room_info)
-
+                
                 # Sort rooms by availability and then by total free time
                 def sort_key(room):
                     total_free_minutes = sum(time_diff_minutes(slot['start'], slot['end']) for slot in room['free_slots'])
@@ -1079,8 +878,7 @@ def manage_resources():
 
                 print(f"Enhanced overlap check for Room: {room_id}, Day: {day}")
 
-                # CRITICAL FIX: More comprehensive database query to handle data inconsistencies
-                # Try multiple query strategies to ensure we find all schedules
+                
                 
                 # Strategy 1: Exact day match
                 query_exact = {'Room ID': room_id, 'Day': day}
@@ -1116,26 +914,7 @@ def manage_resources():
                 
                 print(f"TOTAL UNIQUE SCHEDULES FOUND: {len(all_schedules)}")
                 
-                # DEBUG: Show what we found
-                if all_schedules:
-                    print("=== FOUND SCHEDULES DEBUG ===")
-                    for i, schedule in enumerate(all_schedules):
-                        print(f"Schedule {i+1}: Room={schedule.get('Room ID')}, Day='{schedule.get('Day')}', " +
-                              f"Time={schedule.get('Start')}-{schedule.get('End')}, Course={schedule.get('Course')}, " +
-                              f"Dept={schedule.get('Department')}")
-                    print("=== END DEBUG ===")
-                else:
-                    print(f"❌ NO SCHEDULES FOUND for Room {room_id}")
-                    # Additional debugging - check if room exists at all
-                    any_room_schedules = list(timetables.find({'Room ID': room_id}, {'_id': 0}).limit(5))
-                    if any_room_schedules:
-                        print(f"DEBUG: Room {room_id} exists but has no schedules for day '{day}'")
-                        print("Sample schedules for this room:")
-                        for schedule in any_room_schedules:
-                            print(f"  Day='{schedule.get('Day')}', Time={schedule.get('Start')}-{schedule.get('End')}")
-                    else:
-                        print(f"DEBUG: Room {room_id} does not exist in database at all!")
-                
+                              
                 room_schedules = all_schedules
 
                 if not room_schedules:

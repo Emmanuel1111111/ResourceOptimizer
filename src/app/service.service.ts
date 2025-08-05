@@ -180,12 +180,12 @@ export class AuthService {
   }
 
   // Refresh aggregated data
-  refreshAggregatedData(roomId?: string, prioritizeDay: boolean = true): Observable<any> {
+  refreshAggregatedData(roomId?: string): Observable<any> {
     let params= new HttpParams()
     if (roomId) {
       params = params.set('room_id', roomId);
     }
-    params = params.set('prioritize_day', prioritizeDay.toString());
+
     
     return this.http.get(`${this.apiUrl}/refresh_aggregated_data`, { params }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to refresh aggregated data')))
