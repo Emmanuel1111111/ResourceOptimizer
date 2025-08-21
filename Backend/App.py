@@ -27,7 +27,6 @@ jwt = JWTManager(app)
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:4200"}})
 
 MONGO_URI = os.getenv('MONGO_URI')
-print("MONGO_URI:", MONGO_URI)
 
 db_connection_available = False
 db_error_details = "No connection attempt yet"
@@ -137,24 +136,15 @@ try:
     if not MONGO_URI:
         raise ValueError("MONGO_URI environment variable is not set")
         
-    print("Attempting MongoDB connection with multiple strategies...")
     client = create_mongo_client(MONGO_URI)
-    print("MongoDB connection successful")
     db = client.EduResourceDB
     db_connection_available = True
     
 except Exception as e:
     db_error_details = str(e)
-    print(f"MongoDB Atlas connection error: {e}")
     
   
     if "No nameservers" in str(e) or "NXDOMAIN" in str(e):
-        print("\n🔧 DNS RESOLUTION ERROR DETECTED")
-        print("This is likely caused by:")
-        print("1. Network/firewall blocking DNS queries")
-        print("2. Corporate network restrictions")
-        print("3. DNS server issues")
-        print("\nTrying solutions...")
         
         db_error_details = "DNS resolution error: Unable to resolve MongoDB hostname. Try using a direct connection string instead of SRV format."
         
@@ -163,10 +153,8 @@ except Exception as e:
             import socket
             import dns.resolver
             
-            print("Testing DNS resolution...")
             if MONGO_URI and '@' in MONGO_URI:
                 hostname = MONGO_URI.split('@')[1].split('/')[0].split('?')[0]
-                print(f"Testing hostname: {hostname}")
                 
                 # Test different DNS resolvers
                 resolvers = ['8.8.8.8', '1.1.1.1', '208.67.222.222']  # Google, Cloudflare, OpenDNS
@@ -176,48 +164,30 @@ except Exception as e:
                         resolver = dns.resolver.Resolver()
                         resolver.nameservers = [resolver_ip]
                         answers = resolver.resolve(hostname, 'A')
-                        print(f"✅ DNS resolution successful using {resolver_ip}")
-                        
                         # Try connecting with this resolver
                         import os
                         os.environ['RES_OPTIONS'] = f'nameserver {resolver_ip}'
                         client = create_mongo_client(MONGO_URI)
                         db = client.EduResourceDB
                         db_connection_available = True
-                        print("✅ MongoDB connection successful with custom DNS!")
                         break
-                        
-                    except Exception as dns_err:
-                        print(f"❌ DNS resolver {resolver_ip} failed: {dns_err}")
+
+                    except Exception:
                         continue
                         
-        except ImportError:
-            print("⚠️  dnspython not installed. Install with: pip install dnspython")
-        except Exception as dns_fix_err:
-            print(f"DNS fix attempt failed: {dns_fix_err}")
+        except:
+            pass
     
     # Fallback to local MongoDB if Atlas fails
     if not db_connection_available:
         try:
-            print("\n🔄 Attempting local MongoDB fallback...")
             client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=3000)
             client.server_info()
-            print("✅ Connected to local MongoDB")
             db = client.EduResourceDB
             db_connection_available = True
             db_error_details = "Connected to local MongoDB (Atlas connection failed)"
         except Exception as local_e:
-            local_error = str(local_e)
-            print(f"❌ Local MongoDB connection failed: {local_error}")
-            
-            if "refused" in local_error:
-                print("\n💡 To start local MongoDB:")
-                print("  macOS: brew services start mongodb/brew/mongodb-community")
-                print("  Linux: sudo systemctl start mongod")
-                print("  Windows: net start MongoDB")
-                
-            db_error_details = f"Local MongoDB: {local_error}"
-            print("\n⚠️  WARNING: Application will run with limited functionality")
+            db_error_details = f"Local MongoDB: {str(local_e)}"
         
         # Create a mock database for minimal functionality
         if not db_connection_available:
@@ -229,11 +199,9 @@ except Exception as e:
                     self.data = []
                 
                 def find(self, query=None, projection=None):
-                    print(f"Mock find called on {self.name} with query: {query}")
                     return []
-                    
+
                 def find_one(self, query=None, projection=None):
-                    print(f"Mock find_one called on {self.name} with query: {query}")
                     return None
                     
                 def distinct(self, field):

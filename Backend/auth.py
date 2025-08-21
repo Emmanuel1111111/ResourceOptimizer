@@ -172,7 +172,6 @@ def manage_logs():
                 
                 return jsonify(response), 200
             except Exception as e:
-                print(f"Error retrieving logs: {str(e)}")
                 return jsonify({'status': 'error', 'error': f'Failed to read logs: {str(e)}'}), 500
         elif request.method == 'POST':
             data = request.get_json()
@@ -184,8 +183,6 @@ def manage_logs():
                 logs_collection.insert_one(data)
                 return jsonify({'status': 'success', 'message': 'Log entry added'}), 201
             except Exception as e:
-                print(f"Error adding log: {str(e)}")
                 return jsonify({'status': 'error', 'error': f'Failed to write log: {str(e)}'}), 500
     except Exception as e:
-        print(f"Authentication error: {str(e)}")
         return jsonify({'status': 'error', 'error': f'Authentication error: {str(e)}'}), 401

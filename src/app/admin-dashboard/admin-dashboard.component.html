@@ -195,16 +195,68 @@
                 </button>
               </div>
               <div class="notification-list">
-                <div class="notification-item" 
-                     *ngFor="let notification of notifications" 
+                <div class="notification-item"
+                     *ngFor="let notification of notifications"
                      [class.unread]="!notification.read"
+                     [class.conflict-notification]="notification.type === 'schedule_conflict'"
                      (click)="markNotificationAsRead(notification)">
                   <div class="notification-icon" [ngClass]="notification.type">
-                    <i class="fas fa-bell"></i>
+                    <i class="fas"
+                       [class.fa-exclamation-triangle]="notification.type === 'schedule_conflict'"
+                       [class.fa-bell]="notification.type !== 'schedule_conflict'"></i>
                   </div>
                   <div class="notification-content">
                     <h5>{{notification.title}}</h5>
-                    <p>{{notification.message}}</p>
+                    <p class="notification-message">{{notification.message}}</p>
+
+                    <!-- Enhanced conflict details -->
+                    <div class="conflict-details" *ngIf="notification.type === 'schedule_conflict' && notification.data?.conflicts">
+                      <div class="conflict-summary">
+                        <span class="conflict-badge" [class]="notification.data.severity?.toLowerCase()">
+                          {{notification.data.severity}} Priority
+                        </span>
+                        <span class="conflict-count">{{notification.data.conflict_count}} conflict{{notification.data.conflict_count > 1 ? 's' : ''}}</span>
+                      </div>
+
+                      <!-- Quick conflict preview -->
+                      <div class="conflict-preview" *ngIf="notification.data.display_data">
+                        <div class="preview-item" *ngIf="notification.data.display_data.room_ids?.length > 0">
+                          <i class="fas fa-door-open"></i>
+                          <span>📍 {{notification.data.display_data.room_ids.slice(0, 3).join(', ')}}{{notification.data.display_data.room_ids.length > 3 ? '...' : ''}}</span>
+                        </div>
+                        <div class="preview-item" *ngIf="notification.data.display_data.days_of_week?.length > 0">
+                          <i class="fas fa-calendar-day"></i>
+                          <span>📅 {{notification.data.display_data.days_of_week.slice(0, 3).join(', ')}}{{notification.data.display_data.days_of_week.length > 3 ? '...' : ''}}</span>
+                        </div>
+                        <div class="preview-item" *ngIf="notification.data.display_data.conflicting_time_slots?.length > 0">
+                          <i class="fas fa-clock"></i>
+                          <span>⏰ {{notification.data.display_data.conflicting_time_slots[0]}}{{notification.data.display_data.conflicting_time_slots.length > 1 ? ' +' + (notification.data.display_data.conflicting_time_slots.length - 1) + ' more' : ''}}</span>
+                        </div>
+                      </div>
+
+                      <div class="affected-summary" *ngIf="notification.data.summary">
+                        <div class="summary-item">
+                          <i class="fas fa-door-open"></i>
+                          <span>{{notification.data.summary.rooms_affected?.length || 0}} room{{(notification.data.summary.rooms_affected?.length || 0) !== 1 ? 's' : ''}}</span>
+                        </div>
+                        <div class="summary-item">
+                          <i class="fas fa-calendar-day"></i>
+                          <span>{{notification.data.summary.days_affected?.length || 0}} day{{(notification.data.summary.days_affected?.length || 0) !== 1 ? 's' : ''}}</span>
+                        </div>
+                        <div class="summary-item">
+                          <i class="fas fa-building"></i>
+                          <span>{{notification.data.summary.departments_affected?.length || 0}} dept{{(notification.data.summary.departments_affected?.length || 0) !== 1 ? 's' : ''}}</span>
+                        </div>
+                      </div>
+
+                      <button class="view-details-btn"
+                              (click)="$event.stopPropagation(); viewConflictDetails(notification)"
+                              *ngIf="notification.data.conflicts?.length > 0">
+                        <i class="fas fa-eye"></i>
+                        View Full Details
+                      </button>
+                    </div>
+
                     <small>{{notification.time_ago}}</small>
                   </div>
                   <div class="notification-status" *ngIf="!notification.read">
@@ -274,21 +326,31 @@
       <!-- Quick Stats Grid -->
       <section class="stats-section">
         <div class="stats-grid">
-          <div class="stat-card rooms" (click)="navigateToRooms()">
+          <div class="stat-card rooms" (click)="navigateToRooms()"
+               matTooltip="Click to view all rooms. Trend shows room utilization percentage.">
             <div class="stat-icon">
               <i class="fas fa-door-open"></i>
             </div>
             <div class="stat-content">
               <h3 class="stat-number" [@countUp]="userStats.totalRooms">{{ userStats.totalRooms }}</h3>
               <p class="stat-label">Total Rooms</p>
-              <div class="stat-trend positive" *ngIf="roomsTrend > 0">
+              <div class="stat-trend positive" *ngIf="roomsTrend > 0"
+                   matTooltip="{{roomsTrend}}% of rooms have active schedules">
                 <i class="fas fa-arrow-up"></i>
-                <span>+{{roomsTrend}}%</span>
+                <span>{{roomsTrend}}%</span>
+              </div>
+              <div class="stat-trend neutral" *ngIf="roomsTrend === 0"
+                   matTooltip="No rooms have schedules or data unavailable">
+                <i class="fas fa-minus"></i>
+                <span>0%</span>
               </div>
             </div>
             <div class="stat-actions">
-              <button class="quick-action-btn" matTooltip="View All Rooms">
+              <button class="quick-action-btn" matTooltip="View All Rooms" (click)="$event.stopPropagation(); navigateToRooms()">
                 <i class="fas fa-eye"></i>
+              </button>
+              <button class="quick-action-btn" matTooltip="Refresh Room Count" (click)="$event.stopPropagation(); loadRoomStats()">
+                <i class="fas fa-sync-alt"></i>
               </button>
             </div>
           </div>
@@ -347,6 +409,91 @@
                 <i class="fas fa-chart-line"></i>
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Conflict Monitoring Section -->
+      <section class="conflict-monitoring-section">
+        <div class="section-header">
+          <h2>🔍 Automated Conflict Detection</h2>
+          <p>Monitor and detect schedule conflicts automatically</p>
+        </div>
+
+        <div class="monitoring-controls">
+          <div class="monitoring-status">
+            <div class="status-indicator" [class.active]="conflictMonitoringActive" [class.inactive]="!conflictMonitoringActive">
+              <i class="fas" [class.fa-play-circle]="!conflictMonitoringActive" [class.fa-pause-circle]="conflictMonitoringActive"></i>
+              <span>{{ conflictMonitoringActive ? 'Active' : 'Inactive' }}</span>
+            </div>
+
+            <div class="monitoring-info">
+              <div class="info-item">
+                <label>Scan Interval:</label>
+                <span>{{ Math.round(conflictScanInterval / 60) }} minutes</span>
+              </div>
+              <div class="info-item">
+                <label>Last Scan:</label>
+                <span>{{ lastConflictScan }}</span>
+              </div>
+              <div class="info-item" *ngIf="conflictsDetected > 0">
+                <label>Conflicts Detected:</label>
+                <span class="conflict-count">{{ conflictsDetected }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="monitoring-actions">
+            <button class="action-btn start-btn"
+                    *ngIf="!conflictMonitoringActive"
+                    (click)="startConflictMonitoring()"
+                    matTooltip="Start automated conflict detection">
+              <i class="fas fa-play"></i>
+              Start Monitoring
+            </button>
+
+            <button class="action-btn stop-btn"
+                    *ngIf="conflictMonitoringActive"
+                    (click)="stopConflictMonitoring()"
+                    matTooltip="Stop automated conflict detection">
+              <i class="fas fa-stop"></i>
+              Stop Monitoring
+            </button>
+
+            <button class="action-btn scan-btn"
+                    (click)="runManualConflictScan()"
+                    matTooltip="Run immediate conflict scan">
+              <i class="fas fa-search"></i>
+              Scan Now
+            </button>
+
+            <button class="action-btn refresh-btn"
+                    (click)="loadConflictMonitoringStatus()"
+                    matTooltip="Refresh monitoring status">
+              <i class="fas fa-sync-alt"></i>
+              Refresh Status
+            </button>
+
+            <button class="action-btn clear-btn"
+                    (click)="clearOldNotificationsAndScan()"
+                    matTooltip="Clear old notifications and run fresh detailed scan">
+              <i class="fas fa-broom"></i>
+              Fresh Scan
+            </button>
+
+            <button class="action-btn test-btn"
+                    (click)="createSampleDetailedNotification()"
+                    matTooltip="Create sample detailed conflict notification for testing">
+              <i class="fas fa-flask"></i>
+              Test Sample
+            </button>
+
+            <button class="action-btn sync-btn"
+                    (click)="forceRefreshNotifications()"
+                    matTooltip="Force sync notifications with backend">
+              <i class="fas fa-sync"></i>
+              Force Sync
+            </button>
           </div>
         </div>
       </section>

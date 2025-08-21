@@ -7,6 +7,7 @@ from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
 import os
 from process import preprocess_data
+from flask_jwt_extended import jwt_required, get_jwt_identity
 load_dotenv()
 
 
@@ -14,23 +15,13 @@ manage_resources_bp = Blueprint('manage_resources', __name__)
 MONGO_URI = os.getenv("MONGO_URI")
 try:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=8000)
-    client.server_info()
+    
     print("MongoDB connection successful in manage_resources")
     db = client['EduResourceDB']
     timetables = db['timetables']
 except Exception as e:
     print(f"MongoDB connection error in manage_resources: {e}")
-    try:
-        client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
-        client.server_info()
-        print("Connected to local MongoDB in manage_resources")
-        db = client['EduResourceDB']
-        timetables = db['timetables']
-    except Exception as local_e:
-        print(f"Local MongoDB connection failed in manage_resources: {local_e}")
-        print("WARNING: Resource management operations will not function correctly")
-        db = None
-        timetables = None
+   
  
 def validate_time_format(time_str):
    
@@ -289,6 +280,7 @@ def _calculate_free_slots_improved(occupied_slots, business_start, business_end)
     return free_slots
 
 @manage_resources_bp.route('/manage_resources', methods=['POST', 'GET'])
+@jwt_required(optional=True)  # Make JWT optional for backward compatibility
 def manage_resources():
    
     try:
@@ -323,12 +315,9 @@ def manage_resources():
                 date_obj = datetime.strptime(date, '%Y-%m-%d')
                 inferred_day = date_obj.strftime('%A')
                 
-               
+
                 if not day_provided_in_request:
                     day = inferred_day
-                    print(f"Day not provided in request, using inferred day: {day}")
-                else:
-                    print(f"Using day provided in request: {day} (inferred from date: {inferred_day})")
             except ValueError:
                 return jsonify({'error': 'Invalid date format, use YYYY-MM-DD'}), 400
         
@@ -336,29 +325,37 @@ def manage_resources():
         valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         if day not in valid_days:
             return jsonify({'error': f'Invalid day format. Must be one of: {", ".join(valid_days)}'}), 400
-            
-        print(f"Final day used for scheduling: {day}")
 
         
        
         
-        # REMOVED OLD check_overlap implementation - using enhanced version only
-        # This was causing conflicts to be missed because the old logic was executed first
-        
-        if operation == 'reallocate':
-            if not schedule_id or not new_schedule:
-                return jsonify({'status': 'error', 'error': 'Missing schedule_id or new_schedule'}), 400
 
-            # Get additional parameters to uniquely identify the specific schedule
+        if operation == 'reallocate':
+            # Validate required data
+            if not new_schedule:
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Missing new_schedule data'
+                }), 400
+
+            # Get the original schedule identification parameters
+            original_room_id = schedule_id or room_id  # schedule_id should contain the room_id
             original_day = data.get('original_day')
             original_start_time = data.get('original_start_time')
             original_end_time = data.get('original_end_time')
             original_course = data.get('original_course')
-            
-            # Build query to find the specific schedule entry
-            query = {'Room ID': schedule_id}
-            
-            # Add additional filters if provided to uniquely identify the schedule
+
+            # Validate we have enough information to identify the schedule
+            if not original_room_id:
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Missing room identification. Please provide schedule_id (room_id) or room_id.'
+                }), 400
+
+            # Build query to find the specific schedule using room_id + additional criteria
+            query = {'Room ID': original_room_id}
+
+            # Add additional criteria to uniquely identify the schedule
             if original_day:
                 query['Day'] = original_day
             if original_start_time:
@@ -367,46 +364,61 @@ def manage_resources():
                 query['End'] = original_end_time
             if original_course:
                 query['Course'] = original_course
-            
+
             # Find the specific schedule
             original_schedule = timetables.find_one(query)
+
             if not original_schedule:
-                return jsonify({'status': 'error', 'error': 'Specific schedule not found. Please provide more details to identify the exact schedule.'}), 404
-            
-            # If multiple schedules match, return error asking for more specific identification
-            if original_day and original_start_time and original_end_time:
-                # This should be unique enough, but let's double-check
-                matching_schedules = list(timetables.find(query))
-                if len(matching_schedules) > 1:
-                    return jsonify({
-                        'status': 'error', 
-                        'error': 'Multiple schedules found with the same criteria. Please provide course name or other unique identifier.',
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Schedule not found. Please ensure the room ID and schedule details are correct.',
+                    'debug_info': {
+                        'search_query': query,
+                        'room_id_provided': original_room_id,
+                        'additional_criteria': {
+                            'day': original_day,
+                            'start_time': original_start_time,
+                            'end_time': original_end_time,
+                            'course': original_course
+                        }
+                    }
+                }), 404
+
+            # Check if multiple schedules match (ambiguous identification)
+            matching_schedules = list(timetables.find(query))
+            if len(matching_schedules) > 1:
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Multiple schedules found with the same criteria. Please provide more specific details.',
+                    'debug_info': {
+                        'matches_found': len(matching_schedules),
                         'matching_schedules': [
                             {
-                                'room_id': schedule.get('Room ID'),
-                                'course': schedule.get('Course'),
-                                'day': schedule.get('Day'),
-                                'time': f"{schedule.get('Start')}-{schedule.get('End')}",
-                                'lecturer': schedule.get('Lecturer')
-                            } for schedule in matching_schedules
+                                'room_id': s.get('Room ID'),
+                                'course': s.get('Course'),
+                                'day': s.get('Day'),
+                                'time': f"{s.get('Start')}-{s.get('End')}",
+                                'lecturer': s.get('Lecturer')
+                            } for s in matching_schedules
                         ]
-                    }), 400
+                    }
+                }), 400
             
             original_date = original_schedule.get('Date')
 
-            # Handle partial updates - use original values for missing fields
-            new_room_id = new_schedule.get('room_id', original_schedule.get('Room ID'))
-            new_date = new_schedule.get('date', original_date)
-            new_start_time = new_schedule.get('start_time', original_schedule.get('Start'))
-            new_end_time = new_schedule.get('end_time', original_schedule.get('End'))
-            new_day = new_schedule.get('day', original_schedule.get('Day'))
-            
+            # Handle partial updates - use original values for missing or empty fields
+            new_room_id = new_schedule.get('room_id') or original_schedule.get('Room ID')
+            new_date = new_schedule.get('date') or original_date
+            new_start_time = new_schedule.get('start_time') or original_schedule.get('Start')
+            new_end_time = new_schedule.get('end_time') or original_schedule.get('End')
+            new_day = new_schedule.get('day') or original_schedule.get('Day')
+
             # Get course information fields with fallbacks to original values
-            new_course = new_schedule.get('course', original_schedule.get('Course', 'Unknown'))
-            new_department = new_schedule.get('department', original_schedule.get('Department', 'Unknown'))
-            new_year = new_schedule.get('year', original_schedule.get('Year', 'Unknown'))
-            new_status = new_schedule.get('status', original_schedule.get('Status', 'Booked'))
-            new_lecturer = new_schedule.get('lecturer', original_schedule.get('Instructor', 'Unknown'))  # Fixed: use 
+            new_course = new_schedule.get('course') or original_schedule.get('Course', 'Unknown')
+            new_department = new_schedule.get('department') or original_schedule.get('Department', 'Unknown')
+            new_year = new_schedule.get('year') or original_schedule.get('Year', 'Unknown')
+            new_status = new_schedule.get('status') or original_schedule.get('Status', 'Booked')
+            new_lecturer = new_schedule.get('lecturer') or original_schedule.get('Instructor', 'Unknown')
             if not validate_time_format(new_start_time) or not validate_time_format(new_end_time):
                 return jsonify({'status': 'error', 'error': 'Invalid time format in new_schedule. Use HH:MM format.'}), 400
 
@@ -496,9 +508,11 @@ def manage_resources():
                     'Lecturer': new_lecturer
                 }
             }
-            result = timetables.update_one(query, update)  
+            # Use the original schedule's _id for the update to ensure we update the correct document
+            update_query = {'_id': original_schedule['_id']}
+            result = timetables.update_one(update_query, update)
             if result.matched_count == 0:
-                return jsonify({'status': 'error', 'error': 'Schedule not found'}), 404
+                return jsonify({'status': 'error', 'error': 'Schedule not found during update'}), 404
 
             return jsonify({
                 'status': 'success',
@@ -566,7 +580,7 @@ def manage_resources():
                         print(f"  → Skipping due to invalid time format")
                         continue
 
-                    has_overlap = has_time_overlap(start_time, end_time, schedule_start, schedule_end)
+                    has_overlap = check_overlap(start_time, end_time, schedule_start, schedule_end)
                     print(f"  → Overlap check result: {has_overlap}")
 
                     if has_overlap:
@@ -666,14 +680,19 @@ def manage_resources():
                 total_count = timetables.count_documents(query)
                 
                
-                schedules = list(timetables.find(query, {'_id': 0}).skip(skip).limit(per_page))
+                # Include _id for reallocate operation - don't exclude it
+                schedules = list(timetables.find(query).skip(skip).limit(per_page))
                 
-                # Format times consistently for display
+                # Format times consistently for display and convert ObjectId to string
                 for schedule in schedules:
                     start = schedule.get('Start', '')
                     end = schedule.get('End', '')
                     if start and end:
-                        schedule['Time'] = f"{start}–{end}"  
+                        schedule['Time'] = f"{start}–{end}"
+
+                    # Convert ObjectId to string for frontend use
+                    if '_id' in schedule:
+                        schedule['_id'] = str(schedule['_id'])
                 
                 # Serialize for JSON response
                 serialized_schedules = [serialize_mongo_doc(s) for s in schedules]
@@ -726,12 +745,18 @@ def manage_resources():
                 # Validate requested time is within business hours
                 if is_time_before(start_time, business_start) or is_time_after(end_time, business_end):
                     return jsonify({
-                        'status': 'warning', 
-                        'message': f'Requested time is outside business hours ({business_start}-{business_end})',
-                        'business_hours': {'start': business_start, 'end': business_end}
+                        'status': 'warning',
+                        'message': f'Requested time ({start_time}-{end_time}) is outside business hours ({business_start}-{business_end})',
+                        'business_hours': {'start': business_start, 'end': business_end},
+                        'suggested_rooms': [],
+                        'conflicted_rooms': [],
+                        'total_available': 0,
+                        'total_conflicted': 0,
+                        'day': day,
+                        'time': f"{start_time}-{end_time}"
                     }), 200
 
-                # OPTIMIZATION: Single bulk query instead of N+1 queries
+               
                 if room_id:
                     room_filter = {'Room ID': room_id, 'Day': day}
                     all_rooms = [room_id]
@@ -780,13 +805,15 @@ def manage_resources():
                             duration = time_diff_minutes(schedule_start, schedule_end)
                             if duration > 0:  # Valid duration
                                 normalized_schedules.append({
-                                'start': schedule_start,
-                                'end': schedule_end,
+                                    'start': schedule_start,
+                                    'end': schedule_end,
                                     'course': schedule.get('Course', 'Unknown'),
                                     'department': schedule.get('Department', 'Unknown')
-                        })
-                    else:
+                                })
+                            else:
                                 print(f"Warning: Invalid schedule duration for {room}: {schedule_start}-{schedule_end}")
+                        else:
+                            print(f"Warning: Invalid time format for {room}: {schedule_start}-{schedule_end}")
                     
                     # Calculate free time slots using improved logic
                     free_slots = _calculate_free_slots_improved(normalized_schedules, business_start, business_end)
@@ -801,17 +828,30 @@ def manage_resources():
                             conflicting_schedule = schedule
                             break
                     
+                    # Get department information from schedules
+                    departments = list(set([s.get('department', 'Unknown') for s in normalized_schedules if s.get('department')]))
+                    primary_department = departments[0] if departments else 'Unknown'
+
+                    # Calculate utilization metrics
+                    total_scheduled_minutes = sum(time_diff_minutes(s['start'], s['end']) for s in normalized_schedules)
+                    business_minutes = time_diff_minutes(business_start, business_end)
+                    utilization_percentage = (total_scheduled_minutes / business_minutes * 100) if business_minutes > 0 else 0
+
                     # Prepare room information
-                        room_info = {
-                            'room_id': room,
+                    room_info = {
+                        'room_id': room,
                         'status': 'Available' if is_available else 'Conflicted',
-                        'free_slots': free_slots,  # Use the improved free_slots
-                            'requested_slot': {
-                                'start': start_time,
-                                'end': end_time,
-                                'duration': format_duration(time_diff_minutes(start_time, end_time))
+                        'department': primary_department,
+                        'departments_using': departments,
+                        'free_slots': free_slots,
+                        'requested_slot': {
+                            'start': start_time,
+                            'end': end_time,
+                            'duration': format_duration(time_diff_minutes(start_time, end_time))
                         },
                         'total_schedules': len(normalized_schedules),
+                        'utilization_percentage': round(utilization_percentage, 1),
+                        'total_free_minutes': sum(time_diff_minutes(slot['start'], slot['end']) for slot in free_slots),
                         'business_hours': {'start': business_start, 'end': business_end}
                     }
                     
@@ -841,9 +881,20 @@ def manage_resources():
                 truly_available = [r for r in available_rooms if r['status'] == 'Available']
                 conflicted_rooms = [r for r in available_rooms if r['status'] == 'Conflicted']
 
+                # Determine response status based on results
+                if len(truly_available) == 0 and len(conflicted_rooms) == 0:
+                    status = 'warning'
+                    message = f'No rooms found for {day} {start_time}-{end_time}. Please check your search criteria.'
+                elif len(truly_available) == 0:
+                    status = 'warning'
+                    message = f'No available rooms found for {day} {start_time}-{end_time}. All {len(conflicted_rooms)} rooms have conflicts.'
+                else:
+                    status = 'success'
+                    message = f'Found {len(truly_available)} available rooms, {len(conflicted_rooms)} conflicted'
+
                 return jsonify({
-                    'status': 'success',
-                    'message': f'Found {len(truly_available)} available rooms, {len(conflicted_rooms)} conflicted',
+                    'status': status,
+                    'message': message,
                     'date': date,
                     'day': day,
                     'time': f"{start_time}-{end_time}",
@@ -862,6 +913,113 @@ def manage_resources():
             except Exception as e:
                 print(f"Error in suggest_rooms: {str(e)}")
                 return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
+
+
+        elif operation == 'conflict_monitoring':
+            # Require authentication for conflict monitoring operations
+            try:
+                current_admin_id = get_jwt_identity()
+                if not current_admin_id:
+                    return jsonify({'status': 'error', 'error': 'Authentication required'}), 401
+            except:
+                return jsonify({'status': 'error', 'error': 'Invalid or missing authentication token'}), 401
+
+            try:
+                from conflict_detector import conflict_detector
+
+                action = data.get('action')  # 'start', 'stop', 'status', 'scan_now'
+
+                if action == 'start':
+                    conflict_detector.start_monitoring()
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Automated conflict monitoring started',
+                        'monitoring_active': True,
+                        'scan_interval': conflict_detector.scan_interval
+                    }), 200
+
+                elif action == 'stop':
+                    conflict_detector.stop_monitoring()
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Automated conflict monitoring stopped',
+                        'monitoring_active': False
+                    }), 200
+
+                elif action == 'status':
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Conflict monitoring status retrieved',
+                        'monitoring_active': conflict_detector.running,
+                        'scan_interval': conflict_detector.scan_interval,
+                        'last_scan': 'Not implemented yet'  # TODO: Add last scan tracking
+                    }), 200
+
+                elif action == 'scan_now':
+                    # Use the authenticated admin_id for notifications
+                    conflicts = conflict_detector.scan_all_conflicts()
+
+                    # For manual scans, always create notifications for the requesting admin
+                    # regardless of whether conflicts are new or existing
+                    if conflicts and current_admin_id:
+                        conflict_detector._create_manual_scan_notifications(conflicts, current_admin_id)
+
+                    # Still process conflicts normally for database storage
+                    conflict_detector._process_detected_conflicts(conflicts, current_admin_id)
+
+                    return jsonify({
+                        'status': 'success',
+                        'message': f'Manual conflict scan completed',
+                        'conflicts_found': len(conflicts),
+                        'conflicts': conflicts[:10] if len(conflicts) > 10 else conflicts  # Limit response size
+                    }), 200
+
+                else:
+                    return jsonify({
+                        'status': 'error',
+                        'error': 'Invalid action. Use: start, stop, status, or scan_now'
+                    }), 400
+
+            except ImportError as e:
+                return jsonify({
+                    'status': 'error',
+                    'error': f'Conflict detector not available: {str(e)}'
+                }), 500
+            except Exception as e:
+                return jsonify({
+                    'status': 'error',
+                    'error': f'Conflict monitoring error: {str(e)}'
+                }), 500
+
+        # Operation: Get total room count
+        elif operation == 'get_room_count':
+            try:
+                
+                distinct_rooms = timetables.distinct('Room ID')
+                total_rooms = len(distinct_rooms)
+
+                # Get additional statistics
+                total_schedules = timetables.count_documents({})
+
+                # Get rooms with schedules vs empty rooms
+                rooms_with_schedules = len(list(timetables.distinct('Room ID', {'Room ID': {'$exists': True, '$ne': None}})))
+                empty_rooms = total_rooms - rooms_with_schedules if total_rooms > rooms_with_schedules else 0
+
+                return jsonify({
+                    'status': 'success',
+                    'message': f'Found {total_rooms} total rooms in system',
+                    'data': {
+                        'total_rooms': total_rooms,
+                        'rooms_with_schedules': rooms_with_schedules,
+                        'empty_rooms': empty_rooms,
+                        'total_schedules': total_schedules,
+                        'room_list': distinct_rooms[:10] if len(distinct_rooms) > 10 else distinct_rooms  
+                    }
+                }), 200
+
+            except Exception as e:
+                print(f"Error in get_room_count: {str(e)}")
+                return jsonify({'status': 'error', 'error': f'Failed to get room count: {str(e)}'}), 500
 
         # Operation: Check overlap - ENHANCED VERSION
         elif operation == 'check_overlap':
@@ -888,12 +1046,11 @@ def manage_resources():
                 # Strategy 2: Case-insensitive day match
                 query_case_insensitive = {'Room ID': room_id, 'Day': {'$regex': f'^{day}$', '$options': 'i'}}
                 schedules_case_insensitive = list(timetables.find(query_case_insensitive, {'_id': 0}))
-                print(f"Strategy 2 - Case-insensitive day match: Found {len(schedules_case_insensitive)} schedules")
+                
                 
                 # Strategy 3: Room only (ignore day field - useful if day data is inconsistent)
                 query_room_only = {'Room ID': room_id}
                 schedules_room_only = list(timetables.find(query_room_only, {'_id': 0}))
-                print(f"Strategy 3 - Room only (all days): Found {len(schedules_room_only)} schedules")
                 
                 # Strategy 4: Find schedules with missing/null day field
                 query_missing_day = {'Room ID': room_id, '$or': [{'Day': {'$exists': False}}, {'Day': None}, {'Day': ''}]}
@@ -912,9 +1069,7 @@ def manage_resources():
                             seen_schedules.add(schedule_id)
                             all_schedules.append(schedule)
                 
-                print(f"TOTAL UNIQUE SCHEDULES FOUND: {len(all_schedules)}")
-                
-                              
+               
                 room_schedules = all_schedules
 
                 if not room_schedules:
@@ -941,8 +1096,7 @@ def manage_resources():
 
                 print(f"Found {len(room_schedules)} total schedules for Room {room_id} on {day}")
 
-                # CRITICAL FIX: Normalize and validate schedules WITHOUT removing duplicates
-                # We WANT to detect duplicate schedules as conflicts!
+               
                 normalized_schedules = []
                 invalid_schedules = []
                 duplicate_candidates = []
@@ -1028,25 +1182,13 @@ def manage_resources():
                 overlapping_pairs = []
                 all_overlaps = []
                 
-                print(f"\n=== STARTING OVERLAP DETECTION ===")
-                print(f"Checking {len(normalized_schedules)} normalized schedules for overlaps...")
+               
                 
                 for i in range(len(normalized_schedules)):
                     for j in range(i + 1, len(normalized_schedules)):
                         schedule1 = normalized_schedules[i]
                         schedule2 = normalized_schedules[j]
-                        
-                        print(f"\n--- COMPARISON {i+1} vs {j+1} ---")
-                        print(f"Schedule {i+1}: {schedule1['course']} ({schedule1['start']}-{schedule1['end']}) - Dept: {schedule1['department']}")
-                        print(f"Schedule {j+1}: {schedule2['course']} ({schedule2['start']}-{schedule2['end']}) - Dept: {schedule2['department']}")
-                        
-                        # CRITICAL DEBUG: Check if this is the overlap case you're looking for
-                        if (schedule1['start'] == '08:00' and schedule1['end'] == '09:55') or \
-                           (schedule2['start'] == '08:00' and schedule2['end'] == '09:55'):
-                            print(f"🔍 FOUND TARGET TIME SLOT 08:00-09:55 - DEBUGGING CAREFULLY:")
-                            print(f"  Schedule1 normalized: start='{schedule1['start']}', end='{schedule1['end']}'")
-                            print(f"  Schedule2 normalized: start='{schedule2['start']}', end='{schedule2['end']}'")
-                        
+                 
                         # Check if schedules overlap (including exact duplicates)
                         overlap_result = check_overlap(schedule1['start'], schedule1['end'], schedule2['start'], schedule2['end'])
                         
@@ -1248,17 +1390,7 @@ def manage_resources():
 
 # Helper function to calculate time difference in minutes - FIXED VERSION
 def time_diff_minutes(start_time, end_time):
-    """
-    Calculate time difference in minutes between two time strings.
-    Handles overnight periods and validates input.
     
-    Args:
-        start_time (str): Start time in HH:MM format
-        end_time (str): End time in HH:MM format
-    
-    Returns:
-        int: Time difference in minutes (0 if invalid)
-    """
     try:
         # Validate input formats first
         if not validate_time_format(start_time) or not validate_time_format(end_time):

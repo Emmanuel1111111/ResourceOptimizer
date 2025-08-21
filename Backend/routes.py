@@ -117,12 +117,8 @@ def get_available_rooms():
                 time_match = start_time <= current_time_obj <= end_time  
                 
                 result = day_match and time_match
-                if result:
-                    print(f"Match found: {day} {start_time}-{end_time}")
-                
                 return result
             except Exception as e:
-                print(f"Error in time comparison: {e}")
                 return False
 
         df['Matches_Current_Time'] = df.apply(
@@ -133,20 +129,6 @@ def get_available_rooms():
         )
        
         
-        # Show which rows match current time for debugging
-        matching_rows = df[df['Matches_Current_Time'] == True]
-        if len(matching_rows) > 0:
-            print(f"Debug - Found matching schedules:")
-            for _, row in matching_rows.iterrows():
-                print(f"  - {row['Course']} in {row['Room ID']} on {row['Day']} from {row['Start']} to {row['End']}")
-        else:
-            print("Debug - No matching schedules found")
-            # Show some sample data to help debug
-            if len(df) > 0:
-                print("Debug - Sample schedules for comparison:")
-                for _, row in df.head(3).iterrows():
-                    print(f"  - {row['Course']} in {row['Room ID']} on {row['Day']} from {row['Start']} to {row['End']}")
-
         # Filter and sort current time matches
         current_time_df = df[df['Matches_Current_Time'] == True][
             ['Room ID', 'Course', 'Start', 'End', 'Day', 'Status', 'Year', 'Department']
@@ -463,7 +445,6 @@ def get_room_schedules():
         }), 200
         
     except Exception as e:
-        print(f"Error in get_room_schedules: {str(e)}")
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
     
 
@@ -490,10 +471,6 @@ def refresh_aggregated_data():
         if not raw_data:
             return jsonify({"status": "error", "error": "No data found for the given filters"}), 404
 
-        # Print raw data for debugging
-       
-       
-
         # Convert to DataFrame and reprocess
         df = pd.DataFrame(raw_data)
         if df.empty:
@@ -509,7 +486,6 @@ def refresh_aggregated_data():
                                           (daily_summary['Date'] == pd.to_datetime('today').date())]
                 
                 if not day_entries.empty:
-                    print(f"Using day-based entries for room {room_id}")
                     daily_summary = day_entries
         
         # Return the refreshed data
@@ -627,8 +603,8 @@ def get_day_based_schedules():
                         hours = (end_hour - start_hour) + (end_min - start_min) / 60
                         if hours > 0:
                             day_schedules[day]['Daily_Booked_Hours'] += hours
-            except Exception as e:
-                print(f"Error calculating hours: {e}")
+            except Exception:
+                pass
         
         # Format the data for response
         result = []

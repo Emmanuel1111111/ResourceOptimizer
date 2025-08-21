@@ -241,8 +241,8 @@ def log_admin_activity(action: str, details: dict, success: bool = True):
         }
         collections = get_admin_collections()
         collections['admin_logs'].insert_one(log_entry)
-    except Exception as e:
-        print(f"Failed to log admin activity: {e}")
+    except Exception:
+        pass
 
 @admin_auth_bp.route('/admin/login', methods=['POST'])
 def admin_login():
@@ -700,7 +700,6 @@ def get_unread_count():
         return jsonify({'unread_count': count}), 200
         
     except Exception as e:
-        print(f"Error getting unread count: {e}")
         return jsonify({'error': 'Failed to get unread count'}), 500
 
 @admin_auth_bp.route('/admin/notifications/create', methods=['POST'])

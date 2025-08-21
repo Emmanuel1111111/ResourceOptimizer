@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -66,6 +66,7 @@ export class ExecutiveBookingComponent implements OnInit {
   currentPage: number = 1;
   roomsPerPage: number = 8;
   totalPages: number = 1;
+  showConflictedRooms: boolean = false;
   
   // Room selection modal
   showRoomSelectionModal: boolean = false;
@@ -97,7 +98,8 @@ export class ExecutiveBookingComponent implements OnInit {
     private resourceService: ResourceManagementService,
     private authService: AuthService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {
      
     this.form = this.fb.group({
@@ -166,7 +168,7 @@ export class ExecutiveBookingComponent implements OnInit {
       next: (response: any) => {
         if (response.schedules) {
           this.foundSchedules = response.schedules.map((schedule: any) => ({
-            id: schedule['Room ID'] + '_' + schedule.Start + '_' + schedule.Course,
+            id: schedule._id || (schedule['Room ID'] + '_' + schedule.Start + '_' + schedule.Course), // Use MongoDB _id if available, fallback to composite
             room_id: schedule['Room ID'],
             course: schedule.Course || 'Unknown',
             day: schedule.Day || 'Unknown',
@@ -191,10 +193,11 @@ export class ExecutiveBookingComponent implements OnInit {
 
   selectScheduleForReallocation(schedule: ExistingSchedule) {
     this.selectedSchedule = schedule;
-    
-    
+
+ 
     this.form.patchValue({
-      roomId: '', 
+      scheduleId: schedule.room_id, // Use the actual room_id from the selected schedule
+      roomId: '', // Clear the new room ID field (user will enter new room if needed)
       day: schedule.day,
       startTime: schedule.start,
       endTime: schedule.end,
@@ -343,17 +346,41 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       case 'suggest_rooms':
+        // Reset room display state before new request
+        this.resetRoomDisplay();
+
         this.resourceService.suggestRooms(date, startTime, endTime, day).subscribe({
           next: (response) => {
             this.results = response;
             this.handleBookingOperation(operation, roomData, response);
-            this.snackBar.open('Room suggestions generated successfully!', 'Close', { duration: 3000 });
+
+            // CRITICAL FIX: Initialize room display arrays immediately after API response
+            this.initializeRoomDisplay();
+
+            // Enhanced success messaging based on results
+            if (response['status'] === 'warning') {
+              this.snackBar.open(response['message'] || 'Warning occurred', 'Close', {
+                duration: 5000,
+                panelClass: ['warning-snackbar']
+              });
+            } else if (response['total_available'] === 0) {
+              this.snackBar.open('No available rooms found for the requested time slot', 'Close', {
+                duration: 4000,
+                panelClass: ['warning-snackbar']
+              });
+            } else {
+              this.snackBar.open(
+                `Found ${response['total_available'] || 0} available rooms!`,
+                'Close',
+                { duration: 3000 }
+              );
+            }
           },
           error: (error) => {
             this.handleApiError(error, 'Failed to suggest rooms');
           },
           complete: () => {
-          this.loading = false;
+            this.loading = false;
           }
         });
         break;
@@ -384,13 +411,29 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       case 'reallocate':
-        this.resourceService.reallocateSchedule(scheduleId, {
-          room_id: roomId,
-          date: date,
-          start_time: startTime,
-          end_time: endTime,
-          day: day
-        }).subscribe({
+        // Include original schedule details for unique identification
+        const originalScheduleDetails = this.selectedSchedule ? {
+          original_day: this.selectedSchedule.day,
+          original_start_time: this.selectedSchedule.start,
+          original_end_time: this.selectedSchedule.end,
+          original_course: this.selectedSchedule.course
+        } : {};
+
+        // Build new schedule object with only non-empty fields
+        const newSchedule: any = {};
+        if (roomId) newSchedule.room_id = roomId;
+        if (date) newSchedule.date = date;
+        if (startTime) newSchedule.start_time = startTime;
+        if (endTime) newSchedule.end_time = endTime;
+        if (day) newSchedule.day = day;
+
+        // Add other fields from the form if they have values
+        if (course) newSchedule.course = course;
+        if (department) newSchedule.department = department;
+        if (lecturer) newSchedule.lecturer = lecturer;
+        if (level) newSchedule.year = level;
+
+        this.resourceService.reallocateSchedule(scheduleId, newSchedule, originalScheduleDetails).subscribe({
           next: (response) => {
             this.results = response;
             this.handleBookingOperation(operation, roomData, response);
@@ -575,6 +618,34 @@ export class ExecutiveBookingComponent implements OnInit {
   }
   
 
+  // CRITICAL FIX: Initialize room display after API response
+  initializeRoomDisplay() {
+    console.log('🔄 Initializing room display after API response...');
+
+    // Reset search query to show all rooms initially
+    this.roomSearchQuery = '';
+
+    // Populate filteredRooms with all suggested rooms
+    if (this.results && this.results.suggested_rooms) {
+      this.filteredRooms = [...this.results.suggested_rooms];
+      console.log(`📋 Populated filteredRooms with ${this.filteredRooms.length} rooms`);
+    } else {
+      this.filteredRooms = [];
+      console.log('⚠️ No suggested rooms found in API response');
+    }
+
+    // Apply initial sorting
+    this.sortRooms();
+
+    // Initialize pagination and display
+    this.initializePagination();
+
+    // Force Angular change detection to update the view
+    this.cdr.detectChanges();
+
+    console.log(`✅ Room display initialized: ${this.displayedRooms.length} rooms ready for display`);
+  }
+
   // Room suggestion pagination methods
   initializePagination() {
     this.currentPage = 1;
@@ -586,6 +657,10 @@ export class ExecutiveBookingComponent implements OnInit {
     const startIndex = (this.currentPage - 1) * this.roomsPerPage;
     const endIndex = Math.min(startIndex + this.roomsPerPage, this.filteredRooms.length);
     this.displayedRooms = this.filteredRooms.slice(startIndex, endIndex);
+
+    console.log(`📄 Page ${this.currentPage}/${this.totalPages}: Displaying rooms ${startIndex + 1}-${endIndex} of ${this.filteredRooms.length} total`);
+    console.log(`🎯 DisplayedRooms array now contains ${this.displayedRooms.length} rooms:`,
+                this.displayedRooms.map(r => r.room_id));
   }
   
   changePage(page: number) {
@@ -648,29 +723,37 @@ export class ExecutiveBookingComponent implements OnInit {
   }
   
   filterRooms() {
+    console.log('🔍 Filtering rooms with query:', this.roomSearchQuery);
+
     if (!this.results || !this.results.suggested_rooms) {
+      console.log('⚠️ No results or suggested_rooms available for filtering');
+      this.filteredRooms = [];
+      this.displayedRooms = [];
       return;
     }
-    
-    
+
     if (this.roomSearchQuery.trim() === '') {
       this.filteredRooms = [...this.results.suggested_rooms];
+      console.log(`📋 Showing all ${this.filteredRooms.length} rooms (no filter)`);
     } else {
       const query = this.roomSearchQuery.toLowerCase();
       this.filteredRooms = this.results.suggested_rooms.filter((room: any) => {
-        return room.room_id.toLowerCase().includes(query) || 
+        return room.room_id.toLowerCase().includes(query) ||
                (room.department && room.department.toLowerCase().includes(query));
       });
-    } 
-    
+      console.log(`🔍 Filtered to ${this.filteredRooms.length} rooms matching "${query}"`);
+    }
+
     // Apply sorting
     this.sortRooms();
-    
+
     // Reset pagination
     this.initializePagination();
   }
   
   sortRooms() {
+    console.log(`🔄 Sorting ${this.filteredRooms.length} rooms by: ${this.roomSortOption}`);
+
     switch (this.roomSortOption) {
       case 'room_id':
         this.filteredRooms.sort((a, b) => a.room_id.localeCompare(b.room_id));
@@ -678,18 +761,18 @@ export class ExecutiveBookingComponent implements OnInit {
       case 'free_slots':
         this.filteredRooms.sort((a, b) => {
           // Sort by total free time (descending)
-          const aFreeTime = a.free_slots.reduce((total: number, slot: any) => {
+          const aFreeTime = a.free_slots ? a.free_slots.reduce((total: number, slot: any) => {
             const start = this.timeToMinutes(slot.start);
             const end = this.timeToMinutes(slot.end);
             return total + (end - start);
-          }, 0);
-          
-          const bFreeTime = b.free_slots.reduce((total: number, slot: any) => {
+          }, 0) : 0;
+
+          const bFreeTime = b.free_slots ? b.free_slots.reduce((total: number, slot: any) => {
             const start = this.timeToMinutes(slot.start);
             const end = this.timeToMinutes(slot.end);
             return total + (end - start);
-          }, 0);
-          
+          }, 0) : 0;
+
           return bFreeTime - aFreeTime; // Descending order
         });
         break;
@@ -701,13 +784,49 @@ export class ExecutiveBookingComponent implements OnInit {
         });
         break;
     }
-    
+
     this.updateDisplayedRooms();
+    console.log(`✅ Sorting complete. DisplayedRooms updated with ${this.displayedRooms.length} rooms`);
   }
   
   timeToMinutes(timeStr: string): number {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+
+  // TrackBy function for better *ngFor performance
+  trackByRoomId(index: number, room: any): string {
+    return room.room_id || index.toString();
+  }
+
+  // Reset room display state
+  resetRoomDisplay() {
+    console.log('🔄 Resetting room display state...');
+    this.filteredRooms = [];
+    this.displayedRooms = [];
+    this.roomSearchQuery = '';
+    this.currentPage = 1;
+    this.totalPages = 1;
+    this.showConflictedRooms = false;
+    console.log('✅ Room display state reset');
+  }
+
+  // Debug method to check room display state
+  debugRoomDisplay() {
+    console.log('🔍 DEBUG: Room Display State');
+    console.log('Results:', this.results);
+    console.log('Suggested Rooms:', this.results?.suggested_rooms);
+    console.log('Filtered Rooms:', this.filteredRooms);
+    console.log('Displayed Rooms:', this.displayedRooms);
+    console.log('Current Page:', this.currentPage);
+    console.log('Total Pages:', this.totalPages);
+    console.log('Search Query:', this.roomSearchQuery);
+
+    // Force re-initialization if we have results but no displayed rooms
+    if (this.results?.suggested_rooms?.length > 0 && this.displayedRooms.length === 0) {
+      console.log('🔧 Forcing room display re-initialization...');
+      this.initializeRoomDisplay();
+    }
   }
 
   calculateTotalFreeTime(freeSlots: any[]): number {

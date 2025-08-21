@@ -10,8 +10,6 @@ def preprocess_data(df):
     required_columns = ['Room ID', 'Date', 'Start', 'End', 'Course', 'Day']
     missing_columns = [col for col in required_columns if col not in df.columns]
     if missing_columns:
-        print(f"Warning: Missing required columns: {missing_columns}")
-   
         for col in missing_columns:
             df[col] = 'Unknown'
     
@@ -42,8 +40,7 @@ def preprocess_data(df):
     try:
         df['Start_dt'] = pd.to_datetime(df['Date'].dt.strftime('%Y-%m-%d') + ' ' + df['Start'], errors='coerce')
         df['End_dt'] = pd.to_datetime(df['Date'].dt.strftime('%Y-%m-%d') + ' ' + df['End'], errors='coerce')
-    except Exception as e:
-        print(f"Error converting dates: {e}")
+    except Exception:
         df['Start_dt'] = pd.to_datetime(df['Date'])
         df['End_dt'] = pd.to_datetime(df['Date'])
     
@@ -60,8 +57,7 @@ def preprocess_data(df):
     # Validate calculated hours to ensure no duplicates affected calculations
     max_daily_hours = df.groupby(['Room ID', 'Day'])['Booked hours'].sum().max()
     if max_daily_hours > total_availableHrs:
-        print(f"WARNING: Maximum daily booked hours ({max_daily_hours:.2f}) exceeds available hours ({total_availableHrs})")
-        print("This may indicate remaining data issues or overlapping schedules.")
+        pass  # Log warning if needed
     
     # 2. Day-based aggregation (new approach)
     day_summary = df.groupby(['Room ID', 'Day']).agg(

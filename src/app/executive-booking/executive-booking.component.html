@@ -218,6 +218,11 @@
               <button class="action-button primary pulse-animation" (click)="executeOperation('suggest_rooms')" [disabled]="loading">
                 <span class="button-icon">🏢</span> Suggest Rooms
               </button>
+
+              <!-- Debug button (remove in production) -->
+              <button class="action-button secondary" (click)="debugRoomDisplay()" type="button" style="margin-left: 10px;">
+                🔍 Debug Room Display
+              </button>
             </div>
           </form>
         </div>
@@ -247,6 +252,27 @@
             </div>
           </div>
 
+          <!-- Empty Results Message -->
+          <div *ngIf="results && (!results.suggested_rooms || results.suggested_rooms.length === 0)" class="empty-results">
+            <div class="empty-icon">🏢</div>
+            <h3>No Available Rooms Found</h3>
+            <p *ngIf="results.status === 'warning'">{{results.message}}</p>
+            <p *ngIf="results.total_conflicted > 0">
+              However, {{results.total_conflicted}} room(s) have conflicts during this time.
+              <button class="view-conflicts-btn" (click)="showConflictedRooms = !showConflictedRooms">
+                {{showConflictedRooms ? 'Hide' : 'View'}} Conflicted Rooms
+              </button>
+            </p>
+            <div class="suggestions-tips">
+              <h4>Try these suggestions:</h4>
+              <ul>
+                <li>Choose a different time slot</li>
+                <li>Select a different day</li>
+                <li>Check business hours: {{results.business_hours?.start}} - {{results.business_hours?.end}}</li>
+              </ul>
+            </div>
+          </div>
+
           <div *ngIf="results.suggested_rooms && results.suggested_rooms.length > 0" class="suggestions-container">
             <h3>Suggested Rooms</h3>
             
@@ -273,15 +299,40 @@
               </div>
             </div>
             
+            <!-- Debug Information (remove in production) -->
+            <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
+              <strong>Debug Info:</strong><br>
+              Results: {{results ? 'Available' : 'None'}}<br>
+              Suggested Rooms: {{results?.suggested_rooms?.length || 0}}<br>
+              Filtered Rooms: {{filteredRooms.length}}<br>
+              Displayed Rooms: {{displayedRooms.length}}<br>
+              Current Page: {{currentPage}}/{{totalPages}}<br>
+              Search Query: "{{roomSearchQuery}}"
+            </div>
+
             <!-- Display rooms with pagination -->
             <div class="suggestions-grid">
-              <div *ngFor="let room of displayedRooms; let i = index" class="suggestion-card animate-in" [style.animation-delay]="i * 0.1 + 's'">
+              <div *ngFor="let room of displayedRooms; let i = index; trackBy: trackByRoomId" class="suggestion-card animate-in" [style.animation-delay]="i * 0.1 + 's'">
                 <div class="suggestion-header">
                   <span class="suggestion-room">{{room.room_id}}</span>
+                  <span class="room-status" [class]="room.status?.toLowerCase()">{{room.status}}</span>
                 </div>
+
+                <!-- Enhanced Room Information -->
+                <div class="room-info" *ngIf="room.department || room.utilization_percentage">
                 
-                <div class="free-slots-container">
-                  <h4>Free Time Slots</h4>
+                  <div class="info-item" *ngIf="room.utilization_percentage !== undefined">
+                    <span class="info-label">Utilization:</span>
+                    <span class="info-value">{{room.utilization_percentage}}%</span>
+                  </div>
+                  <div class="info-item" *ngIf="room.total_schedules">
+                    <span class="info-label">Schedules:</span>
+                    <span class="info-value">{{room.total_schedules}}</span>
+                  </div>
+                </div>
+
+                <div class="free-slots-container" *ngIf="room.free_slots && room.free_slots.length > 0">
+                  <h4>Free Time Slots ({{room.free_slots.length}})</h4>
                   <div class="free-slots-list">
                     <div *ngFor="let slot of room.free_slots" class="free-slot-item">
                       <div class="time-range">
@@ -292,6 +343,11 @@
                       <span class="duration-badge">{{slot.duration}}</span>
                     </div>
                   </div>
+                </div>
+
+                <!-- No Free Slots Message -->
+                <div class="no-slots-message" *ngIf="!room.free_slots || room.free_slots.length === 0">
+                  <p>No free time slots available</p>
                 </div>
                 
                 <div class="suggestion-details">
@@ -347,13 +403,47 @@
               </div>
             </div>
           </div>
-          
-          <div *ngIf="!results.suggested_rooms || results.suggested_rooms.length === 0" class="no-results">
-            <div class="no-results-card">
-              <div class="no-results-icon">🔍</div>
-              <h3>No Available Rooms Found</h3>
-              <p>No rooms are available for the selected time and day.</p>
-              <p>Try selecting a different time or day.</p>
+
+          <!-- Conflicted Rooms Section -->
+          <div *ngIf="results.conflicted_rooms && results.conflicted_rooms.length > 0 && (showConflictedRooms || results.suggested_rooms?.length === 0)" class="conflicted-rooms-container">
+            <h3>Conflicted Rooms ({{results.conflicted_rooms.length}})</h3>
+            <p class="conflict-explanation">These rooms have scheduling conflicts during your requested time:</p>
+
+            <div class="conflicted-rooms-grid">
+              <div *ngFor="let room of results.conflicted_rooms" class="conflicted-room-card">
+                <div class="room-header">
+                  <span class="room-id">{{room.room_id}}</span>
+                  <span class="conflict-badge">Conflict</span>
+                </div>
+
+                <div class="conflict-details" *ngIf="room.conflict">
+                  <div class="conflict-info">
+                    <span class="conflict-label">Conflicting Course:</span>
+                    <span class="conflict-value">{{room.conflict.course}}</span>
+                  </div>
+                  <div class="conflict-info">
+                    <span class="conflict-label">Time:</span>
+                    <span class="conflict-value">{{room.conflict.time}}</span>
+                  </div>
+                  <div class="conflict-info" *ngIf="room.conflict.department">
+                    <span class="conflict-label">Department:</span>
+                    <span class="conflict-value">{{room.conflict.department}}</span>
+                  </div>
+                </div>
+
+                <!-- Show available slots for conflicted rooms -->
+                <div class="alternative-slots" *ngIf="room.free_slots && room.free_slots.length > 0">
+                  <h5>Alternative Time Slots:</h5>
+                  <div class="alt-slots-list">
+                    <div *ngFor="let slot of room.free_slots.slice(0, 3)" class="alt-slot">
+                      {{slot.start}} - {{slot.end}} ({{slot.duration}})
+                    </div>
+                    <div *ngIf="room.free_slots.length > 3" class="more-slots">
+                      +{{room.free_slots.length - 3}} more slots
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

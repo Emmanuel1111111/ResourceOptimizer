@@ -50,7 +50,7 @@ class NotificationService:
         return str(result.inserted_id)
     
     def get_notifications(self, admin_id: str, limit: int = 50, unread_only: bool = False) -> List[Dict]:
-        """Get notifications for an admin user"""
+        
         query = {"admin_id": admin_id, "is_active": True}
         
         if unread_only:

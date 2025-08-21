@@ -2548,4 +2548,259 @@ body {
     font-size: 2rem;
   }
 }
-    
+
+/* Enhanced Room Suggestion Styles */
+.empty-results {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.empty-results h3 {
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.empty-results p {
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.view-conflicts-btn {
+  background: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.view-conflicts-btn:hover {
+  background: #ffb300;
+  transform: translateY(-1px);
+}
+
+.suggestions-tips {
+  margin-top: 2rem;
+  text-align: left;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.suggestions-tips h4 {
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.suggestions-tips ul {
+  list-style: none;
+  padding: 0;
+}
+
+.suggestions-tips li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+  color: #6c757d;
+}
+
+.suggestions-tips li:before {
+  content: "💡";
+  margin-right: 0.5rem;
+}
+
+/* Room Status Badges */
+.room-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.room-status.available {
+  background: #d4edda;
+  color: #155724;
+}
+
+.room-status.conflicted {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Enhanced Room Information */
+.room-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+
+.info-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-weight: 600;
+  color: #495057;
+}
+
+.no-slots-message {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* Conflicted Rooms Styles */
+.conflicted-rooms-container {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #fff5f5;
+  border-radius: 12px;
+  border-left: 4px solid #dc3545;
+}
+
+.conflicted-rooms-container h3 {
+  color: #721c24;
+  margin-bottom: 0.5rem;
+}
+
+.conflict-explanation {
+  color: #856404;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.conflicted-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.conflicted-room-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-left: 4px solid #dc3545;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.room-id {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #495057;
+}
+
+.conflict-badge {
+  background: #dc3545;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.conflict-details {
+  margin-bottom: 1.5rem;
+}
+
+.conflict-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.conflict-label {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.conflict-value {
+  font-weight: 600;
+  color: #495057;
+}
+
+.alternative-slots h5 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.alt-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alt-slot {
+  background: #e7f3ff;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #0056b3;
+}
+
+.more-slots {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Responsive Design for New Elements */
+@media (max-width: 768px) {
+  .conflicted-rooms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .room-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .info-item {
+    min-width: auto;
+  }
+
+  .conflict-info {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

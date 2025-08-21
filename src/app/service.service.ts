@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, tap, switchMap, map } from 'rxjs/operators';
+import { SecurityService } from './services/security.service';
 import { CurrentSchedule } from '../Environ';
 import { Prediction } from '../Environ';
 import { AnalysisResult } from '../Environ';
@@ -45,7 +46,7 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
  
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private securityService: SecurityService) {}
 
   login(username: string, password: string, rememberMe: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, { username, password, rememberMe }).pipe(
@@ -241,6 +242,106 @@ export class AuthService {
   checkDatabaseStatus(): Observable<{status: string, message: string, connection_type: string, error_details?: string}> {
     return this.http.get<{status: string, message: string, connection_type: string, error_details?: string}>(`${this.apiUrl}/api/db_status`).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to check database status')))
+    );
+  }
+
+  // Get actual room count from database
+  getRoomCount(): Observable<any> {
+    const payload = {
+      operation: 'get_room_count'
+    };
+
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get room count')))
+    );
+  }
+
+  // Automated Conflict Detection Methods
+  startConflictMonitoring(): Observable<any> {
+    const payload = {
+      operation: 'conflict_monitoring',
+      action: 'start'
+    };
+
+    // Get decrypted admin token for authentication
+    const adminToken = this.securityService.getSecureToken();
+    if (!adminToken) {
+      return throwError(() => new Error('Admin authentication required'));
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`
+    });
+
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to start conflict monitoring')))
+    );
+  }
+
+  stopConflictMonitoring(): Observable<any> {
+    const payload = {
+      operation: 'conflict_monitoring',
+      action: 'stop'
+    };
+
+    // Get decrypted admin token for authentication
+    const adminToken = this.securityService.getSecureToken();
+    if (!adminToken) {
+      return throwError(() => new Error('Admin authentication required'));
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`
+    });
+
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to stop conflict monitoring')))
+    );
+  }
+
+  getConflictMonitoringStatus(): Observable<any> {
+    const payload = {
+      operation: 'conflict_monitoring',
+      action: 'status'
+    };
+
+    // Get decrypted admin token for authentication
+    const adminToken = this.securityService.getSecureToken();
+    if (!adminToken) {
+      return throwError(() => new Error('Admin authentication required'));
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`
+    });
+
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get monitoring status')))
+    );
+  }
+
+  runManualConflictScan(): Observable<any> {
+    const payload = {
+      operation: 'conflict_monitoring',
+      action: 'scan_now'
+    };
+
+    // Get decrypted admin token for authentication
+    const adminToken = this.securityService.getSecureToken();
+    if (!adminToken) {
+      return throwError(() => new Error('Admin authentication required'));
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`
+    });
+
+    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+      catchError(err => throwError(() => new Error(err.error?.error || 'Failed to run manual conflict scan')))
     );
   }
 
