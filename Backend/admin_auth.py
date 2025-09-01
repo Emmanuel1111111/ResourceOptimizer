@@ -77,7 +77,7 @@ class SecurityService:
         if not re.search(r'\d', password):
             errors.append('Password must contain at least one number')
         
-        if not re.search(r'[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]', password):
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]", password):
             errors.append('Password must contain at least one special character')
         
         return {
@@ -246,7 +246,7 @@ def log_admin_activity(action: str, details: dict, success: bool = True):
 
 @admin_auth_bp.route('/admin/login', methods=['POST'])
 def admin_login():
-    """Enhanced admin login with security features"""
+    
     print("🔍 Admin login attempt received")
     
     data = request.get_json()
@@ -731,4 +731,38 @@ def create_notification():
         
     except Exception as e:
         print(f"Error creating notification: {e}")
-        return jsonify({'error': 'Failed to create notification'}), 500 
+        return jsonify({'error': 'Failed to create notification'}), 500
+
+# Add this temporary debug route:
+@admin_auth_bp.route('/admin/debug-login', methods=['POST'])
+def debug_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    print(f"🔍 DEBUG LOGIN - Username: {username}")
+    print(f"🔍 DEBUG LOGIN - Password: '{password}'")
+    
+    collections = get_admin_collections()
+    admin_users = collections['admin_users']
+    user = admin_users.find_one({'username': username})
+    
+    if user:
+        print(f"🔍 DEBUG LOGIN - User found")
+        print(f"🔍 DEBUG LOGIN - Stored hash: {user['password'][:20]}...")
+        
+        # Test verification
+        result = bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8'))
+        print(f"🔍 DEBUG LOGIN - Verification result: {result}")
+        
+        return jsonify({
+            'debug': True,
+            'user_found': True,
+            'password_valid': result,
+            'hash_preview': user['password'][:20]
+        })
+    else:
+        return jsonify({
+            'debug': True,
+            'user_found': False
+        })

@@ -315,7 +315,7 @@ def manage_resources():
                 date_obj = datetime.strptime(date, '%Y-%m-%d')
                 inferred_day = date_obj.strftime('%A')
                 
-
+               
                 if not day_provided_in_request:
                     day = inferred_day
             except ValueError:
@@ -325,7 +325,7 @@ def manage_resources():
         valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         if day not in valid_days:
             return jsonify({'error': f'Invalid day format. Must be one of: {", ".join(valid_days)}'}), 400
-
+            
         
        
         
@@ -344,7 +344,7 @@ def manage_resources():
             original_start_time = data.get('original_start_time')
             original_end_time = data.get('original_end_time')
             original_course = data.get('original_course')
-
+            
             # Validate we have enough information to identify the schedule
             if not original_room_id:
                 return jsonify({
@@ -364,7 +364,7 @@ def manage_resources():
                 query['End'] = original_end_time
             if original_course:
                 query['Course'] = original_course
-
+            
             # Find the specific schedule
             original_schedule = timetables.find_one(query)
 
@@ -385,10 +385,10 @@ def manage_resources():
                 }), 404
 
             # Check if multiple schedules match (ambiguous identification)
-            matching_schedules = list(timetables.find(query))
-            if len(matching_schedules) > 1:
-                return jsonify({
-                    'status': 'error',
+                matching_schedules = list(timetables.find(query))
+                if len(matching_schedules) > 1:
+                    return jsonify({
+                        'status': 'error', 
                     'error': 'Multiple schedules found with the same criteria. Please provide more specific details.',
                     'debug_info': {
                         'matches_found': len(matching_schedules),
@@ -402,7 +402,7 @@ def manage_resources():
                             } for s in matching_schedules
                         ]
                     }
-                }), 400
+                    }), 400
             
             original_date = original_schedule.get('Date')
 
@@ -438,24 +438,25 @@ def manage_resources():
                         schedule.get('Start') == original_schedule.get('Start') and
                         schedule.get('End') == original_schedule.get('End') and
                         schedule.get('Course') == original_schedule.get('Course')):
-                        continue
+                          continue
                     
-                    schedule_start = schedule.get('Start')
-                    schedule_end = schedule.get('End')
-                    
+                schedule_start = schedule.get('Start')
+                schedule_end = schedule.get('End')
+                
                     # Skip schedules with invalid time format
-                    if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
-                        print(f"Skipping schedule with invalid time format: Start={schedule_start}, End={schedule_end}")
-                        continue
-                    
-                    if check_overlap(new_start_time, new_end_time, schedule_start, schedule_end):
-                        conflicts.append({
-                            'schedule_id': schedule.get('Room ID', 'Unknown'),
-                            'course': schedule.get('Course', 'Unknown'),
-                            'time': f"{schedule_start}-{schedule_end}",
-                            'day': schedule.get('Day', 'Unknown'),
-                            'lecturer': schedule.get('Lecturer', 'Unknown')
-                        })
+                if not validate_time_format(schedule_start) or not validate_time_format(schedule_end):
+                    print(f"Skipping schedule with invalid time format: Start={schedule_start}, End={schedule_end}")
+                          
+                        
+                
+                if check_overlap(new_start_time, new_end_time, schedule_start, schedule_end):
+                    conflicts.append({
+                        'schedule_id': schedule.get('Room ID', 'Unknown'),
+                        'course': schedule.get('Course', 'Unknown'),
+                        'time': f"{schedule_start}-{schedule_end}",
+                        'day': schedule.get('Day', 'Unknown'),
+                        'lecturer': schedule.get('Lecturer', 'Unknown')
+                    })
 
             
             page = int(data.get('page', 1))
@@ -688,7 +689,7 @@ def manage_resources():
                     start = schedule.get('Start', '')
                     end = schedule.get('End', '')
                     if start and end:
-                        schedule['Time'] = f"{start}–{end}"
+                        schedule['Time'] = f"{start}–{end}"  
 
                     # Convert ObjectId to string for frontend use
                     if '_id' in schedule:
@@ -805,15 +806,14 @@ def manage_resources():
                             duration = time_diff_minutes(schedule_start, schedule_end)
                             if duration > 0:  # Valid duration
                                 normalized_schedules.append({
-                                    'start': schedule_start,
-                                    'end': schedule_end,
+                                'start': schedule_start,
+                                'end': schedule_end,
                                     'course': schedule.get('Course', 'Unknown'),
                                     'department': schedule.get('Department', 'Unknown')
-                                })
-                            else:
+                        })
+                    else:
                                 print(f"Warning: Invalid schedule duration for {room}: {schedule_start}-{schedule_end}")
-                        else:
-                            print(f"Warning: Invalid time format for {room}: {schedule_start}-{schedule_end}")
+                       
                     
                     # Calculate free time slots using improved logic
                     free_slots = _calculate_free_slots_improved(normalized_schedules, business_start, business_end)
@@ -891,7 +891,7 @@ def manage_resources():
                 else:
                     status = 'success'
                     message = f'Found {len(truly_available)} available rooms, {len(conflicted_rooms)} conflicted'
-
+                
                 return jsonify({
                     'status': status,
                     'message': message,

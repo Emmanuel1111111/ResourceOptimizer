@@ -728,7 +728,7 @@ body {
   }
   
   .tabs-container {
-    flex-wrap: wrap;
+  flex-wrap: wrap;
   }
   
   .tab-button {
@@ -748,9 +748,9 @@ body {
 @media (max-width: 768px) {
   .search-wrapper {
     flex-direction: column;
-    gap: 1rem;
-  }
-  
+  gap: 1rem;
+}
+
   .search-btn {
     width: 100%;
     margin-left: 0;
@@ -1434,15 +1434,15 @@ body {
   .distribution-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .recommendations-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .insights-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .modern-table {
     font-size: 0.8rem;
   }
@@ -1455,7 +1455,7 @@ body {
   .timeslot-chips {
     flex-direction: column;
   }
-  
+
   .day-chips {
     justify-content: center;
   }

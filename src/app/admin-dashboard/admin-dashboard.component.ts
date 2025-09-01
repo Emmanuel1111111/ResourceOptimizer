@@ -216,7 +216,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     ).subscribe(isAuthenticated => {
       if (isAuthenticated) {
         console.log('✅ User authenticated, initializing dashboard features');
-        this.loadUserStats();
+    this.loadUserStats();
         this.loadUserProfile();
         this.loadRealTimeData();
         this.setupRouteTracking();

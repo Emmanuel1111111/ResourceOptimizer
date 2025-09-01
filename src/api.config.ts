@@ -1,4 +1,4 @@
-export const api={
+export const  api={
     baseUrl: 'http://localhost:5000/api',
     endpoints: {
       availableRooms: '/available_rooms',

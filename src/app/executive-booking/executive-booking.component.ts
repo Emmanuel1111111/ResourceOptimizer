@@ -380,7 +380,7 @@ export class ExecutiveBookingComponent implements OnInit {
             this.handleApiError(error, 'Failed to suggest rooms');
           },
           complete: () => {
-            this.loading = false;
+          this.loading = false;
           }
         });
         break;
@@ -731,22 +731,22 @@ export class ExecutiveBookingComponent implements OnInit {
       this.displayedRooms = [];
       return;
     }
-
+    
     if (this.roomSearchQuery.trim() === '') {
       this.filteredRooms = [...this.results.suggested_rooms];
       console.log(`📋 Showing all ${this.filteredRooms.length} rooms (no filter)`);
     } else {
       const query = this.roomSearchQuery.toLowerCase();
       this.filteredRooms = this.results.suggested_rooms.filter((room: any) => {
-        return room.room_id.toLowerCase().includes(query) ||
+        return room.room_id.toLowerCase().includes(query) || 
                (room.department && room.department.toLowerCase().includes(query));
       });
       console.log(`🔍 Filtered to ${this.filteredRooms.length} rooms matching "${query}"`);
-    }
-
+    } 
+    
     // Apply sorting
     this.sortRooms();
-
+    
     // Reset pagination
     this.initializePagination();
   }
@@ -766,13 +766,13 @@ export class ExecutiveBookingComponent implements OnInit {
             const end = this.timeToMinutes(slot.end);
             return total + (end - start);
           }, 0) : 0;
-
+          
           const bFreeTime = b.free_slots ? b.free_slots.reduce((total: number, slot: any) => {
             const start = this.timeToMinutes(slot.start);
             const end = this.timeToMinutes(slot.end);
             return total + (end - start);
           }, 0) : 0;
-
+          
           return bFreeTime - aFreeTime; // Descending order
         });
         break;
@@ -784,7 +784,7 @@ export class ExecutiveBookingComponent implements OnInit {
         });
         break;
     }
-
+    
     this.updateDisplayedRooms();
     console.log(`✅ Sorting complete. DisplayedRooms updated with ${this.displayedRooms.length} rooms`);
   }

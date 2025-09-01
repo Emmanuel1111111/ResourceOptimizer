@@ -208,13 +208,11 @@ export class AdminAuthService {
    * Admin-specific validations
    */
   private isValidAdminUsername(username: string): boolean {
-    // Admin usernames must start with "admin." for security
+   
     return /^admin\.[a-zA-Z0-9._-]+$/.test(username);
   }
 
-  /**
-   * Activity Logging
-   */
+  
   private logActivity(action: string, resource: string, details: any): void {
     const user = this.currentUserSubject.value;
     if (!user) return;
@@ -228,9 +226,9 @@ export class AdminAuthService {
       success: details.success !== false
     };
 
-    // Send to backend (fire and forget)
+   
     this.http.post(`${this.apiUrl}/api/admin/activity-log`, logEntry).subscribe({
-      error: () => {} // Ignore logging errors
+      error: () => {} 
     });
   }
 

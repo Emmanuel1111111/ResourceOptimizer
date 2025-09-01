@@ -10,9 +10,6 @@ import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ'
 import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
 import { api } from '../api.config';
 
-const environment = {
-  apiUrl: 'http://localhost:5000'
-};
 
 export interface LoginResponse {
   message: string;
@@ -43,13 +40,12 @@ export class AuthService {
 
   private errorSubject = new BehaviorSubject<string | null>(null)
   public error$ = this.errorSubject.asObservable()
-  private apiUrl = environment.apiUrl;
- 
+  private apiUrl = api.baseUrl
 
   constructor(private http: HttpClient, private securityService: SecurityService) {}
 
   login(username: string, password: string, rememberMe: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, { username, password, rememberMe }).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password, rememberMe }).pipe(
       tap(response => {
         if (response.token) {
           localStorage.setItem('token', response.token);

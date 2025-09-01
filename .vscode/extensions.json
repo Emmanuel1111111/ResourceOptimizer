@@ -6,6 +6,8 @@
     "ms-python.python",
     "rangav.vscode-thunder-client",
     "mechatroner.rainbow-csv",
-    "codeium.codeium-enterprise-updater"
+    "codeium.codeium-enterprise-updater",
+    "tabnine.tabnine-vscode",
+    "tabnine.tabnine-vscode-self-hosted-updater"
   ]
 }

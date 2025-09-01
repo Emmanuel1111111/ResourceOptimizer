@@ -159,10 +159,10 @@ export interface AnalysisResult {
 
 export interface SmartAvailabilityRequest {
   operation: 'smart_availability';
-  date?: string; // YYYY-MM-DD, optional (defaults to current date)
-  start_time?: string; // HH:MM, optional
-  end_time?: string; // HH:MM, optional
-  department?: string; // Optional department filter
+  date?: string; 
+  start_time?: string; 
+  end_time?: string; 
+  department?: string; 
 }
 
 export interface OptimizeResourcesRequest {
@@ -173,9 +173,8 @@ export interface RoomInfo {
   room_id: string;
   department: string;
   utilization: number;
-  score?: number; // Only in smart_availability
-  status?: 'Over-utilized' | 'Under-utilized' | 'Well-utilized'; // Only in optimize_resources
-}
+  score?: number; 
+  status?: 'Over-utilized' | 'Under-utilized' | 'Well-utilized'; }
 
 export interface SmartAvailabilityResponse {
   message: string;

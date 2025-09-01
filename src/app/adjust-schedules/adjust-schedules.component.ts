@@ -120,9 +120,8 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   chatInput: string = '';
   
   // API Configuration
-  private apiUrl = 'http://localhost:5000'; // Backend API URL
-  
-  // New properties for dynamic statistics
+  private apiUrl = 'http://localhost:5000'; 
+
   roomStats: any = { total: 0, available: 0, occupied: 0, departments: 0 };
   scheduleStats: any = { total: 0, today: 0, active: 0, upcoming: 0, departments: 0 };
   utilizationStats: any = { average: 0, peak: 0, low: 0, trend: 'stable' };
@@ -138,7 +137,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     
     // Setup search debouncing
     this.searchSubject.pipe(
-      debounceTime(300),
+      debounceTime(100),
       distinctUntilChanged()
     ).subscribe(searchText => {
       this.performSearch(searchText);
@@ -166,7 +165,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     this.loadDailyUtilization();
     this.loadWeeklySummary();
     
-    // Set default section based on route or localStorage
+    
     this.currentSection = 'home';
     
     // Load user info
@@ -175,17 +174,17 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     // Setup debounced search
     this.setupDebouncedSearch();
     
-    // Add debug for current time matches
+    
     setTimeout(() => {
       this.debugCurrentTimeMatches();
-    }, 2000);  // Wait for initial data to load
+    }, 2000);  
   }
 
-  // Setup debounced search functionality
+  
   private setupDebouncedSearch(): void {
     this.searchSubject.pipe(
-      debounceTime(300), // Wait 300ms after user stops typing
-      distinctUntilChanged() // Only emit if value is different from previous
+      debounceTime(300), 
+      distinctUntilChanged() 
     ).subscribe(searchTerm => {
       console.log('Debounced search triggered:', searchTerm);
       this.performSearch(searchTerm);
@@ -892,8 +891,6 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
     const currentTime = now.toTimeString().slice(0, 5);
     
-    console.log(`Manually calculating current time matches: Day=${currentDay}, Time=${currentTime}`);
-    console.log(`Total schedules available: ${this.allSchedules.length}`);
     
     // Only proceed if we have schedules to work with
     if (!this.allSchedules || this.allSchedules.length === 0) {
@@ -902,11 +899,11 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     }
   
     const manualMatches = this.allSchedules.filter(schedule => {
-      // More flexible day matching
+
       const scheduleDay = schedule.Day ? schedule.Day.trim() : '';
       const dayMatch = scheduleDay.toLowerCase() === currentDay.toLowerCase();
       
-      // Proper time comparison
+     
       const timeMatch = this.isTimeWithinRange(currentTime, schedule.Start, schedule.End);
       
       if (dayMatch && timeMatch) {
@@ -1022,7 +1019,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
             
             console.log(`Loaded ${this.allSchedules.length} total schedules from ${rooms.length} rooms`);
             
-            // Debug: Show sample schedule data
+          
             if (this.allSchedules.length > 0) {
               console.log('Sample schedule data:', this.allSchedules[0]);
               console.log('Schedule fields:', Object.keys(this.allSchedules[0]));
@@ -1069,7 +1066,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     if (this.selectedRoom) {
       this.loadDailyUtilization();
       this.loadAllSchedules();
-      this.getCurrentTimeMatchesGlobal(); // Use API call instead of manual calculation
+      this.getCurrentTimeMatchesGlobal(); 
     }
   }
 
@@ -1077,7 +1074,6 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   searchRoom(): void {
     this.searchSubject.next(this.searchQuery);
     
-   
     if (this.searchQuery && this.searchQuery.trim().length >= 1) {
       console.log('Searching for:', this.searchQuery);
       
