@@ -1,0 +1,10 @@
+
+{
+  "build": {
+    "builder": "nixpacks"
+  },
+  "deploy": {
+    "startCommand": "npm run build && npx http-server dist/resource-optimizer -p $PORT",
+    "healthcheckPath": "/"
+  }
+}

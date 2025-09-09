@@ -48,27 +48,34 @@ def login():
     user = users_collection.find_one({'username': username})
     
 
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+    # Debug logging (remove in production)
+    print(f"Login attempt for username: {username}")
+    print(f"User found: {user is not None}")
+    if user:
+        print(f"Stored password hash: {user['password'][:20]}...")  # Only show first 20 chars
+    
+    # Fix: Remove .encode('utf-8') from the stored password hash
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8') if isinstance(user['password'], str) else user['password']):
       
         exp_hours = 168 if remember_me else 24  
         # Use Flask-JWT-Extended to create token
         access_token = create_access_token(
-            identity=user['Id'],
+            identity=str(user['_id']),  # Ensure string conversion
             additional_claims={"username": username},
             expires_delta=timedelta(hours=exp_hours)
         )
         
         log_entry['success'] = True
         log_entry['message'] = 'Login successful'
-        log_entry['user_id'] = user['Id']
-        log_entry['email'] = user.get('email', '')  # Add user's email to log entry
+        log_entry['user_id'] = str(user['_id'])
+        log_entry['email'] = user.get('email', '')  
         logs_collection.insert_one(log_entry)
         return jsonify({
             'message': 'Login successful',
-            'Id': user['Id'],
+            'Id': str(user['_id']),  # Ensure string conversion
             'token': access_token,
             'username': username,
-            'email': user.get('email', '')  # Include email in response
+            'email': user.get('email', '')  
         }), 200
     else:
         log_entry['message'] = 'Invalid credentials'
@@ -77,7 +84,7 @@ def login():
 
 
 def generate_token(user_id, username, exp_hours=13):
-    # Use Flask-JWT-Extended to create token
+   
     access_token = create_access_token(
         identity=user_id,
         additional_claims={"username": username},
@@ -113,13 +120,14 @@ def signup():
         return jsonify({'error': log_entry['message']}), 409
 
     user_id = str(uuid.uuid4())
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    # Fix: Store password hash as bytes, not string
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     
     user = {
-        'Id': user_id,
+        '_id': user_id,
         'username': username,
         'email': email,
-        'password': hashed_password
+        'password': hashed_password  # Store as bytes
     }
     
     users_collection.insert_one(user)
@@ -130,12 +138,20 @@ def signup():
         if '_id' in obj:
             obj['_id'] = str(obj['_id'])  
         return obj
-
+     
+    token = generate_token(user_id, username, exp_hours=13000)
     
-    user_response = {k: v for k, v in user.items() if k != 'password'}
-    user_response = serialized_object(user_response)
+    
+    user_response={
+        'Id':user_id,
+        'username': username,
+        'email': email,
+        'token': token,
+        'message': 'Signup successful'
+        }
+    
 
-    token = generate_token(user_id, username)
+    serialized_object(user_response)
     
     log_entry['success'] = True
     log_entry['message'] = 'Signup successful'
@@ -144,7 +160,8 @@ def signup():
 
     return jsonify({
         "user": user_response,
-        "token": token
+        "status": "sucess",
+       
     }), 201
 
 @auth_bp.route('/logs', methods=['GET', 'POST'])

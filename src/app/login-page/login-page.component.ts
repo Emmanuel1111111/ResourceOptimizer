@@ -5,6 +5,7 @@ import { AuthService } from '../service.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { timer, Observable, tap, debounce } from 'rxjs';
+import { parse } from '@fortawesome/fontawesome-svg-core';
 
 @Component({
   selector: 'app-login-page',
@@ -210,28 +211,21 @@ export class LoginPageComponent implements OnInit {
           password: this.SignUpProfile.get('password')?.value
         };
 
-        console.log('Signup data:', signupData);
+   
 
         await this.simulateApiCall();
 
         this.auth.signup(signupData.username, signupData.email, signupData.password).subscribe({
           next: (response) => {
             console.log('SignUp response:', response);
-            const token = response.token || '';
-            const Id = response.Id;
-            localStorage.setItem('token', token);
-            localStorage.setItem('userId', Id);
             this.successMessage = 'Signup successful!, Redirecting to dashboard...';
-            this.router.navigate(['/admin-dashboard']);
-            console.log('userId:', Id);
-            console.log('Api response', response);
-
+            
             debounceTime(5000).pipe(
               tap(() => {
                 this.router.navigate(['/admin-dashboard']);
               })
             ).subscribe();
-            
+           
             
           },
           error: (error: any) => {

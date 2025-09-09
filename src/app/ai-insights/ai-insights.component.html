@@ -24,7 +24,7 @@
     </div>
     
     <div class="nav-menu">
-      <a class="nav-item " href="#">
+      <a class="nav-item " (click)="navigations('dashboard')">
         <div class="nav-icon">
           <i class="bi bi-house-door" style="color: white;"></i>
         </div>
@@ -32,7 +32,7 @@
        
       </a>
       
-      <a class="nav-item" href="#">
+      <a class="nav-item" (click)="navigations('schedules')">
         <div class="nav-icon">
           <i class="bi bi-calendar-week"></i>
         </div>
@@ -48,14 +48,14 @@
          <div class="nav-indicator"></div>
       </a>
       
-      <a class="nav-item" href="#">
+      <a class="nav-item" (click)="navigations('settings')">
         <div class="nav-icon">
           <i class="bi bi-gear"></i>
         </div>
         <span class="nav-text">Settings</span>
       </a>
       
-      <a class="nav-item" href="#">
+      <a class="nav-item" (click)="navigations('profile')">
         <div class="nav-icon">
           <i class="bi bi-person-circle"></i>
         </div>

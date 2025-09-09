@@ -81,10 +81,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   ongoingSchedules: any[] = [];
   dailyAnalysisData: any[] = [];
   
-  // Table columns - restored original
-  utilizationColumns: string[] = ['Day', 'Room ID', 'Daily Utilization', 'Time Slot', 'Courses', 'Department', 'Status', 'Year'];
-  scheduleColumns: string[] = ['Day', 'Course', 'Time', 'Department', 'Year', 'Status'];
-  displayedColumns: string[] = ['Room ID', 'Course', 'Start', 'End', 'Department', 'Year', 'Instructor', 'Day'];
+  
   
   // Daily analysis table columns as specified
   dailyAnalysisColumns: string[] = ['Day', 'Room', 'Utilization (%)', 'Time Slot', 'Courses', 'Department', 'Status', 'Year'];
@@ -204,8 +201,18 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       this.utilizationChart.destroy();
     }
     this.searchSubject.complete();
-  }
+    
+    if(this.allSchedules && this.filteredSchedules && this.authService) {
+      this.authService.logout();
+      this.allSchedules = []
+      this.filteredSchedules=[]
+      this.availableRooms=[]
+      
 
+
+  
+  }
+  }
   // Initialization methods
   private initializeComponent(): void {
     
@@ -1702,6 +1709,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
 
   navigateToExecutive(): void {
     this.router.navigate(['/executive-booking']);
+   
   }
 
   logout(): void {

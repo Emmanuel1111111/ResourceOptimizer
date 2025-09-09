@@ -1,0 +1,42 @@
+
+import os
+from flask import Flask, jsonify
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+import logging
+from env_validator import validate_environment
+from security import add_security_headers
+from logging_config import setup_logging
+from health_check import create_health_check
+from error_handlers import register_error_handlers
+from monitoring import setup_monitoring
+from rate_limiting import rate_limit
+
+# Validate environment before starting
+validate_environment()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+
+# Production configuration
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+# Setup production features
+setup_logging(app)
+app = add_security_headers(app)
+register_error_handlers(app)
+setup_monitoring(app)
+
+# CORS configuration
+if os.getenv('FLASK_ENV') == 'production':
+    CORS(app, origins=[
+        "https://*.railway.app",
+        "https://your-custom-domain.com"
+    ])
+else:
+    CORS(app)

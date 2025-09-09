@@ -10,6 +10,7 @@ import { Chart, type ChartConfiguration, type ChartType } from "chart.js"
 import  { AuthService } from "../service.service"
 import { Subject, fromEvent } from "rxjs"
 import { takeUntil, debounceTime, distinctUntilChanged } from "rxjs/operators"
+import { Router } from "@angular/router"
 
 @Component({
   selector: "app-ai-insights",
@@ -51,6 +52,7 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
   constructor(
     private service: AuthService,
     private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -113,6 +115,30 @@ export class AiInsightsComponent implements OnInit, OnDestroy {
       this.searchFocused = false
       this.showSuggestions = false
     }, 200)
+  }
+  navigations(route:string){
+    switch(route){
+      case "dashboard":
+        this.router.navigate(['/admin-dashboard']);
+         break;
+      case "schedules":
+        this.router.navigate(['/admin/schedules']);
+        break;
+        case "settings":
+          this.router.navigate(['/admin-dashboard']);
+        break;
+        case "home":
+          this.router.navigate(['/admin-dashboard']);
+        break;
+        case "profile":
+          this.router.navigate(['/admin-dashboard']);
+        break;
+
+        
+
+
+    }
+
   }
 
   fetchInsights(): void {

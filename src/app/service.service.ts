@@ -19,11 +19,14 @@ export interface LoginResponse {
 }
 
 export interface SignupResponse {
-  Id: string;
+  user:
+  {
+    Id: string;
   message: string;
   token?: string;
   username?: string;
   email?: string;
+  }
 }
 
 @Injectable({
@@ -57,13 +60,19 @@ export class AuthService {
   }
 
   signup(username: string, email: string, password: string): Observable<SignupResponse> {
-    return this.http.post<SignupResponse>(`${this.apiUrl}/api/signup`, { username, email, password }).pipe(
-      tap(response => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('userId', response.Id);
-        }
-      }),
+    return this.http.post<SignupResponse>(`${this.apiUrl}/signup`, { username, email, password }).pipe(
+     tap(response=>{
+      const userData= response.user
+
+      if(userData.token) {
+        localStorage.setItem('token', userData.token);
+        localStorage.setItem('userId', userData.Id);
+        localStorage.setItem('username', userData.username||'');
+        localStorage.setItem('email', userData.email||'')
+      }
+
+
+     }),
       catchError(err => throwError(() => new Error(err.error?.error || 'Signup failed')))
     );
   }
@@ -85,7 +94,7 @@ export class AuthService {
   currentUtilization(roomId: string): Observable<AnalysisResult[]> {
    
     const body = roomId ? { room_id: roomId } : {};
-      return this.http.post<AnalysisResult[]>(`${this.apiUrl}/api/current_utilization`, body).pipe(
+      return this.http.post<AnalysisResult[]>(`${this.apiUrl}/current_utilization`, body).pipe(
         catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch current utilization')))
       );
     }
@@ -159,7 +168,7 @@ export class AuthService {
       ...scheduleData
     };
     
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to inject schedule')))
     );
   }
@@ -171,7 +180,7 @@ export class AuthService {
       params = params.set('day', day);
     }
     
-    return this.http.get(`${this.apiUrl}/get_room_schedules`, { params }).pipe(
+    return this.http.get(`${this.apiUrl}/available_rooms`, { params }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to fetch room schedules')))
     );
   }
@@ -196,7 +205,7 @@ export class AuthService {
       ...scheduleData
     };
     
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload).pipe(
       switchMap(response => {
         return this.refreshAggregatedData(scheduleData.room_id).pipe(
           map(refreshResponse => {
@@ -236,7 +245,7 @@ export class AuthService {
   
   // Check database connection status
   checkDatabaseStatus(): Observable<{status: string, message: string, connection_type: string, error_details?: string}> {
-    return this.http.get<{status: string, message: string, connection_type: string, error_details?: string}>(`${this.apiUrl}/api/db_status`).pipe(
+    return this.http.get<{status: string, message: string, connection_type: string, error_details?: string}>(`${this.apiUrl}/db_status`).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to check database status')))
     );
   }
@@ -247,7 +256,7 @@ export class AuthService {
       operation: 'get_room_count'
     };
 
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get room count')))
     );
   }
@@ -270,7 +279,7 @@ export class AuthService {
       'Authorization': `Bearer ${adminToken}`
     });
 
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload, { headers }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to start conflict monitoring')))
     );
   }
@@ -292,7 +301,7 @@ export class AuthService {
       'Authorization': `Bearer ${adminToken}`
     });
 
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload, { headers }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to stop conflict monitoring')))
     );
   }
@@ -314,7 +323,7 @@ export class AuthService {
       'Authorization': `Bearer ${adminToken}`
     });
 
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload, { headers }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to get monitoring status')))
     );
   }
@@ -336,7 +345,7 @@ export class AuthService {
       'Authorization': `Bearer ${adminToken}`
     });
 
-    return this.http.post(`${this.apiUrl}/api/manage_resources`, payload, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/manage_resources`, payload, { headers }).pipe(
       catchError(err => throwError(() => new Error(err.error?.error || 'Failed to run manual conflict scan')))
     );
   }

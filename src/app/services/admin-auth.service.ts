@@ -184,12 +184,21 @@ export class AdminAuthService {
   }
 
   hasPermission(resource: string, action: string): boolean {
+    const user = this.currentUserSubject.value;
+    if (!user) return false;
+
+    // Super admin has all permissions
+    if (user.role === 'super_admin') {
+      return true;
+    }
+
     const permissions = this.permissionsSubject.value;
     return permissions.some(permission => 
       permission.resource === resource && 
       permission.actions.includes(action)
     );
   }
+  
 
   hasAnyRole(roles: string[]): boolean {
     const user = this.currentUserSubject.value;

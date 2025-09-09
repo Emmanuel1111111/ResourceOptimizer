@@ -16,8 +16,8 @@ import { api } from '../api.config';
   providedIn: 'root'
 })
 export class ResourceManagementService {
-  private readonly API_BASE_URL = 'http://localhost:5000/api';
-  private readonly ENDPOINT = '/manage_resources';
+  private readonly API_BASE_URL = api.baseUrl
+  private readonly ENDPOINT = api.endpoints.manageResource;
 
   private httpOptions = {
     headers: new HttpHeaders({
@@ -27,9 +27,7 @@ export class ResourceManagementService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Check for schedule overlaps in a specific room (Day-based priority)
-   */
+
   checkOverlap(
     roomId: string,
     date: string,
@@ -43,7 +41,7 @@ export class ResourceManagementService {
       day: day // Day is required and prioritized
     };
     
-    // Add optional parameters only if provided
+
     if (date) {
       payload.date = date;
     }

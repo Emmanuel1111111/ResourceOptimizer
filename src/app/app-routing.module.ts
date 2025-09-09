@@ -87,11 +87,11 @@ const routes: Routes = [
   // Regular user login
   { path: 'login', component: LoginPageComponent },
   
-  // Admin routes with enhanced security
+
   {
     path: 'admin',
     children: [
-      // Admin login (no guard needed)
+     
       { path: 'login', component: AdminLoginComponent },
       
       // Admin dashboard (requires admin role)
