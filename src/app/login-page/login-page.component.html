@@ -4,12 +4,16 @@
     <div class="container container-fluid justify-content-center col-10">
       <div class="justify-content-center col-12 content">
         <div class="welcome-section">
-          <mat-spinner *ngIf="isloading" class="spinner" aria-label="Loading"></mat-spinner>
           <h1 class="welcome-title">Welcome</h1>
           <p class="welcome-subtitle">Please sign in to your account or create a new one</p>
           
 
 
+        </div>
+
+         <div class="loading-overlay" *ngIf="isloading">
+          <mat-spinner diameter="60"></mat-spinner>
+          <p class="loading-text">Authenticating...</p>
         </div>
 
 
@@ -29,9 +33,16 @@
           <mat-icon class="info-icon">info</mat-icon>
           <span>* Indicates required fields</span>
         </div>
+        
 
         <mat-tab-group class="auth-tabs" (selectedTabChange)="onTabChange($event)">
+         
+
+          
+
+
           <mat-tab label="LOGIN" aria-label="Login form">
+            
             <div class="form-container">
               <form [formGroup]="Profile" class="form-section" (ngSubmit)="logIn()" novalidate>
                 <mat-form-field appearance="outline">
@@ -272,8 +283,11 @@
                 </button>
               </form>
             </div>
-          </mat-tab>
+            
+          </mat-tab> 
+      
         </mat-tab-group>
+        
 
         <div class="divider">
           <span>Or continue with</span>

@@ -62,7 +62,7 @@ export class NotificationService {
     // Get authenticated headers
     const headers = this.getAuthHeaders();
     if (!headers) {
-      console.log('No valid authentication, skipping notification request');
+     
       return new Observable(subscriber => {
         subscriber.next({ notifications: [], unread_count: 0 });
         subscriber.complete();
@@ -79,12 +79,12 @@ export class NotificationService {
       headers
     }).pipe(
       tap(response => {
-        console.log(`✅ Fetched ${response.notifications.length} notifications from backend`);
+
         this.notificationsSubject.next(response.notifications);
         this.unreadCountSubject.next(response.unread_count);
       }),
       catchError(error => {
-        console.error('❌ Error fetching notifications:', error);
+  
         if (error.status === 401) {
           console.log('🔐 Authentication error - token may be expired');
           this.notificationsSubject.next([]);

@@ -211,11 +211,11 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    // Enable router preloading for better performance
+ 
     preloadingStrategy: PreloadAllModules,
     // Enable tracing for debugging (disable in production)
     enableTracing: false,
-    // Scroll to top on route change
+
     scrollPositionRestoration: 'top'
   })],
   exports: [RouterModule]

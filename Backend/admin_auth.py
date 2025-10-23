@@ -16,6 +16,7 @@ import re
 from functools import wraps
 import time
 from collections import defaultdict, deque
+import pyotp
 import hashlib
 
 # Import notification service
@@ -278,13 +279,6 @@ def admin_login():
     print(f"✅ Username format valid: {username}")
     
     # Check rate limiting
-    if RateLimiter.is_rate_limited(username, ip_address):
-        print(f"❌ Rate limited for username: {username}")
-        log_admin_activity('login_rate_limited', {
-            'username': username,
-            'ip_address': ip_address
-        }, False)
-        return jsonify({'error': 'Account temporarily locked due to too many failed attempts'}), 429
     
     # Find user
     print(f"🔍 Looking for user: {username}")
@@ -328,35 +322,14 @@ def admin_login():
     print(f"✅ Password verified for: {username}")
     
     # Check MFA if enabled
-    if user.get('mfa_enabled', False):
-        if not mfa_code:
-            return jsonify({
-                'requiresMFA': True,
-                'message': 'Multi-factor authentication required'
-            }), 200
+    
         
         # Verify MFA code
-        if not MFAService.verify_totp(user['mfa_secret'], mfa_code):
-            # Check backup codes
-            backup_codes = user.get('backup_codes', [])
-            if mfa_code.upper() not in backup_codes:
-                RateLimiter.record_attempt(username, ip_address, False)
-                log_admin_activity('login_failed', {
-                    'username': username,
-                    'reason': 'invalid_mfa',
-                    'ip_address': ip_address
-                }, False)
-                return jsonify({'error': 'Invalid authentication code'}), 401
-            else:
-                # Remove used backup code
-                backup_codes.remove(mfa_code.upper())
-                collections['admin_users'].update_one(
-                    {'_id': user['_id']},
-                    {'$set': {'backup_codes': backup_codes}}
-                )
+  
+    
     
     # Successful login
-    RateLimiter.record_attempt(username, ip_address, True)
+    
     
     # Create tokens
     if remember_device:

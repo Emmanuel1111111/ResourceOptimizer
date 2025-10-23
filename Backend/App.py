@@ -35,7 +35,8 @@ if os.getenv('FLASK_ENV') == 'production':
     CORS(app, origins=[
         "https://*.railway.app",
         "https://your-custom-domain.com",
-        "http://localhost:4200"
+        "http://localhost:4200",
+        "http://localhost:54485"
     ])
 else:
     CORS(app, origins=["http://localhost:4200"])

@@ -168,7 +168,7 @@ export class ExecutiveBookingComponent implements OnInit {
       next: (response: any) => {
         if (response.schedules) {
           this.foundSchedules = response.schedules.map((schedule: any) => ({
-            id: schedule._id || (schedule['Room ID'] + '_' + schedule.Start + '_' + schedule.Course), // Use MongoDB _id if available, fallback to composite
+            id: schedule._id || (schedule['Room ID'] + '_' + schedule.Start + '_' + schedule.Course), 
             room_id: schedule['Room ID'],
             course: schedule.Course || 'Unknown',
             day: schedule.Day || 'Unknown',
@@ -325,7 +325,7 @@ export class ExecutiveBookingComponent implements OnInit {
 
     const roomData = { room_id: roomId, date, start: startTime, end: endTime, day };
     
-    console.log(`Performing ${operation} operation with data:`, roomData);
+ 
 
     switch (operation) {
       case 'check_overlap':
@@ -411,7 +411,7 @@ export class ExecutiveBookingComponent implements OnInit {
         break;
 
       case 'reallocate':
-        // Include original schedule details for unique identification
+       
         const originalScheduleDetails = this.selectedSchedule ? {
           original_day: this.selectedSchedule.day,
           original_start_time: this.selectedSchedule.start,
@@ -801,14 +801,14 @@ export class ExecutiveBookingComponent implements OnInit {
 
   // Reset room display state
   resetRoomDisplay() {
-    console.log('🔄 Resetting room display state...');
+ 
     this.filteredRooms = [];
     this.displayedRooms = [];
     this.roomSearchQuery = '';
     this.currentPage = 1;
     this.totalPages = 1;
     this.showConflictedRooms = false;
-    console.log('✅ Room display state reset');
+
   }
 
   // Debug method to check room display state

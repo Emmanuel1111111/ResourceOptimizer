@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable,signal } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, tap, switchMap, map } from 'rxjs/operators';
@@ -37,6 +37,9 @@ export class AuthService {
    throw new Error('Method not implemented.');
    
   }
+
+
+  todo=signal<any[]>([])
   private loadingSubject = new BehaviorSubject<boolean>(false)
   public loading$ = this.loadingSubject.asObservable()
   
