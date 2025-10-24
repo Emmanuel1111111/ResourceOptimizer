@@ -32,14 +32,25 @@ setup_logging(app)
 
 # CORS configuration
 if os.getenv('FLASK_ENV') == 'production':
-    CORS(app, origins=[
-        "https://resource-optimizer-01.vercel.app",
-        "http://localhost:4200",
-        "http://localhost:54119"
-    ])
+   
+    CORS(app, 
+         origins=[
+             "https://resource-optimizer-01.vercel.app",
+             "http://localhost:4200",
+             "http://localhost:54119"
+         ],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Add this!
+         allow_headers=["Content-Type", "Authorization"],  # Add this!
+         supports_credentials=True  # If using cookies/auth
+    )
 else:
-    CORS(app, origins=["http://localhost:4200"])
-
+    # Development - allow localhost
+    CORS(app, 
+         origins=["http://localhost:4200"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization"],
+         supports_credentials=True
+    )
 # JWT Manager
 jwt = JWTManager(app)
 @app.route('/api/db_status', methods=['GET'])
