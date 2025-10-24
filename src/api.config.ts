@@ -1,5 +1,5 @@
 export const  api={
-    baseUrl: 'http://localhost:5000/api',
+    baseUrl: 'https://resource-optimizer-niwkhw24y-asante1036-8679s-projects.vercel.app',
     endpoints: {
       availableRooms: '/available_rooms',
       manageResource: '/manage_resources',
@@ -7,4 +7,4 @@ export const  api={
       updateSchedule: '/update_schedule',
       logs: '/logs'
     }
-}
+} 
