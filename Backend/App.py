@@ -31,6 +31,8 @@ setup_logging(app)
 
 
 # CORS configuration
+if os.getenv('FLASK_ENV') == 'production':
+    CORS(app)
 
 # JWT Manager
 jwt = JWTManager(app)
