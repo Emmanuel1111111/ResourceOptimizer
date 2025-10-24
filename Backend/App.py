@@ -36,7 +36,7 @@ setup_logging(app)
 jwt = JWTManager(app)
 @app.route('/api/db_status', methods=['GET'])
 def db_status():
-    db_error_details = None  # Default value if no error details are available
+    db_error_details = None 
     try:
         if db_connection_available:
             
