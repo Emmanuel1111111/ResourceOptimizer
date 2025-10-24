@@ -1,5 +1,5 @@
 export const  api={
-    baseUrl: 'http://resource-optimizer-01.vercel.app',
+    baseUrl: 'https://resource-optimizer-01.vercel.app',
     endpoints: {
       availableRooms: '/available_rooms',
       manageResource: '/manage_resources',
