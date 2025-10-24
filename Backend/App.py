@@ -31,12 +31,20 @@ setup_logging(app)
 
 
 # CORS configuration
+if os.getenv('FLASK_ENV') == 'production':
+    CORS(app, origins=[
+        "https://resource-optimizer-01.vercel.app",
+        "http://localhost:4200",
+        "http://localhost:54119"
+    ])
+else:
+    CORS(app, origins=["http://localhost:4200"])
 
 # JWT Manager
 jwt = JWTManager(app)
 @app.route('/api/db_status', methods=['GET'])
 def db_status():
-    db_error_details = None 
+    db_error_details = None  # Default value if no error details are available
     try:
         if db_connection_available:
             
