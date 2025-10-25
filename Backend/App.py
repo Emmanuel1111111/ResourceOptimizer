@@ -113,13 +113,13 @@ from routes import routes_bp
 
 try:
     from manage_resources import manage_resources_bp
-    app.register_blueprint(manage_resources_bp)
+    app.register_blueprint(manage_resources_bp, url_prefix='/api')
 except ImportError:
     logger.warning("manage_resources module not found")
 
-app.register_blueprint(auth_bp, )
-app.register_blueprint(admin_auth_bp)
-app.register_blueprint(routes_bp )
+app.register_blueprint(auth_bp, url_prefix='/api')
+app.register_blueprint(admin_auth_bp, url_prefix='/api')
+app.register_blueprint(routes_bp, url_prefix='/api')
 # JWT error handlers
 @jwt.invalid_token_loader
 def invalid_token_callback(error_string):
