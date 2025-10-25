@@ -119,7 +119,7 @@ except ImportError:
 
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(admin_auth_bp, url_prefix='/api')
-app.register_blueprint(routes_bp)
+app.register_blueprint(routes_bp, url_prefix='/api')
 # JWT error handlers
 @jwt.invalid_token_loader
 def invalid_token_callback(error_string):
