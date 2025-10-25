@@ -74,7 +74,7 @@ export class NotificationService {
       limit: limit.toString()
     };
 
-    return this.http.get<NotificationResponse>(`${this.apiUrl}/api/admin/notifications`, {
+    return this.http.get<NotificationResponse>(`${this.apiUrl}/admin/notifications`, {
       params,
       headers
     }).pipe(
@@ -109,7 +109,7 @@ export class NotificationService {
       });
     }
 
-    return this.http.post(`${this.apiUrl}/api/admin/notifications/${notificationId}/read`, {}, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/admin/notifications/${notificationId}/read`, {}, { headers }).pipe(
       tap(() => {
         // Update local state
         const notifications = this.notificationsSubject.value.map(notification => 
@@ -145,7 +145,7 @@ export class NotificationService {
       });
     }
 
-    return this.http.post(`${this.apiUrl}/api/admin/notifications/read-all`, {}, { headers }).pipe(
+    return this.http.post(`${this.apiUrl}/admin/notifications/read-all`, {}, { headers }).pipe(
       tap(() => {
         // Update local state
         const notifications = this.notificationsSubject.value.map(notification => ({
@@ -179,7 +179,7 @@ export class NotificationService {
       });
     }
 
-    return this.http.get<{unread_count: number}>(`${this.apiUrl}/api/admin/notifications/unread-count`, { headers }).pipe(
+    return this.http.get<{unread_count: number}>(`${this.apiUrl}/admin/notifications/unread-count`, { headers }).pipe(
       tap(response => {
         this.unreadCountSubject.next(response.unread_count);
       }),
@@ -279,7 +279,7 @@ export class NotificationService {
       });
     }
 
-    return this.http.delete(`${this.apiUrl}/api/admin/notifications/clear-all`, { headers }).pipe(
+    return this.http.delete(`${this.apiUrl}/admin/notifications/clear-all`, { headers }).pipe(
       tap(() => {
         // Clear local state after successful backend clear
         this.clearNotifications();

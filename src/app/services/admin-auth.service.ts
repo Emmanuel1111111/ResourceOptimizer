@@ -19,7 +19,7 @@ export class AdminAuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
-  private readonly apiUrl = environment.apiUrl || 'http://localhost:5000';
+  private readonly apiUrl = environment.apiUrl 
 
   constructor(
     private http: HttpClient,
@@ -64,7 +64,7 @@ export class AdminAuthService {
     }
 
     // Simplified request without security context for now
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/admin/login`, loginRequest).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/admin/login`, loginRequest).pipe(
       tap(response => {
         this.securityService.recordLoginAttempt(loginRequest.username, true);
         this.handleSuccessfulLogin(response);
@@ -133,7 +133,7 @@ export class AdminAuthService {
   logout(): Observable<any> {
     const token = this.securityService.getSecureToken();
     
-    return this.http.post(`${this.apiUrl}/api/admin/logout`, { token }).pipe(
+    return this.http.post(`${this.apiUrl}/admin/logout`, { token }).pipe(
       tap(() => {
         this.logActivity('admin_logout', 'authentication', { success: true });
       }),
@@ -166,7 +166,7 @@ export class AdminAuthService {
 
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    return this.http.get<AdminUser>(`${this.apiUrl}/api/admin/validate`, { headers }).pipe(
+    return this.http.get<AdminUser>(`${this.apiUrl}/admin/validate`, { headers }).pipe(
       tap(user => this.setCurrentUser(user)),
       catchError(() => {
         this.cleanupSession();
@@ -236,7 +236,7 @@ export class AdminAuthService {
     };
 
    
-    this.http.post(`${this.apiUrl}/api/admin/activity-log`, logEntry).subscribe({
+    this.http.post(`${this.apiUrl}/admin/activity-log`, logEntry).subscribe({
       error: () => {} 
     });
   }
@@ -255,7 +255,7 @@ export class AdminAuthService {
       return throwError(() => new Error(`Password validation failed: ${validation.errors.join(', ')}`));
     }
 
-    return this.http.post(`${this.apiUrl}/api/admin/change-password`, {
+    return this.http.post(`${this.apiUrl}/admin/change-password`, {
       currentPassword,
       newPassword,
       mfaCode
@@ -281,7 +281,7 @@ export class AdminAuthService {
       return throwError(() => new Error('Invalid admin username format'));
     }
 
-    return this.http.post(`${this.apiUrl}/api/admin/password-reset/request`, { username }).pipe(
+    return this.http.post(`${this.apiUrl}/admin/password-reset/request`, { username }).pipe(
       tap(() => {
         this.logActivity('password_reset_requested', 'security', { 
           success: true, 
@@ -297,7 +297,7 @@ export class AdminAuthService {
       return throwError(() => new Error(`Password validation failed: ${validation.errors.join(', ')}`));
     }
 
-    return this.http.post(`${this.apiUrl}/api/admin/password-reset/confirm`, {
+    return this.http.post(`${this.apiUrl}/admin/password-reset/confirm`, {
       token,
       newPassword
     });
