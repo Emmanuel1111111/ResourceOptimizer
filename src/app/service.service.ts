@@ -9,6 +9,7 @@ import { AnalysisResult } from '../Environ';
 import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ';
 import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
 import { api } from '../api.config';
+import { timeout } from 'rxjs/operators';
 
 
 export interface LoginResponse {
@@ -52,6 +53,7 @@ export class AuthService {
 
   login(username: string, password: string, rememberMe: boolean): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password, rememberMe }).pipe(
+      timeout(10000),
       tap(response => {
         if (response.token) {
           localStorage.setItem('token', response.token);
@@ -64,18 +66,18 @@ export class AuthService {
 
   signup(username: string, email: string, password: string): Observable<SignupResponse> {
     return this.http.post<SignupResponse>(`${this.apiUrl}/signup`, { username, email, password }).pipe(
-     tap(response=>{
-      const userData= response.user
+      timeout(10000),
+      tap(response => {
+        const userData = response.user;
 
-      if(userData.token) {
-        localStorage.setItem('token', userData.token);
-        localStorage.setItem('userId', userData.Id);
-        localStorage.setItem('username', userData.username||'');
-        localStorage.setItem('email', userData.email||'')
-      }
+        if (userData.token) {
+          localStorage.setItem('token', userData.token);
+          localStorage.setItem('userId', userData.Id);
+          localStorage.setItem('username', userData.username || '');
+          localStorage.setItem('email', userData.email || '');
+        }
 
-
-     }),
+      }),
       catchError(err => throwError(() => new Error(err.error?.error || 'Signup failed')))
     );
   }
