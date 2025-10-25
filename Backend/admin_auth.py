@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_tok
 from datetime import datetime, timedelta
 import bcrypt
 import pyotp
-import qrcode
 import io
 import base64
 import secrets
@@ -146,6 +145,7 @@ class MFAService:
     
     @staticmethod
     def generate_qr_code(username: str, secret: str) -> str:
+        import qrcode
         """Generate QR code for MFA setup"""
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=username,
