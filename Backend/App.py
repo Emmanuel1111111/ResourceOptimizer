@@ -28,19 +28,12 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 # Setup logging
 setup_logging(app)
 
-# === CORS ===
-allowed_origins = [
-    "https://resource-optimizer-01.vercel.app/",
-    "http://localhost:4200",
-    "http://localhost:54119"
-]
-
 
 if os.getenv('FLASK_ENV') == 'production':
     CORS(app,
      origins=[
          "https://resource-optimizer-01.vercel.app",
-         "https://resource-optimizer-ikux.vercel.app"
+         "https://resource-optimizer-ikux.vercel.app",
          "http://localhost:4200",
          "http://localhost:54119"
      ],
@@ -48,6 +41,7 @@ if os.getenv('FLASK_ENV') == 'production':
      allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
      supports_credentials=True,
      expose_headers=["Content-Type", "Authorization"]  # CRITICAL
+
 )
 else:
     CORS(app,
