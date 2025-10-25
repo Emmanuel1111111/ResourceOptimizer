@@ -279,7 +279,7 @@ def _calculate_free_slots_improved(occupied_slots, business_start, business_end)
     
     return free_slots
 
-@manage_resources_bp.route('/manage_resources', methods=['POST', 'GET'])
+@manage_resources_bp.route('/api/manage_resources', methods=['POST', 'GET'])
 @jwt_required(optional=True)  # Make JWT optional for backward compatibility
 def manage_resources():
    
