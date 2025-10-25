@@ -32,7 +32,7 @@ setup_logging(app)
 if os.getenv('FLASK_ENV') == 'production':
     CORS(app,
      origins=[
-         "https://resource-optimizer-01.vercel.app",
+         "https://resource-optimizer03.vercel.app",
          "https://resource-optimizer-ikux.vercel.app",
          "http://localhost:4200",
          "http://localhost:54119"
