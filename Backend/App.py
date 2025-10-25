@@ -30,17 +30,24 @@ setup_logging(app)
 
 # === CORS ===
 allowed_origins = [
-    "https://resource-optimizer-01.vercel.app",
+    "https://resource-optimizer-01.vercel.app/",
     "http://localhost:4200",
     "http://localhost:54119"
 ]
 
+
 if os.getenv('FLASK_ENV') == 'production':
     CORS(app,
-         origins=allowed_origins,
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         allow_headers=["Content-Type", "Authorization"],
-         supports_credentials=True)
+     origins=[
+         "https://resource-optimizer-01.vercel.app",
+         "http://localhost:4200",
+         "http://localhost:54119"
+     ],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     supports_credentials=True,
+     expose_headers=["Content-Type", "Authorization"]  # CRITICAL
+)
 else:
     CORS(app,
          origins=["http://localhost:4200"],

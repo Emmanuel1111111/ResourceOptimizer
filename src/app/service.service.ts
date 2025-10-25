@@ -50,7 +50,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private securityService: SecurityService) {}
 
-  login(username: string, password: string, rememberMe: string): Observable<LoginResponse> {
+  login(username: string, password: string, rememberMe: boolean): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password, rememberMe }).pipe(
       tap(response => {
         if (response.token) {
