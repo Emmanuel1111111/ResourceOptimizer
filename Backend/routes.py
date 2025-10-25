@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from pymongo import MongoClient
 import pandas as pd
+
 from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required
 import os
@@ -39,10 +40,9 @@ except Exception as e:
         timetables_collection = None
 
 
-@routes_bp.route('/api/available_rooms', methods=['GET', 'OPTIONS'])
+@routes_bp.route('/api/available_rooms', methods=['GET'])
 def get_available_rooms():
-    if request.method == 'OPTIONS':
-        return '', 200
+    
     try:
         # Check if database connection is available
         if db is None or timetables_collection is None:
@@ -185,10 +185,9 @@ def get_available_rooms():
 
 
 
-@routes_bp.route('/api/current_utilization', methods=['POST', 'OPTIONS'])
+@routes_bp.route('/api/current_utilization', methods=['POST'])
 def current_utilization():
-    if request.method == 'OPTIONS':
-        return '', 200 
+   
     try:
        
         if db is None or timetables_collection is None:
@@ -380,10 +379,9 @@ def current_utilization():
         return jsonify({'status': 'error', 'error': f'Error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/get_room_schedules', methods=['GET', 'OPTIONS'])
+@routes_bp.route('/api/get_room_schedules', methods=['GET'])
 def get_room_schedules():
-    if request.method == 'OPTIONS':
-        return '', 200
+    
     try:
         # Check if database connection is available
         if db is None or timetables_collection is None:
@@ -453,10 +451,9 @@ def get_room_schedules():
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/refresh_aggregated_data', methods=['GET', 'OPTIONS'])
+@routes_bp.route('/api/refresh_aggregated_data', methods=['GET',])
 def refresh_aggregated_data():
-    if request.method == 'OPTIONS':
-        return '', 200
+   
     try:
         # Check if database connection is available
         if db is None or timetables_collection is None:
@@ -519,10 +516,9 @@ def refresh_aggregated_data():
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/get_day_based_schedules', methods=['GET',' OPTIONS'])
+@routes_bp.route('/api/get_day_based_schedules', methods=['GET'])
 def get_day_based_schedules():
-    if request.method == 'OPTIONS':
-        return '', 200 
+   
     try:
         # Check if database connection is available
         if db is None or timetables_collection is None:

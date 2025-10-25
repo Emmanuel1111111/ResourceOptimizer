@@ -48,10 +48,8 @@ else:
          allow_headers=["Content-Type", "Authorization"],
          supports_credentials=True)
 
-# === JWT ===
 jwt = JWTManager(app)
 
-# === DATABASE CONNECTION (MOVED UP) ===
 db = None
 client = None
 db_connection_available = False

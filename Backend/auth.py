@@ -21,12 +21,11 @@ logs_collection = db.logs
 # JWT Secret Key
 SECRET_KEY = os.getenv("JWT_SECRET", "fallback-secret-key")  # Added fallback key
 
-@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    if request.method == 'OPTIONS':
-        return '', 200
     
+   
     username = data.get('username')
   
     password = data.get('password')
@@ -94,11 +93,8 @@ def generate_token(user_id, username, exp_hours=13):
     )
     return access_token
 
-@auth_bp.route('/signup', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/signup', methods=['POST'])
 def signup():
-    if request.method == 'OPTIONS':
-        return '', 200
-    
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
@@ -169,7 +165,7 @@ def signup():
        
     }), 201
 
-@auth_bp.route('/logs', methods=['GET', 'POST', 'OPTIONS'])
+@auth_bp.route('/logs', methods=['GET', 'POST'])
 @jwt_required()
 def manage_logs():
     try:
