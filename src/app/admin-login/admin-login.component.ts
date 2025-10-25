@@ -208,48 +208,37 @@ export class AdminLoginComponent implements OnInit, OnDestroy {
   /**
    * Login Process
    */
-  async onLogin(): Promise<void> {
-    if (this.adminLoginForm.invalid) {
-      this.markFormGroupTouched(this.adminLoginForm);
-      return;
-    }
+  onLogin(): void {
+  if (this.adminLoginForm.invalid) {
+    this.markFormGroupTouched(this.adminLoginForm);
+    return;
+  }
 
-    this.isLoading = true;
-    this.clearMessages();
+  this.isLoading = true;
+  this.clearMessages();
 
-    const { username, password, rememberDevice } = this.adminLoginForm.value;
-    console.log('🔍 Starting login process for:', username);
+  const { username, password, rememberDevice } = this.adminLoginForm.value;
 
-    try {
-      console.log('🔍 Making login request...');
-      const response = await this.adminAuth.loginAdmin({
-        username,
-        password,
-        rememberDevice
-      }).toPromise();
-
-      console.log('✅ Login response received:', response);
-
+  this.adminAuth.loginAdmin({ username, password, rememberDevice }).subscribe({
+    next: (response) => {
+      console.log('Login success:', response);
       if (response?.requiresMFA) {
-     
         this.showMFAStep = true;
         this.mfaEnabled = true;
-        if (response.mfaQrCode) {
-          this.qrCodeUrl = response.mfaQrCode;
-        }
+        if (response.mfaQrCode) this.qrCodeUrl = response.mfaQrCode;
       } else {
-      
         this.handleSuccessfulLogin();
       }
-
-    } catch (error: any) {
-      
+    },
+    error: (error) => {
+      console.log('LOGIN ERROR:', error);
       this.handleLoginError(error);
-    } finally {
-    
+    },
+    complete: () => {
       this.isLoading = false;
     }
-  }
+  });
+}
 
   /**
    * MFA Verification

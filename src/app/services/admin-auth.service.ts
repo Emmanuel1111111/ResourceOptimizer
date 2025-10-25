@@ -20,7 +20,7 @@ export class AdminAuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
-  private apiUrl = 'https://resourceoptimizer.onrender.com'; 
+  private apiUrl = 'https://resourceoptimizer.onrender.com/api'; 
 
   constructor(
     private http: HttpClient,
@@ -63,17 +63,21 @@ loginAdmin(loginRequest: LoginRequest): Observable<LoginResponse> {
       this.logActivity('admin_login', 'authentication', { success: true });
     }),
     catchError(error => {
+  console.log('CATCH ERROR IN PIPE:', error);  // ← THIS WILL NOW RUN
+  console.log('ADMIN LOGIN URL:', url);
 
-      console.log('ADMIN LOGIN URL:', url);
-      this.logActivity('admin_login_failed', 'authentication', { 
-        success: false, 
-        error: error.message,
-        username: loginRequest.username 
-      });
-      return throwError(() => error);
-    })
-  );
+  this.securityService.recordLoginAttempt(loginRequest.username, false);
+  this.logActivity('admin_login_failed', 'authentication', { 
+    success: false, 
+    error: error.message,
+    username: loginRequest.username 
+  });
+
+  return throwError(() => error);
+})
+  )
 }
+
 
   /**
    * Multi-Factor Authentication Login
