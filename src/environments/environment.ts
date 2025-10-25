@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://resource-optimizer-01.vercel.app',
+  apiUrl: 'https://resource-optimizer-01.vercel.app/api',
   
   // Admin-specific settings
   admin: {
@@ -38,11 +38,11 @@ export const environment = {
   
   // API endpoints
   endpoints: {
-    auth: '/api/admin',
-    resources: '/api/manage_resources',
-    analytics: '/api/analytics',
-    audit: '/api/admin/audit',
-    security: '/api/admin/security'
+    auth: '/admin',
+    resources: '/manage_resources',
+    analytics: '/analytics',
+    audit: '/admin/audit',
+    security: '/admin/security'
   }
 }; 
 
