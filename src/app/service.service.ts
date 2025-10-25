@@ -51,7 +51,7 @@ export class AuthService {
   constructor(private http: HttpClient, private securityService: SecurityService) {}
 
   login(username: string, password: string, rememberMe: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/login`, { username, password, rememberMe }).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password, rememberMe }).pipe(
       tap(response => {
         if (response.token) {
           localStorage.setItem('token', response.token);
@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   signup(username: string, email: string, password: string): Observable<SignupResponse> {
-    return this.http.post<SignupResponse>(`${this.apiUrl}/api/signup`, { username, email, password }).pipe(
+    return this.http.post<SignupResponse>(`${this.apiUrl}/signup`, { username, email, password }).pipe(
      tap(response=>{
       const userData= response.user
 
