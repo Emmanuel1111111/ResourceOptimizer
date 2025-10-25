@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from pymongo import MongoClient
 import pandas as pd
-from prophet import Prophet
 from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required
 import os
