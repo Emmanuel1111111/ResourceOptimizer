@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AdminUser, LoginRequest, LoginResponse, AdminPermission, AdminActivityLog } from '../interfaces/admin.interface';
 import { SecurityService } from './security.service';
 import { environment } from '../../environments/environment';
+import{ timeout} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -65,6 +66,7 @@ export class AdminAuthService {
 
     // Simplified request without security context for now
     return this.http.post<LoginResponse>(`${this.apiUrl}/admin/login`, loginRequest).pipe(
+      timeout(10000), // 10 seconds timeout
       tap(response => {
         this.securityService.recordLoginAttempt(loginRequest.username, true);
         this.handleSuccessfulLogin(response);
@@ -134,6 +136,7 @@ export class AdminAuthService {
     const token = this.securityService.getSecureToken();
     
     return this.http.post(`${this.apiUrl}/admin/logout`, { token }).pipe(
+      timeout(10000), // 10 seconds timeout
       tap(() => {
         this.logActivity('admin_logout', 'authentication', { success: true });
       }),
@@ -167,6 +170,7 @@ export class AdminAuthService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
     return this.http.get<AdminUser>(`${this.apiUrl}/admin/validate`, { headers }).pipe(
+      timeout(10000), // 10 seconds timeout
       tap(user => this.setCurrentUser(user)),
       catchError(() => {
         this.cleanupSession();
@@ -260,6 +264,7 @@ export class AdminAuthService {
       newPassword,
       mfaCode
     }).pipe(
+      timeout(10000), // 10 seconds timeout
       tap(() => {
         this.logActivity('password_changed', 'security', { success: true });
       }),

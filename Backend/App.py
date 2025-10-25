@@ -133,7 +133,7 @@ except ImportError as e:
     logger.warning(f"manage_resources module not found: {e}")
 
 app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(admin_auth_bp)
+app.register_blueprint(admin_auth_bp, url_prefix='/api')
 app.register_blueprint(routes_bp, url_prefix='/api')
 
 # === JWT ERROR HANDLERS ===
