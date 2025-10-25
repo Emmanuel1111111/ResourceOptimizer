@@ -20,7 +20,7 @@ export class AdminAuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
-  private readonly apiUrl = 'https://resourceoptimizer.onrender.com'; 
+  private apiUrl = 'https://resourceoptimizer.onrender.com'; 
 
   constructor(
     private http: HttpClient,
@@ -52,8 +52,8 @@ export class AdminAuthService {
 
 
 loginAdmin(loginRequest: LoginRequest): Observable<LoginResponse> {
-  const url = `${this.apiUrl}/admin/login`;  // → /api/admin/login
-  console.log('ADMIN LOGIN URL:', url);
+  const url = `${this.apiUrl}/admin/login`; 
+  
 
   return this.http.post<LoginResponse>(url, loginRequest).pipe(
     timeout(10000),

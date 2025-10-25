@@ -89,7 +89,7 @@ def home():
         "version": "1.0",
         "endpoints": {
             "auth": "/api/auth/...",
-            "admin": "/api/admin/...",
+            "admin": "/admin/...",
             "predict": "/api/predict",
             "health": "/health",
             "db_status": "/api/db_status"
