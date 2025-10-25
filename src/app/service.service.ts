@@ -8,7 +8,7 @@ import { Prediction } from '../Environ';
 import { AnalysisResult } from '../Environ';
 import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ';
 import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
-import { api } from '../api.config';
+import { environment } from '../environments/environment';
 import { timeout } from 'rxjs/operators';
 
 
@@ -47,7 +47,7 @@ export class AuthService {
 
   private errorSubject = new BehaviorSubject<string | null>(null)
   public error$ = this.errorSubject.asObservable()
-  private apiUrl = api.baseUrl
+  private apiUrl = environment.apiUrl
 
   constructor(private http: HttpClient, private securityService: SecurityService) {}
 
