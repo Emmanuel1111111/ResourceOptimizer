@@ -20,7 +20,7 @@ export class AdminAuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
-  private readonly apiUrl = environment.apiUrl 
+  private readonly apiUrl = 'https://resourceoptimizer.onrender.com/api'; 
 
   constructor(
     private http: HttpClient,
