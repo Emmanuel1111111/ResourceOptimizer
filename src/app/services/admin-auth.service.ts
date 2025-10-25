@@ -63,7 +63,8 @@ loginAdmin(loginRequest: LoginRequest): Observable<LoginResponse> {
       this.logActivity('admin_login', 'authentication', { success: true });
     }),
     catchError(error => {
-      this.securityService.recordLoginAttempt(loginRequest.username, false);
+
+      console.log('ADMIN LOGIN URL:', url);
       this.logActivity('admin_login_failed', 'authentication', { 
         success: false, 
         error: error.message,
