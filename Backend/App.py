@@ -34,8 +34,10 @@ if os.getenv('FLASK_ENV') == 'production':
      origins=[
          "https://resource-optimizer03.vercel.app",
          "https://resource-optimizer-ikux.vercel.app",
+         "https://resource-optimizer02.vercel.app",
          "http://localhost:4200",
          "http://localhost:54119"
+
      ],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
