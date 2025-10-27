@@ -20,7 +20,7 @@ export class AdminAuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   public permissions$ = this.permissionsSubject.asObservable();
 
-  private apiUrl = 'https://resourceoptimizer.onrender.com/api'; 
+  private readonly apiUrl = 'https://resourceoptimizer.onrender.com'; 
 
   constructor(
     private http: HttpClient,
@@ -50,34 +50,39 @@ export class AdminAuthService {
     }
   }
 
+  /**
+   * Admin Login with Enhanced Security
+   */
+  loginAdmin(loginRequest: LoginRequest): Observable<LoginResponse> {
+    // Check rate limiting
+    if (!this.securityService.checkRateLimit(loginRequest.username)) {
+      return throwError(() => new Error('Account temporarily locked due to too many failed attempts. Please try again later.'));
+    }
 
-loginAdmin(loginRequest: LoginRequest): Observable<LoginResponse> {
-  const url = `${this.apiUrl}/admin/login`; 
-  
+    // Validate admin username format
+    if (!this.isValidAdminUsername(loginRequest.username)) {
+      return throwError(() => new Error('Invalid admin username format. Admin usernames must start with "admin."'));
+    }
 
-  return this.http.post<LoginResponse>(url, loginRequest).pipe(
-    timeout(10000),
-    tap(response => {
-      this.securityService.recordLoginAttempt(loginRequest.username, true);
-      this.handleSuccessfulLogin(response);
-      this.logActivity('admin_login', 'authentication', { success: true });
-    }),
-    catchError(error => {
-  console.log('CATCH ERROR IN PIPE:', error);  // ← THIS WILL NOW RUN
-  console.log('ADMIN LOGIN URL:', url);
-
-  this.securityService.recordLoginAttempt(loginRequest.username, false);
-  this.logActivity('admin_login_failed', 'authentication', { 
-    success: false, 
-    error: error.message,
-    username: loginRequest.username 
-  });
-
-  return throwError(() => error);
-})
-  )
-}
-
+    // Simplified request without security context for now
+    return this.http.post<LoginResponse>(`${this.apiUrl}/admin/login`, loginRequest).pipe(
+      timeout(10000), // 10 seconds timeout
+      tap(response => {
+      
+        this.handleSuccessfulLogin(response);
+        this.logActivity('admin_login', 'authentication', { success: true });
+      }),
+      catchError(error => {
+       
+        this.logActivity('admin_login_failed', 'authentication', { 
+          success: false, 
+          error: error.message,
+          username: loginRequest.username 
+        });
+        return throwError(() => error);
+      })
+    );
+  }
 
   /**
    * Multi-Factor Authentication Login

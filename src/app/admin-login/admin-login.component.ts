@@ -223,16 +223,19 @@ export class AdminLoginComponent implements OnInit, OnDestroy {
     next: (response) => {
       console.log('Login success:', response);
       if (response?.requiresMFA) {
+     
         this.showMFAStep = true;
         this.mfaEnabled = true;
         if (response.mfaQrCode) this.qrCodeUrl = response.mfaQrCode;
       } else {
+      
         this.handleSuccessfulLogin();
       }
     },
     error: (error) => {
       console.log('LOGIN ERROR:', error);
       this.handleLoginError(error);
+      this.isLoading = false;
     },
     complete: () => {
       this.isLoading = false;
