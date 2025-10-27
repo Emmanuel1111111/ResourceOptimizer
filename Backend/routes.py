@@ -40,7 +40,7 @@ except Exception as e:
         timetables_collection = None
 
 
-@routes_bp.route('/api/available_rooms', methods=['GET'])
+@routes_bp.route('/available_rooms', methods=['GET'])
 def get_available_rooms():
     
     try:
@@ -185,7 +185,7 @@ def get_available_rooms():
 
 
 
-@routes_bp.route('/api/current_utilization', methods=['POST'])
+@routes_bp.route('/current_utilization', methods=['POST'])
 def current_utilization():
    
     try:
@@ -379,7 +379,7 @@ def current_utilization():
         return jsonify({'status': 'error', 'error': f'Error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/get_room_schedules', methods=['GET'])
+@routes_bp.route('/get_room_schedules', methods=['GET'])
 def get_room_schedules():
     
     try:
@@ -451,7 +451,7 @@ def get_room_schedules():
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/refresh_aggregated_data', methods=['GET',])
+@routes_bp.route('/refresh_aggregated_data', methods=['GET',])
 def refresh_aggregated_data():
    
     try:
@@ -516,7 +516,7 @@ def refresh_aggregated_data():
         return jsonify({'status': 'error', 'error': f'Unexpected error: {str(e)}'}), 500
     
 
-@routes_bp.route('/api/get_day_based_schedules', methods=['GET'])
+@routes_bp.route('/get_day_based_schedules', methods=['GET'])
 def get_day_based_schedules():
    
     try:

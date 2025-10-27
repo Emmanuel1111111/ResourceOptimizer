@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 import logging
 from dotenv import load_dotenv
+from pymongo import MongoClient
 
 # Load .env early
 load_dotenv()
@@ -36,7 +37,9 @@ if os.getenv('FLASK_ENV') == 'production':
          "https://resource-optimizer-ikux.vercel.app",
          "https://resource-optimizer02.vercel.app",
          "http://localhost:4200",
-         "http://localhost:54119"
+          "http://localhost:58245",
+         "http://localhost:54119",
+        
 
      ],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -54,56 +57,50 @@ else:
 
 jwt = JWTManager(app)
 
+ 
+
 db = None
 client = None
 db_connection_available = False
 
 try:
-    from pymongo import MongoClient
     mongo_uri = os.getenv('MONGO_URI')
     if not mongo_uri:
         raise ValueError("MONGO_URI not set")
     
-    client = MongoClient(mongo_uri)
+    client = MongoClient(
+        mongo_uri,
+        serverSelectionTimeoutMS=5000,  # 5 second timeout
+        connectTimeoutMS=5000
+    )
     db = client['EduResourceDB']
+    
+    # Test the connection
     client.admin.command('ping')
     logger.info("MongoDB connection successful")
     db_connection_available = True
+    
 except Exception as e:
     logger.error(f"MongoDB connection failed: {e}")
     db_connection_available = False
+    client = None
+    db = None
 
-# Store in app config
+# Set app config
 app.config['MONGODB_CLIENT'] = client
 app.config['MONGODB_DB'] = db
 app.config['DB_CONNECTION_AVAILABLE'] = db_connection_available
 
-# === HEALTH CHECK (NOW db is defined) ===
 from health_check import create_health_check
-create_health_check(app, db)  # Now safe!
-
-# === CUSTOM ROUTES ===
-@app.route('/')
-def home():
-    return jsonify({
-        "service": "ResourceOptimizer API",
-        "status": "running",
-        "version": "1.0",
-        "endpoints": {
-            "auth": "/api/auth/...",
-            "admin": "/admin/...",
-            "predict": "/api/predict",
-            "health": "/health",
-            "db_status": "/api/db_status"
-        },
-        "docs": "Coming soon"
-    }), 200
+create_health_check(app, db)
 
 @app.route('/api/db_status', methods=['GET'])
 def db_status():
     try:
-        if db_connection_available and db:
-            db.command('ping')
+        # Use app.config to get the current state
+        if app.config.get('DB_CONNECTION_AVAILABLE') and app.config.get('MONGODB_DB') is not None:
+            # Test the connection
+            app.config['MONGODB_DB'].command('ping')
             return jsonify({
                 "status": "success",
                 "message": "Database connection is active",
@@ -114,13 +111,16 @@ def db_status():
                 "status": "warning",
                 "message": "Running with mock database - limited functionality",
                 "connection_type": "Mock"
-            }), 200
+            }), 200  # Changed from 503 to 200 for mock mode
+            
     except Exception as e:
+        logger.error(f"Database status check failed: {str(e)}")
         return jsonify({
             "status": "error",
             "message": f"Database connection error: {str(e)}",
             "connection_type": "None"
         }), 503
+ 
 
 # === REGISTER BLUEPRINTS (ALL IMPORTS BEFORE USE) ===
 from auth import auth_bp
@@ -135,7 +135,7 @@ except ImportError as e:
     logger.warning(f"manage_resources module not found: {e}")
 
 app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(admin_auth_bp)
+app.register_blueprint(admin_auth_bp, url_prefix='/api')
 app.register_blueprint(routes_bp, url_prefix='/api')
 
 # === JWT ERROR HANDLERS ===

@@ -299,17 +299,7 @@
               </div>
             </div>
             
-            <!-- Debug Information (remove in production) -->
-            <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px;">
-              <strong>Debug Info:</strong><br>
-              Results: {{results ? 'Available' : 'None'}}<br>
-              Suggested Rooms: {{results?.suggested_rooms?.length || 0}}<br>
-              Filtered Rooms: {{filteredRooms.length}}<br>
-              Displayed Rooms: {{displayedRooms.length}}<br>
-              Current Page: {{currentPage}}/{{totalPages}}<br>
-              Search Query: "{{roomSearchQuery}}"
-            </div>
-
+      
             <!-- Display rooms with pagination -->
             <div class="suggestions-grid">
               <div *ngFor="let room of displayedRooms; let i = index; trackBy: trackByRoomId" class="suggestion-card animate-in" [style.animation-delay]="i * 0.1 + 's'">

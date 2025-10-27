@@ -16,8 +16,8 @@ import { api } from '../api.config';
   providedIn: 'root'
 })
 export class ResourceManagementService {
-  private readonly API_BASE_URL = api.baseUrl
-  private readonly ENDPOINT = api.endpoints.manageResource;
+  private readonly API_BASE_URL = api.baseUrl|| 'http://localhost:5000';
+  private readonly ENDPOINT = api.endpoints.manageResource ;
 
   private httpOptions = {
     headers: new HttpHeaders({
@@ -270,7 +270,7 @@ export class ResourceManagementService {
   }
 
   createNotification(notificationData: any): Observable<any> {
-    return this.http.post(`${this.API_BASE_URL}/api/admin/notifications/create`, notificationData).pipe(
+    return this.http.post(`${this.API_BASE_URL}/admin/notifications/create`, notificationData).pipe(
       catchError(this.handleError)
     );
   }
