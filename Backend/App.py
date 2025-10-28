@@ -34,7 +34,7 @@ if os.getenv('FLASK_ENV') == 'production':
     CORS(app,
      origins=[
          "https://resource-optimizer03.vercel.app",
-         "https://resource-optimizer-ikux.vercel.app",
+         "https://resource-optimizer.04.vercel.app",
          "https://resource-optimizer02.vercel.app",
          "http://localhost:4200",
           "http://localhost:58245",
