@@ -24,12 +24,20 @@ export class LoginPageComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private fb: FormBuilder, private auth:AuthService, private router:Router) {}
+  constructor(private fb: FormBuilder, private auth:AuthService, private router:Router ) {}
 
   ngOnInit(): void {
     this.initializeForms();
   }
 
+
+ google():Promise<any>{
+
+  return this.auth.loginWithGoogle()
+   
+ }
+
+   
   private initializeForms(): void {
     
     this.Profile = this.fb.group({
