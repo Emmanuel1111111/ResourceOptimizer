@@ -62,6 +62,7 @@ import { AdminGuard, SuperAdminGuard, PermissionGuard } from './guards/admin.gua
 // Interceptors
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { ErrorInterceptor } from './interceptors/error.interceptor';
+import { CallbackComponent } from './auth/callback/callback.component';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { ErrorInterceptor } from './interceptors/error.interceptor';
     AiInsightsComponent,
     NotificationComponent,
     UnauthorizedComponent,
-    InsufficientPrivilegesComponent
+    InsufficientPrivilegesComponent,
+    CallbackComponent
   ],
   imports: [
     BrowserModule,

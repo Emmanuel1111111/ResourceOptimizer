@@ -142,9 +142,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnInit(): void {
-    console.log('AdjustSchedulesComponent initialized');
     
-    // Ensure loading states are properly initialized
     this.isLoadingUtilization = false;
     this.isLoadingSchedules = false;
     this.isLoadingRoomData = false;
@@ -183,7 +181,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       debounceTime(300), 
       distinctUntilChanged() 
     ).subscribe(searchTerm => {
-      console.log('Debounced search triggered:', searchTerm);
+      
       this.performSearch(searchTerm);
     });
   }
@@ -265,12 +263,12 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
 
   
   private loadAdminLogs(): void {
-    console.log('Loading admin logs from backend for user:', this.user.userId);
+   
     
    
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     if (!token) {
-      console.warn('No authentication token found, loading from backend without auth');
+     
       this.loadSystemStats();
       return;
     }
@@ -326,11 +324,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
         localStorage.setItem('userId', userId);
         localStorage.setItem('username', userName);
         
-        console.log('Extracted user details from logs:', {
-          email: userEmail,
-          username: userName,
-          userId: userId
-        });
+        
       }
       
      
@@ -349,13 +343,11 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       
       // Force change detection to update UI with real user data
       this.cdr.detectChanges();
-      console.log('User data updated from logs - UI refreshed');
+    
    
       this.loadSystemStats();
     })
     .catch(error => {
-      console.error('Error loading admin logs from backend:', error);
-      console.log('Loading system stats without logs');
       this.loadSystemStats();
     });
   }
@@ -466,7 +458,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   
 
   private loadSystemStats(): void {
-    console.log('Loading system statistics from backend...');
+  
     
 
     this.loadRoomStatistics();
@@ -495,11 +487,11 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
             departments: [...new Set(response.rooms.map((room: any) => room.Department))].length
           };
           
-          console.log('Room statistics loaded:', this.roomStats);
+         
         }
       },
       error: (error) => {
-        console.error('Error loading room statistics:', error);
+       
         this.roomStats = { total: 0, available: 0, occupied: 0, departments: 0 };
       }
     });
@@ -527,7 +519,7 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
       departments: [...new Set(this.allSchedules.map(schedule => schedule.Department))].length
     };
     
-    console.log('Schedule statistics loaded:', this.scheduleStats);
+
   }
   
  
@@ -549,14 +541,12 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
             trend: this.calculateUtilizationTrend(weeklyData)
           };
           
-          console.log('Utilization statistics loaded:', this.utilizationStats);
-          
          
           this.updateChartsWithRealData(utilData, weeklyData);
         }
       },
       error: (error) => {
-        console.error('Error loading utilization statistics:', error);
+       
         this.utilizationStats = { average: 0, peak: 0, low: 0, trend: 'stable' };
       }
     });
@@ -777,8 +767,6 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading rooms:', error);
-        this.error_masssage = 'Failed to load rooms data';
         this.isLoading = false;
       }
     });
@@ -846,10 +834,10 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
   private getCurrentTimeMatchesGlobal(): void {
     console.log('Getting current time matches from available_rooms endpoint...');
     
-    // Prevent too many rapid calls (throttle to once per 5 seconds)
+    // Prevent too many rapid calls (throttle to once per 10 seconds)
     const now = Date.now();
-    if (this.lastCurrentTimeMatchesCall && (now - this.lastCurrentTimeMatchesCall) < 5000) {
-      console.log('⏳ Throttling getCurrentTimeMatchesGlobal call (too soon since last call)');
+    if (this.lastCurrentTimeMatchesCall && (now - this.lastCurrentTimeMatchesCall) < 10000) {
+      
       return;
     }
     this.lastCurrentTimeMatchesCall = now;
@@ -857,19 +845,15 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
     // Call the available_rooms endpoint which includes current_time_matches
     this.authService.getAvailableRooms().subscribe({
       next: (response) => {
-        console.log('Available rooms response received:', response);
-        
+       
         if (response && response.current_time_matches) {
           // Only update if we have actual data
           if (response.current_time_matches.length > 0) {
             this.currentTimeMatches = response.current_time_matches;
-            console.log(`✅ SUCCESS: Assigned ${this.currentTimeMatches.length} current time matches to component`);
-            console.log('Current time matches data:', this.currentTimeMatches);
-          } else {
-            console.log('⚠️ API returned empty current_time_matches array, keeping existing data');
+    
           }
           
-          // Ensure loading state is false so table can be displayed
+          
           this.isLoadingUtilization = false;
           
           // Force change detection to ensure UI updates
@@ -1024,20 +1008,13 @@ export class AdjustSchedulesComponent implements OnInit, AfterViewInit, OnDestro
             this.allSchedules = results.flat();
             this.filteredSchedules = [...this.allSchedules];
             
-            console.log(`Loaded ${this.allSchedules.length} total schedules from ${rooms.length} rooms`);
-            
-          
-            if (this.allSchedules.length > 0) {
-              console.log('Sample schedule data:', this.allSchedules[0]);
-              console.log('Schedule fields:', Object.keys(this.allSchedules[0]));
-            }
-            
+       
             this.isLoadingSchedules = false;
            
             this.getCurrentTimeMatchesGlobal();
           });
         } else {
-          console.error('No rooms data received');
+          
           this.scheduleError = 'No rooms data available';
           this.isLoadingSchedules = false;
         }

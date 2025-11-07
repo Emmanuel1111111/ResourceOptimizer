@@ -205,7 +205,6 @@ export class ResourceManagementService {
       payload.department = department;
     }
 
-    console.log('Suggest rooms payload (day-based priority):', payload);
 
     return this.http.post<SuggestRoomsResponse>(
       `${this.API_BASE_URL}${this.ENDPOINT}`,

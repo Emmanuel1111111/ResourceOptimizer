@@ -6,6 +6,13 @@ export interface Room {
 }
 
 
+export const SupabaseApi={
+    production:false,
+    supabaseUrl:"https://zahkyfbzdgppwmmlcxdv.supabase.co",
+    supabaseKey:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphaGt5ZmJ6ZGdwcHdtbWxjeGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2MzUzNzAsImV4cCI6MjA3NTIxMTM3MH0.SW9Sz3ChQwXNv2UHWYBDnXW-sl3xgLTRwBem5X_CZKU"
+
+}
+
 
 export interface DailyUtilization {
   'Room ID': string;

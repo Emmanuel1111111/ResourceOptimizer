@@ -102,7 +102,7 @@ export class NotificationService {
     // Get authenticated headers
     const headers = this.getAuthHeaders();
     if (!headers) {
-      console.log('No valid authentication, skipping mark as read request');
+      
       return new Observable(subscriber => {
         subscriber.next({});
         subscriber.complete();
@@ -297,7 +297,7 @@ export class NotificationService {
    * Force sync with backend (useful after conflict scans)
    */
   forceSyncWithBackend(): Observable<NotificationResponse> {
-    console.log('🔄 Force syncing notifications with backend...');
+;
 
     // Stop polling temporarily
     this.stopPolling();
@@ -307,7 +307,7 @@ export class NotificationService {
       tap(() => {
         // Restart polling after sync
         this.startPolling();
-        console.log('✅ Notification sync completed');
+       
       }),
       catchError(error => {
         console.error('❌ Failed to sync with backend:', error);

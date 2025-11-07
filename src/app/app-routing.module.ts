@@ -13,6 +13,7 @@ import { AiInsightsComponent } from './ai-insights/ai-insights.component';
 import { NotificationComponent } from './notification/notification.component';
 import { canActivate } from './guard/auth.guard';
 import { AdminGuard, SuperAdminGuard } from './guards/admin.guard';
+import { CallbackComponent } from './auth/callback/callback.component';
 
 // Error page components
 @Component({
@@ -86,6 +87,8 @@ const routes: Routes = [
   
   // Regular user login
   { path: 'login', component: LoginPageComponent },
+
+  {path: 'callback', component:CallbackComponent},
   
 
   {

@@ -10,6 +10,12 @@ import { SmartAvailabilityResponse, SmartAvailabilityRequest } from '../Environ'
 import { OptimizeResourcesRequest, OptimizeResourcesResponse } from '../Environ';
 import { environment } from '../environments/environment';
 import { timeout } from 'rxjs/operators';
+import  {SupabaseApi} from '../Environ';
+import {createClient, SupabaseClient} from '@supabase/supabase-js'
+import { NgZone } from '@angular/core';
+import { Router } from '@angular/router';
+
+
 
 
 export interface LoginResponse {
@@ -33,12 +39,15 @@ export interface SignupResponse {
 @Injectable({
   providedIn: 'root'
 })
+
 export class AuthService {
   updateSchedule(schedule: CurrentSchedule):Observable<any> {
    throw new Error('Method not implemented.');
    
   }
 
+
+public supabase!:SupabaseClient
 
   todo=signal<any[]>([])
   private loadingSubject = new BehaviorSubject<boolean>(false)
@@ -49,7 +58,57 @@ export class AuthService {
   public error$ = this.errorSubject.asObservable()
   private apiUrl = environment.apiUrl
 
-  constructor(private http: HttpClient, private securityService: SecurityService) {}
+  constructor(private http: HttpClient, private securityService: SecurityService ,
+     private NgZone:NgZone, private router:Router) {
+
+  this.handleAuthEvent()
+  this.initSupabaseClient()
+    
+  }
+
+
+  public async initSupabaseClient(){
+    this.supabase= await createClient(SupabaseApi.supabaseUrl,SupabaseApi.supabaseKey,
+      {
+        auth:{
+          persistSession:false,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+
+
+        }
+      }
+    )
+
+  }
+
+ public  async handleAuthEvent(){
+  this.supabase.auth.onAuthStateChange((event , session)=>{
+    console.log("Auth event:",event,session);
+ 
+
+   this.NgZone.run(()=>{
+    if(session?.user){
+      sessionStorage.setItem("event", event);
+      sessionStorage.setItem("user", JSON.stringify(session))
+      console.log("User data sucessfully saved")
+      console.log(JSON.stringify(session));
+      this.router.navigate(['/dashboard'])
+      
+      
+    }else{
+      console.log("No user session available");
+      this.router.navigate(['/login'])
+
+
+    }
+    
+
+
+  })
+  })
+
+  }
 
   login(username: string, password: string, rememberMe: boolean): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { username, password, rememberMe }).pipe(
@@ -120,10 +179,21 @@ export class AuthService {
     return throwError(() => new Error('Facebook login not implemented'));
   }
 
-  loginWithGoogle(): Observable<any> {
-    return throwError(() => new Error('Google login not implemented'));
-  }
+ loginWithGoogle(): Promise<any> {
+  return this.supabase.auth.signInWithOAuth({
+    provider:'google',
+    options:{
+      redirectTo:`${window.location.origin}/auth/callback`,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      }
 
+    }
+
+
+  })
+ }
   getToken(): string | null {
     return localStorage.getItem('token');
   }
