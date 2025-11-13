@@ -32,9 +32,10 @@
         </div>
       </div>
       <div class="user-info">
-        <h4 class="user-name">{{userProfile.firstName}} {{userProfile.lastName}}</h4>
+        <h4 class="user-name">{{userProfile.full_name}}</h4>
         <p class="user-role">{{userProfile.role}}</p>
         <p class="user-department">{{userProfile.department}}</p>
+        <p class="user-email">{{userProfile.email}}</p>
         <div class="status-indicator online"></div>
       </div>
     </div>
@@ -277,7 +278,7 @@
             <button class="user-menu-btn" (click)="toggleUserMenu()">
               <img *ngIf="userProfile.avatar" [src]="userProfile.avatar" alt="User" class="user-menu-avatar">
               <i *ngIf="!userProfile.avatar" class="fas fa-user-circle user-menu-icon"></i>
-              <span class="user-menu-text">{{userProfile.firstName}}</span>
+              <span class="user-menu-text">{{userProfile.full_name}}</span>
               <i class="fas fa-chevron-down"></i>
             </button>
             
@@ -289,7 +290,7 @@
                   <i *ngIf="!userProfile.avatar" class="fas fa-user-circle"></i>
                 </div>
                 <div class="user-menu-info">
-                  <h4>{{userProfile.firstName}} {{userProfile.lastName}}</h4>
+                  <h4>{{userProfile.full_name}}</h4>
                   <p>{{userProfile.email}}</p>
                   <span class="role-badge">{{userProfile.role}}</span>
                 </div>
@@ -414,7 +415,7 @@
       </section>
 
       <!-- Conflict Monitoring Section -->
-      <section class="conflict-monitoring-section">
+      <section [@slideInUp]="conflictSection" class="conflict-monitoring-section"  #conflictSection>
         <div class="section-header">
           <h2>🔍 Automated Conflict Detection</h2>
           <p>Monitor and detect schedule conflicts automatically</p>

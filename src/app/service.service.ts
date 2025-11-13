@@ -63,10 +63,30 @@ public supabase!:SupabaseClient
 
   this.handleAuthEvent()
   this.initSupabaseClient()
+  this.initAuthEvent()
     
   }
 
 
+  async initAuthEvent(){
+    const {data, error}= await this.supabase.auth.getSession();
+
+    if(data?.session){
+      const user= data.session.user
+      console.log("User session found during init:", user);
+
+      this.NgZone.run(()=>{
+        this.router.navigate(['/dashboard']);
+
+      })
+      
+      
+    }else{
+      console.log("No user session found during init.", error);
+      this.router.navigate(['/login']);
+    }
+  }
+    
   public async initSupabaseClient(){
     this.supabase= await createClient(SupabaseApi.supabaseUrl,SupabaseApi.supabaseKey,
       {
@@ -180,10 +200,13 @@ public supabase!:SupabaseClient
   }
 
  loginWithGoogle(): Promise<any> {
+  try{
+
+  
   return this.supabase.auth.signInWithOAuth({
     provider:'google',
     options:{
-      redirectTo:`${window.location.origin}/auth/callback`,
+      redirectTo:`${window.location.origin}/callback`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
@@ -193,7 +216,16 @@ public supabase!:SupabaseClient
 
 
   })
- }
+  }catch(error){
+    console.error("Error during Google login:", error);
+   
+    return Promise.reject('Google login failed');
+
+  }
+  
+}
+
+
   getToken(): string | null {
     return localStorage.getItem('token');
   }

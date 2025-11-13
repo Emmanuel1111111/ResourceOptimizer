@@ -16,7 +16,8 @@ export class CallbackComponent implements OnInit {
 
    if(data?.session?.user){
     console.log("User logged in:",data?.session?.user);
-     this.router.navigate(['/dashboard']);
+     this.router.navigate(['/admin/login']);
+     sessionStorage.setItem('user', JSON.stringify(data?.session?.user));
 
     
 

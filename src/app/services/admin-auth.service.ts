@@ -66,7 +66,7 @@ export class AdminAuthService {
 
     // Simplified request without security context for now
     return this.http.post<LoginResponse>(`${this.apiUrl}/admin/login`, loginRequest).pipe(
-      timeout(10000), // 10 seconds timeout
+      timeout(50000), // 50 seconds timeout
       tap(response => {
       
         this.handleSuccessfulLogin(response);

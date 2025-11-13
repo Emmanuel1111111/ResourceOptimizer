@@ -64,8 +64,7 @@ interface UserProfile {
   email: string;
   role: string;
   avatar?: string;
-  firstName?: string;
-  lastName?: string;
+  full_name?: string;
   department?: string;
 }
 
@@ -77,13 +76,13 @@ interface UserProfile {
     trigger('countUp', [
       transition(':enter', [
         style({ opacity: 0, transform: 'scale(0.5)' }),
-        animate('600ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+        animate('1000ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
       ])
     ]),
     trigger('slideInUp', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(30px)' }),
-        animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        animate('4000ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
     ]),
     trigger('fadeInLeft', [
@@ -132,8 +131,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     email: 'admin@university.edu',
     role: 'System Administrator',
     avatar: '',
-    firstName: 'System',
-    lastName: 'Administrator',
+    full_name:"Emmanuel Asante",
     department: 'IT Department'
   };
   
@@ -348,19 +346,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
 
   // User profile loading
   private loadUserProfile(): void {
-    const userId = localStorage.getItem('userId');
-    const username = localStorage.getItem('username');
-    const userEmail = localStorage.getItem('userEmail');
-    const userAvatar = localStorage.getItem('userAvatar');
-    
-    if (userId) {
+   
+
+    const user= JSON.parse(localStorage.getItem('admin_last_login') || '{}');
+
+    if (user) {
       this.userProfile = {
-        id: userId,
-        username: username || 'Administrator',
-        email: userEmail || 'admin@university.edu',
+        avatar:user?.user_avatar || '',
+        id: user.id,
+        username: user?.username || 'Administrator',
+        email: user?.email || 'admin@university.edu',
         role: 'System Administrator',
-        firstName: username?.split(' ')[0] || 'System',
-        lastName: username?.split(' ')[1] || 'Administrator',
+        full_name:user?.full_name || "Emmanuel Asante",
         department: 'IT Department'
       };
     }
@@ -588,7 +585,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     }, 30000); // Update every 30 seconds
   }
 
-  // Enhanced Notification Service Integration
+
   private initializeNotificationService(): void {
 
 
@@ -1145,7 +1142,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     this.router.navigate(['/login-page']);
   }
 
-  // Utility methods
+
   private checkScreenSize(): void {
     this.isMobile = window.innerWidth < 768;
     if (!this.isMobile && this.sidebarOpen) {
@@ -1162,8 +1159,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
   get hasUnreadNotifications(): boolean {
     return this.notifications.filter(n => !n.read).length > 0;
   }
-
-  // Removed: Old notification methods - now handled by NotificationService
 
   private initializeRecentActivities(): void {
     this.recentActivities = [
