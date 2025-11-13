@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://resourceoptimizer.onrender.com/api',
+  apiUrl: 'https://resourceoptimizer.onrender.com',
 
 
 
